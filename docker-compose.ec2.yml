@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      context: ./trendzy-api
+    container_name: trendzy_api
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./public.pem:/run/secrets/trendzy-public.pem:ro
+    environment:
+      JAVA_OPTS: "-Xmx384m -Xms256m"
+      JWT_PUBLIC_KEY_PATH: file:/run/secrets/trendzy-public.pem
+      
+  business:
+    build:
+      context: ./trendzy-business
+    container_name: trendzy_business
+    restart: always
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    volumes:
+      - ./private.pem:/run/secrets/trendzy-private.pem:ro
+      - ./public.pem:/run/secrets/trendzy-public.pem:ro
+    environment:
+      JAVA_OPTS: "-Xmx384m -Xms256m"
+      JWT_PRIVATE_KEY_PATH: file:/run/secrets/trendzy-private.pem
+      JWT_PUBLIC_KEY_PATH: file:/run/secrets/trendzy-public.pem

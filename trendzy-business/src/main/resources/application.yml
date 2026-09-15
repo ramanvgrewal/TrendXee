@@ -1,0 +1,40 @@
+server:
+  port: ${BUSINESS_PORT:8081}
+  forward-headers-strategy: framework
+
+spring:
+  config:
+    import: optional:file:../.env[.properties],optional:file:.env[.properties]
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/trendzy}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:google-client-secret}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: [email, profile]
+
+app:
+  jwt:
+    private-key-path: ${JWT_PRIVATE_KEY_PATH:file:../private.pem}
+    public-key-path: ${JWT_PUBLIC_KEY_PATH:file:../public.pem}
+    expiration-ms: 86400000
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:3000}
+  admin-emails: ${APP_ADMIN_EMAILS:}
+  cookie:
+    name: trendxee_token
+    domain: ${COOKIE_DOMAIN:localhost}
+    secure: ${COOKIE_SECURE:false}
