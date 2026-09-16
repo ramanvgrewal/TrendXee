@@ -1,0 +1,110 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:       # manual trigger from GitHub UI
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/ramanvgrewal/trendxee
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+
+  # ───────────────────────────────────────────────
+  # 1. Build & push  trendzy-api  image to GHCR
+  # ───────────────────────────────────────────────
+  build-trend-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push trend-api image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./trendzy-api
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/trend-api:latest
+            ${{ env.IMAGE_PREFIX }}/trend-api:${{ github.sha }}
+
+  # ───────────────────────────────────────────────
+  # 2. Build & push  trendzy-business  image to GHCR
+  # ───────────────────────────────────────────────
+  build-business-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push business-api image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./trendzy-business
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/business-api:latest
+            ${{ env.IMAGE_PREFIX }}/business-api:${{ github.sha }}
+
+  # ───────────────────────────────────────────────
+  # 3. SSH into EC2, pull images, restart containers
+  # ───────────────────────────────────────────────
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-trend-api, build-business-api]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy docker-compose file to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "/home/${{ secrets.EC2_USER }}/trendxee"
+          strip_components: 0
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            cd /home/${{ secrets.EC2_USER }}/trendxee
+
+            # Log into GHCR on the server
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull latest images
+            docker pull ${{ env.IMAGE_PREFIX }}/trend-api:latest
+            docker pull ${{ env.IMAGE_PREFIX }}/business-api:latest
+
+            # Restart containers with the new images
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d
+
+            # Clean up dangling images to save disk on t3.micro
+            docker image prune -f
+
+            echo "✅ Deploy complete"

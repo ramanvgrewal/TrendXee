@@ -15,13 +15,6 @@ function ArchivePage() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchArchive = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError('Please login to view your archived trends.');
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       const data = await getArchivedTrends();

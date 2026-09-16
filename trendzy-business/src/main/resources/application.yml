@@ -35,6 +35,6 @@ app:
     url: ${FRONTEND_URL:http://localhost:3000}
   admin-emails: ${APP_ADMIN_EMAILS:}
   cookie:
-    name: trendxee_token
+    name: ${COOKIE_NAME:trendxee_token}
     domain: ${COOKIE_DOMAIN:localhost}
     secure: ${COOKIE_SECURE:false}

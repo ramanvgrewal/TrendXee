@@ -42,7 +42,7 @@ function Index() {
     upper: "🎽",
     sneakers: "👟",
     bottoms: "👖",
-    accessories: "⛓️",
+    caps: "🧢",
     sportswear: "💪",
     fragrances: "🧴",
   };

@@ -11,6 +11,6 @@ spring:
 
 app:
   jwt:
-    public-key-path: ${JWT_PUBLIC_KEY_PATH:file:../public.pem}
+    public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public.pem}
   cookie:
-    name: trendxee_token
+    name: ${COOKIE_NAME:trendxee_token}

@@ -1,7 +1,6 @@
 services:
   api:
-    build:
-      context: ./trendzy-api
+    image: ghcr.io/ramanvgrewal/trendxee/trend-api:latest
     container_name: trendzy_api
     restart: always
     ports:
@@ -11,12 +10,11 @@ services:
     volumes:
       - ./public.pem:/run/secrets/trendzy-public.pem:ro
     environment:
-      JAVA_TOOL_OPTIONS: "-Xmx384m -Xms256m"
-      JWT_PUBLIC_KEY_PATH: file:/run/secrets/trendzy-public.pem
-      
+      JAVA_TOOL_OPTIONS: "-Xmx256m -Xms128m"
+      JWT_PUBLIC_KEY_PATH: "file:/run/secrets/trendzy-public.pem"
+
   business:
-    build:
-      context: ./trendzy-business
+    image: ghcr.io/ramanvgrewal/trendxee/business-api:latest
     container_name: trendzy_business
     restart: always
     ports:
@@ -27,6 +25,6 @@ services:
       - ./private.pem:/run/secrets/trendzy-private.pem:ro
       - ./public.pem:/run/secrets/trendzy-public.pem:ro
     environment:
-      JAVA_TOOL_OPTIONS: "-Xmx384m -Xms256m"
-      JWT_PRIVATE_KEY_PATH: file:/run/secrets/trendzy-private.pem
-      JWT_PUBLIC_KEY_PATH: file:/run/secrets/trendzy-public.pem
+      JAVA_TOOL_OPTIONS: "-Xmx256m -Xms128m"
+      JWT_PRIVATE_KEY_PATH: "file:/run/secrets/trendzy-private.pem"
+      JWT_PUBLIC_KEY_PATH: "file:/run/secrets/trendzy-public.pem"

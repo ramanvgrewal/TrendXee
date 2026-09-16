@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,8 +31,11 @@ public class TrendController {
 
         String normalized = category.trim().toUpperCase();
         Pageable pageable = PageRequest.of(page, size);
+        List<String> categories = normalized.equals("CAPS")
+                ? List.of("CAPS", "ACCESSORIES")
+                : List.of(normalized);
 
-        return trendRepository.findByCategory(normalized, pageable)
+        return trendRepository.findByCategory(categories, pageable)
                 .collectList()
                 .map(trends -> Map.of(
                         "content", trends,

@@ -65,12 +65,13 @@ export function normalizeTrendList(payload: unknown): Trend[] {
 export function normalizeTrend(raw: any): Trend {
   const signalProducts = normalizeSignalProducts(raw?.signalProducts);
   const productTriad = normalizeProductTriad(raw?.products ?? raw?.signalProducts);
+  const category = String(raw?.aestheticId ?? raw?.category ?? raw?.subcategory ?? "").toLowerCase();
 
   return {
     ...raw,
     id: String(raw?.id ?? ""),
     name: raw?.trendName ?? raw?.name ?? "Untitled trend",
-    aestheticId: String(raw?.aestheticId ?? raw?.category ?? raw?.subcategory ?? "").toLowerCase(),
+    aestheticId: category === "accessories" ? "caps" : category,
     trendScore: Number(raw?.trendScore ?? 0),
     vibeTags: Array.isArray(raw?.vibeTags) ? raw.vibeTags : [],
     aiSummary: raw?.aiSummary ?? "",

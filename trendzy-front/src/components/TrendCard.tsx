@@ -3,7 +3,7 @@ import { ChevronDown, ExternalLink, MapPin, Sparkles, Radio, Zap, Bookmark } fro
 import type { ProductMatch, Trend } from "@/lib/mock-data";
 import { useEffect } from "react";
 import { archiveTrend, unarchiveTrend, getArchiveStatus } from "@/lib/archiveApi";
-import { apiFetch } from "@/lib/api";
+import { businessApiFetch } from "@/lib/api";
 type Source = "underdog" | "amazon" | "flipkart";
 const sourceLabels: Record<Source, string> = {
   underdog: "The Underdog",
@@ -14,7 +14,7 @@ const sourceLabels: Record<Source, string> = {
 const trackClick = (trendId: string, source: Source, url: string) => {
   // navigator.sendBeacon is better for tracking links, but doesn't easily support custom headers like Authorization
   // fetch with keepalive ensures the request is not cancelled when navigating away
-  apiFetch("/api/analytics/click", {
+  businessApiFetch("/api/analytics/click", {
     method: 'POST',
     body: JSON.stringify({ trendId, source, url }),
     keepalive: true,
@@ -141,8 +141,6 @@ export function TrendCard({ trend, isArchivedContext = false, onUnarchive }: { t
 
   useEffect(() => {
     const checkStatus = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return;
       try {
         const status = await getArchiveStatus(trend.id);
         setIsArchived(status);
@@ -156,12 +154,6 @@ export function TrendCard({ trend, isArchivedContext = false, onUnarchive }: { t
   }, [trend.id, isArchivedContext]);
 
   const handleArchiveClick = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please login to archive trends.");
-      return;
-    }
-    
     try {
       if (isArchived) {
         if (window.confirm("Are you sure you want to unarchive this trend? If this trend is no longer in the main feed, it will be gone permanently.")) {
@@ -175,7 +167,7 @@ export function TrendCard({ trend, isArchivedContext = false, onUnarchive }: { t
       }
     } catch (e) {
       console.error(e);
-      alert("Failed to update archive status.");
+      alert("Failed to update archive status. Are you logged in?");
     }
   };
 

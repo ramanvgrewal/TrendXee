@@ -23,8 +23,8 @@ public enum Category {
     /** Baggy denim, cargo pants, parachute pants. */
     BOTTOMS,
 
-    /** Chains, rings, caps, and the final pieces. */
-    ACCESSORIES,
+    /** Trucker caps, snapbacks, and statement headwear. */
+    CAPS,
 
     /** Timepieces and wristwear. */
     WATCHES,
