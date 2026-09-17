@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import { LanePoster } from "@/components/LanePoster";
 import { aesthetics } from "@/lib/mock-data";
 import { getTrends } from "@/lib/api";
@@ -54,7 +55,14 @@ function LanesPage() {
   const totalSignals = aesthetics.reduce((sum, a) => sum + a.signalCount, 0);
 
   return (
-    <div className="mx-auto w-full px-5 py-16 sm:px-8">
+    <div className="mx-auto w-full px-5 py-8 sm:px-8">
+      <Link
+        to="/"
+        className="mb-8 inline-flex items-center gap-1.5 text-sm font-semibold text-clay transition-colors hover:text-ink"
+      >
+        <ArrowLeft className="size-4" /> Previous
+      </Link>
+      
       <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">the collection</p>
       <h1 className="mt-2 font-display text-4xl tracking-tight sm:text-5xl">
         All <em className="italic text-clay">lanes</em>.
