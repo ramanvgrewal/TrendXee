@@ -1,15 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { SiteHeader } from "@/components/SiteHeader";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
+import { LanePoster } from "@/components/LanePoster";
+import { Photo } from "@/components/Photo";
 import { aesthetics } from "@/lib/mock-data";
 import { getTrends } from "@/lib/api";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const rotationMap: Record<string, { brand: string; title: string; image: string }[]> = {};
+    const rotationMap: Record<string, { brand: string; title: string; image: string; shopUrl: string }[]> = {};
     try {
       await Promise.all(
         aesthetics.map(async (a) => {
@@ -17,12 +15,13 @@ export const Route = createFileRoute("/")({
           if (a.id === "upper") queryCategory = "tees";
           const trends = await getTrends(queryCategory, 15);
           rotationMap[a.id] = trends
-            .filter((t) => t.products?.underdog?.imageUrl)
-            .slice(0, 3)
+            .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
+            .slice(0, 5) // Fetch top 5 per lane for a good mix
             .map((t) => ({
               brand: t.products.underdog?.brandName || "",
               title: t.products.underdog?.title || "",
               image: t.products.underdog?.imageUrl || "",
+              shopUrl: t.products.underdog?.shopUrl || "",
             }));
         }),
       );
@@ -31,370 +30,218 @@ export const Route = createFileRoute("/")({
     }
     return { rotationMap };
   },
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "TrendXee — Fits before they go viral" },
+      {
+        name: "description",
+        content:
+          "A scrapbook of India's rising fashion drops: streetwear, sneakers, tees, bottoms, caps, sportswear and fragrances, with the underdog brand behind each trend.",
+      },
+      { property: "og:title", content: "TrendXee — Fits before they go viral" },
+      {
+        property: "og:description",
+        content:
+          "Seven lanes of rising fits, scored by signal volume, with the indie brand behind each trend and where to buy it.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Home,
 });
 
-function Index() {
+const engineSteps = [
+  {
+    label: "01",
+    title: "Listen",
+    body: "We watch what people actually post, search and repost across social feeds, marketplaces and indie brand stores.",
+  },
+  {
+    label: "02",
+    title: "Cluster",
+    body: "Related chatter is grouped into one drop — a single fit idea with the reasons it is climbing right now.",
+  },
+  {
+    label: "03",
+    title: "Score",
+    body: "Each drop gets a trend score from signal volume, velocity and how shoppable it currently is.",
+  },
+  {
+    label: "04",
+    title: "Source",
+    body: "We pin the underdog brand making it first, then the mainstream lookalikes, so you can choose either.",
+  },
+];
+
+function Home() {
   const { rotationMap } = Route.useLoaderData();
 
-  const laneEmoji: Record<string, string> = {
-    streetwear: "👕",
-    upper: "🎽",
-    sneakers: "👟",
-    bottoms: "👖",
-    caps: "🧢",
-    sportswear: "💪",
-    fragrances: "🧴",
-  };
+  // Combine all fetched products across all lanes
+  const allProducts = Object.values(rotationMap).flat();
 
-  const streetwear = aesthetics.find((a) => a.id === "streetwear")!;
-  const rest = aesthetics.filter((a) => a.id !== "streetwear");
+  // Create a daily seeded shuffle so it changes once per day
+  const seed = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (Math.imul(31, hash) + seed.charCodeAt(i)) | 0;
+  }
+
+  const shuffledProducts = [...allProducts].sort((a, b) => {
+    const hashA = (Math.imul(31, hash) + a.image.charCodeAt(0)) | 0;
+    const hashB = (Math.imul(31, hash) + b.image.charCodeAt(0)) | 0;
+    return hashA - hashB;
+  });
+
+  // Pick exactly 6 products, repeating if we don't have enough
+  const covers: { image: string; shopUrl: string }[] = [];
+  if (shuffledProducts.length > 0) {
+    for (let i = 0; i < 6; i++) {
+      covers.push(shuffledProducts[i % shuffledProducts.length]);
+    }
+  } else {
+    // Fallback if API completely fails or is empty
+    for (let i = 0; i < 6; i++) {
+      covers.push({ image: aesthetics[i % aesthetics.length].heroImage, shopUrl: "#" });
+    }
+  }
+
+  const totalSignals = aesthetics.reduce((sum, a) => sum + a.signalCount, 0);
 
   return (
-    <div className="relative min-h-screen">
-      <SiteHeader />
-
+    <div className="pb-24">
       {/* Hero */}
-      <section className="relative mx-auto max-w-7xl px-6 pb-24 pt-14 md:pt-20">
-        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
-          {/* Left column */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col items-start gap-7"
-          >
-            <LiveBadge signals={streetwear.signalCount} />
-
-            <h1 className="font-display text-[64px] font-bold leading-[0.95] tracking-tight text-foreground md:text-[96px]">
+      <section className="relative overflow-hidden border-b border-border">
+        <div className="mx-auto grid max-w-[1280px] gap-10 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+          <div>
+            <p className="hand text-lg text-clay">pinned this day</p>
+            <h1 className="mt-3 font-display text-[2.75rem] leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
               Fits before they
               <br />
-              <em className="font-serif italic font-bold uppercase text-[oklch(0.55_0.09_50)]">
-                Go Viral.
-              </em>
+              <em className="italic text-clay">Go Viral.</em>
             </h1>
-
-            <p className="max-w-md text-base leading-relaxed text-foreground/60">
-              TrendXee clusters millions of creator signals into aesthetic
-              movements and finds the underdog fit before the algorithm does.
+            <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-ink/75">
+              TrendXee reads the noise across feeds and marketplaces, then pins what is actually
+              rising in Indian fashion — and names the small brand behind it before everyone else
+              catches on.
             </p>
 
-            <div className="mt-1 flex flex-wrap items-center gap-3">
-              <a
-                href="#archive"
-                className="group inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.22em] text-background shadow-[0_10px_30px_-10px_oklch(0.22_0.03_35/60%)] transition-transform hover:-translate-y-0.5"
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                to="/"
+                hash="lanes"
+                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-sand transition-transform hover:-translate-y-0.5"
               >
-                Explore Lanes
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </a>
-              <a 
-                href="#about"
-                className="rounded-full border border-foreground/20 bg-background px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:border-foreground/40"
+                Explore the lanes <ArrowRight className="size-4" />
+              </Link>
+              <Link
+                to="/about"
+                className="inline-flex items-center gap-2 rounded-full border border-input px-6 py-3 text-sm font-semibold transition-colors hover:border-clay hover:text-clay"
               >
-                How It Works
-              </a>
+                Why we built it
+              </Link>
             </div>
-          </motion.div>
 
-          {/* Polaroid */}
-          <HeroPolaroid a={streetwear} />
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section id="archive" className="relative mx-auto max-w-7xl px-6 pb-32">
-        <div className="mb-10 flex items-end justify-between border-t border-foreground/10 pt-10">
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-foreground/40">
-              The Collection
-            </div>
-            <h2 className="mt-2 font-display text-4xl font-bold tracking-tight text-foreground md:text-6xl">
-              Curated <em className="italic font-semibold text-[oklch(0.55_0.09_50)]">lanes</em>.
-            </h2>
+            <dl className="mt-10 flex flex-wrap gap-8">
+              {[
+                { k: "signals read", v: totalSignals.toLocaleString("en-IN") },
+                { k: "lanes", v: aesthetics.length.toString() },
+              ].map((stat) => (
+                <div key={stat.k}>
+                  <dt className="hand text-sm text-ink/55">{stat.k}</dt>
+                  <dd className="font-display text-3xl tracking-tight">{stat.v}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
-          <Link
-            to="/aesthetic/$id"
-            params={{ id: "streetwear" }}
-            className="hidden items-center gap-2 rounded-full border border-foreground/20 bg-background px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:border-foreground/40 md:inline-flex"
-          >
-            View all lanes
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
 
-        {/* Horizontal numbered lane rail */}
-        <div className="-mx-6 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex gap-4">
-            {[streetwear, ...rest].map((a, i) => (
-              <LaneCard
-                key={a.id}
-                a={a}
-                rotationImages={
-                  rotationMap?.[a.id]?.length ? rotationMap[a.id] : a.underdogRotation || []
+          {/* Taped-up collage of real drops */}
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">
+            {covers.map((cover, index) => (
+              <a
+                key={`${cover.image}-${index}`}
+                href={cover.shopUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group animate-settle overflow-hidden rounded-xl bg-cream p-2 ring-1 ring-border transition-transform hover:z-10 hover:scale-105 hover:shadow-xl"
+                style={
+                  {
+                    "--tilt": index % 2 === 0 ? "-1.4deg" : "1.6deg",
+                    marginTop: index % 3 === 1 ? "1.5rem" : undefined,
+                  } as React.CSSProperties
                 }
-                emoji={laneEmoji[a.id] ?? "✦"}
-                index={i}
-                number={String(i + 1).padStart(2, "0")}
-              />
+              >
+                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-paper">
+                  <Photo
+                    src={cover.image}
+                    alt="Trend drop"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {/* Subtle overlay on hover indicating it's clickable */}
+                  <div className="absolute inset-0 bg-ink/0 transition-colors duration-300 group-hover:bg-ink/10" />
+                </div>
+              </a>
             ))}
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="relative mx-auto max-w-4xl px-6 pb-32 pt-16 text-center">
-        <h2 className="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl mb-6">
-          About Trend<em className="italic font-semibold text-[oklch(0.55_0.09_50)]">xee</em>
-        </h2>
-        <p className="mb-12 text-xl font-medium text-foreground/80">
-          Stop searching. Start discovering.
-        </p>
-
-        <div className="space-y-6 text-base leading-relaxed text-foreground/70 text-left mx-auto max-w-3xl">
-          <p>
-            Ever see a fire fit or a trending aesthetic on Instagram and wonder, "Where did they even get that?" Trendxee is your answer. We bridge the gap between what Gen Z is actually hyping up online and the hidden-gem brands creating those viral pieces.
-          </p>
-          <p>
-            If you want to know what is actually popping off without digging through endless hashtags, you are in the right place.
-          </p>
+      {/* Lanes */}
+      <section id="lanes" className="mx-auto max-w-[1280px] scroll-mt-20 px-5 py-16 sm:px-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">
+              the collection
+            </p>
+            <h2 className="mt-2 font-display text-4xl tracking-tight sm:text-5xl">
+              Curated <em className="italic text-clay">lanes</em>.
+            </h2>
+          </div>
+          <Link
+            to="/lanes"
+            className="inline-flex items-center gap-2 rounded-full border border-input px-6 py-3 text-[12px] font-bold uppercase tracking-[0.18em] transition-colors hover:border-clay hover:text-clay"
+          >
+            view all lanes <ArrowRight className="size-4 -rotate-45" />
+          </Link>
         </div>
 
-        <div className="mt-16 text-left mx-auto max-w-3xl">
-          <h3 className="font-display text-2xl font-bold text-foreground mb-8">What You Can Expect From Us</h3>
-          <ul className="space-y-8">
-            <li className="flex gap-5">
-              <span className="flex-shrink-0 mt-1 h-7 w-7 rounded-full bg-[oklch(0.55_0.09_50/15%)] flex items-center justify-center text-[oklch(0.55_0.09_50)] font-bold text-sm">1</span>
-              <div>
-                <strong className="block text-foreground mb-1.5 text-lg">No More Gatekeeping</strong>
-                <span className="text-foreground/70 leading-relaxed block">We track the exact trends and streetwear signals blowing up right now, so you always know what is genuinely popular on the internet.</span>
-              </div>
-            </li>
-            <li className="flex gap-5">
-              <span className="flex-shrink-0 mt-1 h-7 w-7 rounded-full bg-[oklch(0.55_0.09_50/15%)] flex items-center justify-center text-[oklch(0.55_0.09_50)] font-bold text-sm">2</span>
-              <div>
-                <strong className="block text-foreground mb-1.5 text-lg">Spotlight on Underdog Brands</strong>
-                <span className="text-foreground/70 leading-relaxed block">Skip the mainstream corporate giants. We uncover those cool, premium, and authentic indie brands that dominate Instagram but are impossible to find on generic e-commerce sites.</span>
-              </div>
-            </li>
-            <li className="flex gap-5">
-              <span className="flex-shrink-0 mt-1 h-7 w-7 rounded-full bg-[oklch(0.55_0.09_50/15%)] flex items-center justify-center text-[oklch(0.55_0.09_50)] font-bold text-sm">3</span>
-              <div>
-                <strong className="block text-foreground mb-1.5 text-lg">100% Genuine, Zero Middlemen</strong>
-                <span className="text-foreground/70 leading-relaxed block">We do not sit in the middle of your purchase. When you find something you like, we connect you straight to the brand’s original Shopify or official website. You get the authentic product, and the original creators get your full support.</span>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div className="mt-20 text-left mx-auto max-w-3xl">
-          <h3 className="font-display text-2xl font-bold text-foreground mb-8">How to Use Trendxee</h3>
-          <ul className="space-y-6">
-            <li className="relative pl-7 before:absolute before:left-0 before:top-2.5 before:h-2 before:w-2 before:rounded-full before:bg-[oklch(0.55_0.09_50)]">
-              <strong className="text-foreground text-[17px]">Catch the Wave:</strong> <span className="text-foreground/70 ml-1">Scroll through our platform to discover exactly what Gen Z is currently hyping up across social media.</span>
-            </li>
-            <li className="relative pl-7 before:absolute before:left-0 before:top-2.5 before:h-2 before:w-2 before:rounded-full before:bg-[oklch(0.55_0.09_50)]">
-              <strong className="text-foreground text-[17px]">Hit the Collection Lanes:</strong> <span className="text-foreground/70 ml-1">Find those premium, aesthetic-matching brands waiting for you right in our collection lanes.</span>
-            </li>
-            <li className="relative pl-7 before:absolute before:left-0 before:top-2.5 before:h-2 before:w-2 before:rounded-full before:bg-[oklch(0.55_0.09_50)]">
-              <strong className="text-foreground text-[17px]">Just Here for the Vibes?:</strong> <span className="text-foreground/70 ml-1">Even if you don't want to buy anything today, no stress. Just jump into the streetwear section and check the trends. The internet moves fast—old trends disappear and new ones drop every single day. Stay plugged in so you never miss a beat.</span>
-            </li>
-            <li className="relative pl-7 before:absolute before:left-0 before:top-2.5 before:h-2 before:w-2 before:rounded-full before:bg-[oklch(0.55_0.09_50)]">
-              <strong className="text-foreground text-[17px]">Cop it Directly:</strong> <span className="text-foreground/70 ml-1">When you are ready to buy, click straight through to the brand’s original store to get your gear with zero e-commerce middlemen in the way.</span>
-            </li>
-          </ul>
+        <div className="-mx-5 mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:-mx-8 sm:px-8">
+          {aesthetics.map((aesthetic, index) => (
+            <LanePoster
+              key={aesthetic.id}
+              aesthetic={aesthetic}
+              index={index}
+              rotationImages={rotationMap?.[aesthetic.id] || []}
+              heroOverride={rotationMap?.[aesthetic.id]?.[0]?.image}
+              className="w-[260px] sm:w-[280px]"
+            />
+          ))}
         </div>
       </section>
 
-      <footer className="border-t border-foreground/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-8 text-xs text-foreground/40">
-          <span>© 2026 TrendXee · trendxee.com</span>
-          <span className="font-mono">v0.9.4-beta</span>
-        </div>
-      </footer>
-
-
-    </div>
-  );
-}
-
-function LiveBadge({ signals }: { signals: number }) {
-  return (
-    <div className="inline-flex flex-col items-start gap-3">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-background px-2.5 py-1 ring-1 ring-foreground/15 text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground/70">
-        <span className="relative flex h-1.5 w-1.5">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[oklch(0.72_0.09_55)] opacity-75" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[oklch(0.72_0.09_55)]" />
-        </span>
-        Live
-      </span>
-      <div className="flex flex-col items-start gap-0.5">
-        <span className="text-[15px] font-bold tracking-wide text-foreground/90">Pipeline active.</span>
-        <span className="text-[13px] text-foreground/50 normal-case tracking-normal">
-          Fresh drops coming everyday.
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function HeroPolaroid({ a }: { a: (typeof aesthetics)[number] }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24, rotate: -1 }}
-      animate={{ opacity: 1, y: 0, rotate: 2.5 }}
-      transition={{ duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
-      className="relative mx-auto w-full max-w-md"
-    >
-      {/* Tape */}
-      <span className="absolute -top-4 left-1/2 z-10 h-8 w-24 -translate-x-1/2 rotate-[-4deg] rounded-sm bg-[oklch(0.72_0.09_55/85%)] shadow-md" />
-
-      <Link
-        to="/aesthetic/$id"
-        params={{ id: a.id }}
-        className="group block rounded-[6px] bg-[oklch(0.97_0.008_75)] p-3 shadow-[0_30px_60px_-25px_oklch(0.22_0.03_35/45%)] transition-transform duration-500 hover:-translate-y-1 hover:rotate-0"
+      {/* Engine */}
+      <section
+        id="engine"
+        className="mx-auto max-w-[1280px] scroll-mt-20 border-t border-border px-5 py-16 sm:px-8"
       >
-        <div className="relative overflow-hidden">
-          <img
-            src={a.heroImage}
-            alt={a.name}
-            className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-          />
-        </div>
-        <div className="flex items-end justify-between px-2 pt-4 pb-2">
-          <div>
-            <div className="border-b-2 border-black/80 pb-1 font-display text-sm font-bold uppercase tracking-[0.2em] text-black">
-              {a.name}
-            </div>
-            <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-black/50">
-              {a.signalCount.toLocaleString()} signals
-            </div>
-          </div>
-          <div className="flex items-end gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-black/60">
-            Score
-            <span className="font-display text-2xl italic font-bold text-[oklch(0.55_0.09_50)]">
-              {a.trendScore}
-            </span>
-          </div>
-        </div>
-      </Link>
-
-      <span className="pointer-events-none absolute -bottom-2 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-black text-white">
-        <ArrowUpRight className="h-4 w-4" />
-      </span>
-    </motion.div>
-  );
-}
-
-function LaneCard({
-  a,
-  rotationImages,
-  emoji,
-  index,
-  number,
-}: {
-  a: (typeof aesthetics)[number];
-  rotationImages: { brand: string; title: string; image: string }[];
-  emoji: string;
-  index: number;
-  number: string;
-}) {
-  const rotation = rotationImages;
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    if (rotation.length < 2) return;
-    const t = setInterval(() => setIdx((i) => (i + 1) % rotation.length), 2800 + index * 300);
-    return () => clearInterval(t);
-  }, [rotation.length, index]);
-
-  const isSneaker = a.id === "sneakers";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="w-[260px] shrink-0 sm:w-[280px]"
-    >
-      <Link
-        to="/aesthetic/$id"
-        params={{ id: a.id }}
-        className="group relative block overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/[0.02] transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_oklch(0.30_0.04_40/40%)]"
-      >
-        <div className="relative aspect-[3/4] overflow-hidden bg-foreground/5">
-          {rotation.length > 0 ? (
-            rotation.map((r, i) => (
-              <div
-                key={r.image}
-                className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${
-                  i === idx ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                {isSneaker && (
-                  <img
-                    src={r.image}
-                    aria-hidden="true"
-                    className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl"
-                  />
-                )}
-                <img
-                  src={r.image}
-                  alt={r.title}
-                  loading="lazy"
-                  className={`absolute inset-0 h-full w-full transition-transform duration-700 group-hover:scale-105 ${
-                    isSneaker ? "z-10 object-contain p-4" : "object-cover"
-                  }`}
-                />
-              </div>
-            ))
-          ) : (
-            <div className="absolute inset-0 h-full w-full">
-              {isSneaker && (
-                <img
-                  src={a.heroImage}
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl"
-                />
-              )}
-              <img
-                src={a.heroImage}
-                alt={a.name}
-                className={`absolute inset-0 h-full w-full transition-transform duration-700 group-hover:scale-105 ${
-                  isSneaker ? "z-10 object-contain p-4" : "object-cover"
-                }`}
-                loading="lazy"
-              />
-            </div>
-          )}
-          <div className="absolute inset-0 z-20 bg-gradient-to-t from-[oklch(0.15_0.02_35/95%)] via-[oklch(0.15_0.02_35/30%)] to-transparent" />
-
-          {/* number */}
-          <div className="absolute left-4 top-3 z-30 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[oklch(0.96_0.015_75/80%)]">
-            {number}
-          </div>
-
-          {/* emoji chip */}
-          <div className="absolute right-3 top-3 z-30">
-            <span
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-sm shadow-sm"
-              style={{ background: "oklch(0.955 0.012 75 / 95%)" }}
+        <p className="hand text-lg text-clay">how the engine works</p>
+        <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+          Noise in, one honest drop out
+        </h2>
+        <ol className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {engineSteps.map((step, index) => (
+            <li
+              key={step.label}
+              className="animate-settle rounded-2xl bg-cream/70 p-5 ring-1 ring-border"
+              style={{ "--tilt": index % 2 === 0 ? "0.6deg" : "-0.6deg" } as React.CSSProperties}
             >
-              {emoji}
-            </span>
-          </div>
-
-          {/* bottom info */}
-          <div className="absolute inset-x-0 bottom-0 z-30 p-4">
-            <h3 className="font-display text-2xl font-bold capitalize text-[oklch(0.97_0.015_75)]">
-              {a.name.toLowerCase()}
-            </h3>
-            <div className="mt-1 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-[oklch(0.97_0.015_75/70%)]">
-              <span>{a.signalCount.toLocaleString()} signals</span>
-              <span className="text-[oklch(0.78_0.10_55)]">score {a.trendScore}</span>
-            </div>
-          </div>
-        </div>
-      </Link>
-    </motion.div>
+              <span className="hand text-2xl text-clay">{step.label}</span>
+              <h3 className="mt-1 font-display text-xl tracking-tight">{step.title}</h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-ink/70">{step.body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </div>
   );
 }
-

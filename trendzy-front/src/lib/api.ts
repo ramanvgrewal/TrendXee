@@ -71,7 +71,7 @@ export function normalizeTrend(raw: any): Trend {
     ...raw,
     id: String(raw?.id ?? ""),
     name: raw?.trendName ?? raw?.name ?? "Untitled trend",
-    aestheticId: category === "accessories" ? "caps" : category,
+    aestheticId: category,
     trendScore: Number(raw?.trendScore ?? 0),
     vibeTags: Array.isArray(raw?.vibeTags) ? raw.vibeTags : [],
     aiSummary: raw?.aiSummary ?? "",
@@ -110,8 +110,11 @@ export async function getTrends(category: string, size = 100): Promise<Trend[]> 
   const params = new URLSearchParams({
     category,
     size: String(size),
+    _t: String(Date.now()), // Force bypass of any browser/CDN cache
   });
-  const response = await fetch(apiUrl(`/api/v2/trends?${params.toString()}`));
+  const response = await fetch(apiUrl(`/api/v2/trends?${params.toString()}`), {
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch trends (${response.status})`);

@@ -1,11 +1,28 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
+import { ArrowRight, AlertCircle } from 'lucide-react';
 import { TrendCard } from '@/components/TrendCard';
 import { getArchivedTrends } from '@/lib/archiveApi';
 import type { Trend } from '@/lib/mock-data';
-import { AlertCircle } from 'lucide-react';
 
 export const Route = createFileRoute('/archive')({
+  head: () => ({
+    meta: [
+      { title: "Your archive — TrendXee" },
+      {
+        name: "description",
+        content:
+          "The trend drops you pinned to your own TrendXee board, with the brands and links kept alongside them.",
+      },
+      { property: "og:title", content: "Your archive — TrendXee" },
+      {
+        property: "og:description",
+        content: "Trend drops you pinned to your own TrendXee board.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: ArchivePage,
 });
 
@@ -31,49 +48,57 @@ function ArchivePage() {
   }, []);
 
   const handleUnarchive = () => {
-    fetchArchive(); // Refresh list after unarchiving
+    fetchArchive();
   };
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-[1280px] px-5 py-14 sm:px-8">
+      <p className="hand text-lg text-clay">your corner of the board</p>
+      <h1 className="font-display text-4xl tracking-tight sm:text-5xl">Archive</h1>
+
       {/* Warning Banner */}
-      <div className="mb-8 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-amber-600/90 flex items-start gap-3">
-        <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-        <div className="text-sm font-medium leading-relaxed">
-          Warning: Unarchiving a trend will permanently remove it from here. If it is no longer in the main feed, it will be gone forever.
+      <div className="mt-6 flex items-start gap-3 rounded-2xl bg-cream/70 p-4 ring-1 ring-border">
+        <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-clay" />
+        <div className="text-sm leading-relaxed text-ink/75">
+          Unarchiving a trend will permanently remove it from here. If it is no longer in the main feed, it will be gone forever.
         </div>
       </div>
 
-      <div className="mb-10 flex items-center justify-between">
-        <h1 className="font-display text-4xl font-bold tracking-tight text-foreground">Your Archive</h1>
-        <span className="rounded-full bg-foreground/[0.03] px-3 py-1 font-mono text-xs uppercase tracking-widest text-foreground/50">
+      <div className="mt-6 flex items-center justify-between">
+        <span className="rounded-full bg-cream/70 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-ink/50 ring-1 ring-border">
           {archivedTrends.length} saved
         </span>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground"></div>
-        </div>
+        <p className="mt-8 text-ink/60">Opening your archive…</p>
       ) : error ? (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center text-red-500">
-          {error}
-          <div className="mt-4">
-            <button onClick={fetchArchive} className="text-sm underline hover:no-underline">Try Again</button>
-          </div>
+        <div className="mt-8 rounded-2xl bg-cream/70 p-6 ring-1 ring-border text-center">
+          <p className="text-ink/75">{error}</p>
+          <button onClick={fetchArchive} className="mt-4 text-sm font-semibold text-clay underline hover:no-underline">
+            Try again
+          </button>
         </div>
       ) : archivedTrends.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-foreground/10 py-32 text-center">
-          <div className="text-foreground/40 font-mono text-sm uppercase tracking-widest mb-4">Empty Archive</div>
-          <p className="text-foreground/60 max-w-md">You haven't archived any trends yet. Click the bookmark icon on any trend to save it here for later.</p>
+        <div className="mt-8 max-w-lg rounded-2xl bg-cream/70 p-6 ring-1 ring-border">
+          <p className="text-ink/75">
+            Nothing pinned yet. Tap the bookmark on any drop and it lands here.
+          </p>
+          <Link
+            to="/"
+            hash="lanes"
+            className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-sand"
+          >
+            Browse the lanes <ArrowRight className="size-4" />
+          </Link>
         </div>
       ) : (
-        <div className="flex flex-col gap-10">
+        <div className="mt-8 space-y-6">
           {archivedTrends.map((item) => (
-            <TrendCard 
-              key={item.id} 
-              trend={item.trendSnapshot} 
-              isArchivedContext={true} 
+            <TrendCard
+              key={item.id}
+              trend={item.trendSnapshot}
+              isArchivedContext={true}
               onUnarchive={handleUnarchive}
             />
           ))}
