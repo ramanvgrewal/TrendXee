@@ -99,11 +99,18 @@ function LanePage() {
 
           <div className="mt-6 flex flex-col items-start gap-6">
             <div>
-              <p className="hand text-lg text-clay">{emoji} lane</p>
-              <h1 className="font-display text-4xl tracking-tight sm:text-5xl">{aesthetic.name}</h1>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">
+                Curated Lane
+              </p>
+              <h1 className="mt-2 font-display text-4xl tracking-tight sm:text-5xl">{aesthetic.name}</h1>
               <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-ink/75">
                 {aesthetic.description}
               </p>
+              <div className="mt-5 max-w-3xl border-l-2 border-clay pl-4">
+                <p className="text-[13px] leading-relaxed text-ink/60">
+                  <strong className="text-ink/80">Engine Process:</strong> We monitor activity across social feeds, marketplaces, and indie brand stores. Related chatter is clustered into single drops and scored based on signal volume, velocity, and shoppability. For each trend, we prioritize the original underdog brand behind the fit.
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-6">
