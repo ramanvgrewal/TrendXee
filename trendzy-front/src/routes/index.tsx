@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Shuffle } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
 import { LanePoster } from "@/components/LanePoster";
-import { Photo } from "@/components/Photo";
 import { aesthetics } from "@/lib/mock-data";
 import { getTrends } from "@/lib/api";
 
@@ -78,7 +77,7 @@ const engineSteps = [
 
 function Home() {
   const { rotationMap } = Route.useLoaderData();
-  const [shuffleIndex, setShuffleIndex] = useState(0);
+  const [rotationIndex, setRotationIndex] = useState(0);
 
   // Combine all fetched products across all lanes
   const allProducts = Object.values(rotationMap).flat();
@@ -96,14 +95,14 @@ function Home() {
     return hashA - hashB;
   });
 
-  // Pick exactly 10 products for the day
-  const dailyTen = shuffledProducts.slice(0, 10);
+  // Pick exactly 5 products for the day
+  const dailyFive = shuffledProducts.slice(0, 5);
 
-  const currentDrop =
-    dailyTen.length > 0
-      ? dailyTen[shuffleIndex % dailyTen.length]
-      : { image: aesthetics[0].heroImage, shopUrl: "#", category: aesthetics[0].id };
-
+  useEffect(() => {
+    if (dailyFive.length < 2) return;
+    const t = setInterval(() => setRotationIndex((i) => (i + 1) % dailyFive.length), 5000);
+    return () => clearInterval(t);
+  }, [dailyFive.length]);
 
   return (
     <div className="pb-24">
@@ -127,12 +126,6 @@ function Home() {
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setShuffleIndex((s) => s + 1)}
-                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-sand transition-transform hover:-translate-y-0.5"
-              >
-                Shuffle Drop <Shuffle className="size-4" />
-              </button>
               <a
                 href="#lanes"
                 onClick={(e) => {
@@ -150,30 +143,43 @@ function Home() {
                 Why we built it
               </Link>
             </div>
-
           </div>
 
-          {/* Single featured drop */}
+          {/* Single featured drop that auto-rotates */}
           <div className="flex items-center justify-center lg:justify-end">
             <a
-              href={currentDrop.shopUrl}
+              href={dailyFive[rotationIndex]?.shopUrl || "#"}
               target="_blank"
               rel="noopener noreferrer"
               className="group animate-settle w-full max-w-lg overflow-hidden rounded-2xl bg-cream p-3 ring-1 ring-border transition-transform hover:z-10 hover:scale-[1.02] hover:shadow-xl"
               style={{ "--tilt": "1deg" } as React.CSSProperties}
             >
               <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-paper">
-                <img
-                  src={currentDrop.image}
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl"
-                />
-                <Photo
-                  key={currentDrop.image}
-                  src={currentDrop.image}
-                  alt="Trend drop"
-                  className="absolute inset-0 z-10 h-full w-full object-contain p-4 transition-transform duration-700 group-hover:scale-[1.04]"
-                />
+                {dailyFive.length > 0 ? (
+                  dailyFive.map((r, i) => (
+                    <div
+                      key={`${r.image}-${i}`}
+                      className={`absolute inset-0 size-full transition-opacity duration-700 ${
+                        i === rotationIndex ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      <img
+                        src={r.image}
+                        alt={r.title}
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <img
+                    src={aesthetics[0].heroImage}
+                    alt="Trend drop"
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  />
+                )}
+                
                 {/* Subtle overlay on hover indicating it's clickable */}
                 <div className="absolute inset-0 z-20 bg-ink/0 transition-colors duration-300 group-hover:bg-ink/10" />
               </div>
@@ -241,3 +247,4 @@ function Home() {
     </div>
   );
 }
+
