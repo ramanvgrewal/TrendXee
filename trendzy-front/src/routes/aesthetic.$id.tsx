@@ -68,43 +68,42 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-const laneEmoji: Record<string, string> = {
-  streetwear: "👕",
-  upper: "🎽",
-  sneakers: "👟",
-  bottoms: "👖",
-  caps: "🧢",
-  sportswear: "💪",
-  fragrances: "🧴",
-};
+
 
 function LanePage() {
   const { aesthetic, trends } = Route.useLoaderData() as {
     aesthetic: Aesthetic;
     trends: Trend[];
   };
-  const emoji = laneEmoji[aesthetic.id] ?? "✦";
 
   return (
     <div className="pb-24">
       <header className="border-b border-border">
-        <div className="mx-auto w-full px-5 py-12 sm:px-8">
+        <div className="mx-auto flex w-full flex-wrap items-center justify-between gap-6 px-5 py-6 sm:px-8">
           <Link
             to="/"
             hash="lanes"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-clay"
+            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-clay transition-colors hover:text-ink"
           >
-            <ArrowLeft className="size-4" /> All lanes
+            <ArrowLeft className="size-4" /> Previous
           </Link>
 
-          <div className="mt-6 flex flex-col items-start gap-6">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">
-                Curated Lane
-              </p>
-              <h1 className="mt-2 font-display text-4xl tracking-tight sm:text-5xl">{aesthetic.name}</h1>
-            </div>
-          </div>
+          <nav className="flex flex-wrap items-center gap-4 sm:gap-6">
+            {aesthetics.map((a) => (
+              <Link
+                key={a.id}
+                to="/aesthetic/$id"
+                params={{ id: a.id }}
+                className={`text-[12px] font-bold uppercase tracking-wider transition-colors ${
+                  a.id === aesthetic.id
+                    ? "text-ink border-b-2 border-clay pb-1"
+                    : "text-ink/40 hover:text-ink"
+                }`}
+              >
+                {a.name}
+              </Link>
+            ))}
+          </nav>
         </div>
       </header>
 
