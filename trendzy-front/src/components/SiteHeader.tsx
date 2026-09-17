@@ -45,9 +45,6 @@ export function SiteHeader() {
         </Link>
 
         <div className="flex items-center gap-5 text-[13px] font-semibold sm:gap-7">
-          <Link to="/" hash="lanes" className="transition-colors hover:text-clay">
-            Lanes
-          </Link>
           <Link to="/" hash="engine" className="hidden transition-colors hover:text-clay sm:inline">
             Engine
           </Link>
