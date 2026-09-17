@@ -133,13 +133,16 @@ function Home() {
               >
                 Shuffle Drop <Shuffle className="size-4" />
               </button>
-              <Link
-                to="/"
-                hash="lanes"
+              <a
+                href="#lanes"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("lanes")?.scrollIntoView({ behavior: "smooth" });
+                }}
                 className="inline-flex items-center gap-2 rounded-full border border-input px-6 py-3 text-sm font-semibold transition-colors hover:border-clay hover:text-clay"
               >
                 Explore in curated <ArrowRight className="size-4" />
-              </Link>
+              </a>
               <Link
                 to="/about"
                 className="inline-flex items-center gap-2 rounded-full border border-input px-6 py-3 text-sm font-semibold transition-colors hover:border-clay hover:text-clay"
