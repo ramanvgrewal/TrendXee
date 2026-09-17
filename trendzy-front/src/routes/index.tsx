@@ -120,10 +120,10 @@ function Home() {
             </h1>
             <div className="mt-6 max-w-xl space-y-5 text-[17px] leading-relaxed text-ink/75">
               <p>
-                TrendXee tracks emerging fashion signals to give you a curated discovery experience for India.
+                TrendXee tracks emerging fashion signals to give you a curated discovery experience.
               </p>
               <p>
-                Find products you've never seen before and uncover the small brands hiding behind the trend. No endless scrolling—just discover what you didn't know you wanted.
+                Find products you've never seen before and uncover the small brands hiding behind the trend. No endless searching—just discover what you didn't know you wanted.
               </p>
             </div>
 
