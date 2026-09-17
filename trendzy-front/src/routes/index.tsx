@@ -160,7 +160,7 @@ function Home() {
               className="group animate-settle w-full max-w-lg overflow-hidden rounded-2xl bg-cream p-3 ring-1 ring-border transition-transform hover:z-10 hover:scale-[1.02] hover:shadow-xl"
               style={{ "--tilt": "1deg" } as React.CSSProperties}
             >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-paper">
+              <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-paper">
                 {isSneaker && (
                   <img
                     src={currentDrop.image}
