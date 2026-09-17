@@ -59,7 +59,7 @@ export const Route = createFileRoute("/aesthetic/$id")({
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-[1280px] px-5 py-20 sm:px-8">
+    <div className="mx-auto w-full px-5 py-20 sm:px-8">
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-clay">
         <ArrowLeft className="size-4" /> Back to the board
       </Link>
@@ -88,7 +88,7 @@ function LanePage() {
   return (
     <div className="pb-24">
       <header className="border-b border-border">
-        <div className="mx-auto max-w-[1280px] px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-8">
           <Link
             to="/"
             hash="lanes"
@@ -133,7 +133,7 @@ function LanePage() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-[1280px] space-y-6 px-5 py-12 sm:px-8">
+      <section className="mx-auto w-full space-y-6 px-5 py-12 sm:px-8">
         <p className="hand text-lg text-clay">
           showing {trends.length} drops in this lane
         </p>

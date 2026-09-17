@@ -52,7 +52,7 @@ function ArchivePage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1280px] px-5 py-14 sm:px-8">
+    <div className="mx-auto w-full px-5 py-14 sm:px-8">
       <p className="hand text-lg text-clay">your corner of the board</p>
       <h1 className="font-display text-4xl tracking-tight sm:text-5xl">Archive</h1>
 

@@ -34,7 +34,7 @@ export function SiteHeader() {
 
   return (
     <nav className="sticky top-0 z-40 border-b border-border bg-paper/85 backdrop-blur-sm">
-      <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-5 sm:px-8">
+      <div className="mx-auto flex h-16 w-full items-center justify-between px-5 sm:px-8">
         <Link to="/" className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center">
             <img src="/logo.png" alt="TrendXee Logo" className="h-8 w-8 object-contain" />

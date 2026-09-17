@@ -52,7 +52,7 @@ const howTo = [
 
 function AboutPage() {
   return (
-    <div className="mx-auto max-w-[1280px] px-5 py-14 sm:px-8">
+    <div className="mx-auto w-full px-5 py-14 sm:px-8">
       <p className="hand text-lg text-clay">about</p>
       <h1 className="max-w-3xl font-display text-4xl leading-tight tracking-tight sm:text-5xl">
         We find the fits before they go viral — and name who made them first.

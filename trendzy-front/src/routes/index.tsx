@@ -112,7 +112,7 @@ function Home() {
     <div className="pb-24">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border">
-        <div className="mx-auto grid max-w-[1280px] gap-10 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+        <div className="mx-auto grid w-full gap-10 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.05fr_1fr] lg:items-center">
           <div>
             <p className="hand text-lg text-clay">pinned this day</p>
             <h1 className="mt-3 font-display text-[2.75rem] leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
@@ -187,7 +187,7 @@ function Home() {
       </section>
 
       {/* Lanes */}
-      <section id="lanes" className="mx-auto max-w-[1280px] scroll-mt-20 px-5 py-16 sm:px-8">
+      <section id="lanes" className="mx-auto w-full scroll-mt-20 px-5 py-16 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">
@@ -222,7 +222,7 @@ function Home() {
       {/* Engine */}
       <section
         id="engine"
-        className="mx-auto max-w-[1280px] scroll-mt-20 border-t border-border px-5 py-16 sm:px-8"
+        className="mx-auto w-full scroll-mt-20 border-t border-border px-5 py-16 sm:px-8"
       >
         <p className="hand text-lg text-clay">how the engine works</p>
         <h2 className="font-display text-3xl tracking-tight sm:text-4xl">

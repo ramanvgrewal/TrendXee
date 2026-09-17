@@ -27,7 +27,7 @@ function LanesPage() {
   const totalSignals = aesthetics.reduce((sum, a) => sum + a.signalCount, 0);
 
   return (
-    <div className="mx-auto max-w-[1280px] px-5 py-16 sm:px-8">
+    <div className="mx-auto w-full px-5 py-16 sm:px-8">
       <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">the collection</p>
       <h1 className="mt-2 font-display text-4xl tracking-tight sm:text-5xl">
         All <em className="italic text-clay">lanes</em>.
