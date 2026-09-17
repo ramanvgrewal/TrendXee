@@ -8,7 +8,7 @@ import { getTrends } from "@/lib/api";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const rotationMap: Record<string, { brand: string; title: string; image: string; shopUrl: string }[]> = {};
+    const rotationMap: Record<string, { brand: string; title: string; image: string; shopUrl: string; category?: string }[]> = {};
     try {
       await Promise.all(
         aesthetics.map(async (a) => {
@@ -23,6 +23,7 @@ export const Route = createFileRoute("/")({
               title: t.products.underdog?.title || "",
               image: t.products.underdog?.imageUrl || "",
               shopUrl: t.products.underdog?.shopUrl || "",
+              category: a.id,
             }));
         }),
       );
@@ -101,8 +102,9 @@ function Home() {
   const currentDrop =
     dailyTen.length > 0
       ? dailyTen[shuffleIndex % dailyTen.length]
-      : { image: aesthetics[0].heroImage, shopUrl: "#" };
+      : { image: aesthetics[0].heroImage, shopUrl: "#", category: aesthetics[0].id };
 
+  const isSneaker = currentDrop.category === "sneakers";
   const totalSignals = aesthetics.reduce((sum, a) => sum + a.signalCount, 0);
 
   return (
@@ -164,18 +166,27 @@ function Home() {
               href={currentDrop.shopUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group animate-settle w-full max-w-md overflow-hidden rounded-2xl bg-cream p-3 ring-1 ring-border transition-transform hover:z-10 hover:scale-[1.02] hover:shadow-xl"
+              className="group animate-settle w-full max-w-lg overflow-hidden rounded-2xl bg-cream p-3 ring-1 ring-border transition-transform hover:z-10 hover:scale-[1.02] hover:shadow-xl"
               style={{ "--tilt": "1deg" } as React.CSSProperties}
             >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-paper">
+              <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-paper">
+                {isSneaker && (
+                  <img
+                    src={currentDrop.image}
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl"
+                  />
+                )}
                 <Photo
                   key={currentDrop.image}
                   src={currentDrop.image}
                   alt="Trend drop"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className={`absolute inset-0 h-full w-full transition-transform duration-700 group-hover:scale-[1.04] ${
+                    isSneaker ? "z-10 object-contain p-4" : "object-cover"
+                  }`}
                 />
                 {/* Subtle overlay on hover indicating it's clickable */}
-                <div className="absolute inset-0 bg-ink/0 transition-colors duration-300 group-hover:bg-ink/10" />
+                <div className="absolute inset-0 z-20 bg-ink/0 transition-colors duration-300 group-hover:bg-ink/10" />
               </div>
             </a>
           </div>
