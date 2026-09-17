@@ -105,7 +105,6 @@ function Home() {
       : { image: aesthetics[0].heroImage, shopUrl: "#", category: aesthetics[0].id };
 
   const isSneaker = currentDrop.category === "sneakers";
-  const totalSignals = aesthetics.reduce((sum, a) => sum + a.signalCount, 0);
 
   return (
     <div className="pb-24">
@@ -147,17 +146,6 @@ function Home() {
               </Link>
             </div>
 
-            <dl className="mt-10 flex flex-wrap gap-8">
-              {[
-                { k: "signals read", v: totalSignals.toLocaleString("en-IN") },
-                { k: "lanes", v: aesthetics.length.toString() },
-              ].map((stat) => (
-                <div key={stat.k}>
-                  <dt className="hand text-sm text-ink/55">{stat.k}</dt>
-                  <dd className="font-display text-3xl tracking-tight">{stat.v}</dd>
-                </div>
-              ))}
-            </dl>
           </div>
 
           {/* Single featured drop */}
