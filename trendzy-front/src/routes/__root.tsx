@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 function NotFoundComponent() {
   return (
@@ -78,35 +80,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TrendXee — AI Fashion Trend Intelligence" },
+      { title: "TrendXee — fits before they go viral" },
       {
         name: "description",
         content:
-          "Real-time fashion trend clusters, momentum signals and a shoppable product triad — powered by AI.",
+          "A hand-pinned board of aesthetic lanes, scored by the signals gathering behind each fit.",
       },
-      { name: "author", content: "TrendXee" },
-      { property: "og:title", content: "TrendXee — AI Fashion Trend Intelligence" },
+      { property: "og:title", content: "TrendXee — fits before they go viral" },
       {
         property: "og:description",
         content:
-          "Discover aesthetic clusters, momentum-scored micro-trends and a curated shoppable feed built by AI.",
+          "A hand-pinned board of aesthetic lanes, scored by the signals gathering behind each fit.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@trendxee" },
     ],
     links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
-      },
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Nunito+Sans:wght@400;600;700;800&display=swap",
+      },
+      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "icon", href: "/logo.png", type: "image/png", sizes: "512x512" },
       { rel: "apple-touch-icon", href: "/logo.png" },
     ],
@@ -119,12 +119,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        {/* Set the saved theme before first paint so the board never flashes. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('trendxee-theme');if(t==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(e){}`,
+            __html: `(function(){try{var t=localStorage.getItem('trendxee-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`,
           }}
         />
       </head>
@@ -144,8 +145,6 @@ function RootComponent() {
     // Handle back/forward cache (bfcache) restoration
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
-        // If the page was restored from the browser's in-memory cache,
-        // force TanStack Router to invalidate and refetch loaders.
         router.invalidate();
       }
     };
@@ -159,7 +158,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <div className="flex min-h-screen flex-col">
+        <SiteHeader />
+        <div className="flex-1">
+          <Outlet />
+        </div>
+        <SiteFooter />
+      </div>
     </QueryClientProvider>
   );
 }
