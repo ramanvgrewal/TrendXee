@@ -118,29 +118,12 @@ function Home() {
               <br />
               <em className="italic text-clay">Go Viral.</em>
             </h1>
-            <div className="mt-6 max-w-xl space-y-4 text-[17px] leading-relaxed text-ink/75">
+            <div className="mt-6 max-w-xl space-y-5 text-[17px] leading-relaxed text-ink/75">
               <p>
-                You don't always know what you're looking for.
-                <br />
-                That's where TrendXee comes in.
+                TrendXee tracks emerging fashion signals to give you a curated discovery experience for India.
               </p>
               <p>
-                TrendXee tracks emerging fashion signals and turns them into a curated discovery experience for India.
-              </p>
-              <p>
-                Discover the styles people are starting to wear.
-                <br />
-                Find products you've never seen before.
-                <br />
-                Uncover small brands hiding behind the trend.
-              </p>
-              <p>
-                No endless scrolling. No knowing the right brand name.
-                <br />
-                Just discover what's next.
-              </p>
-              <p className="font-semibold text-ink">
-                TrendXee — Discover what you didn't know you wanted.
+                Find products you've never seen before and uncover the small brands hiding behind the trend. No endless scrolling—just discover what you didn't know you wanted.
               </p>
             </div>
 
