@@ -95,9 +95,12 @@ function Home() {
     return hashA - hashB;
   });
 
+  // Pick exactly 10 products for the day
+  const dailyTen = shuffledProducts.slice(0, 10);
+
   const currentDrop =
-    shuffledProducts.length > 0
-      ? shuffledProducts[shuffleIndex % shuffledProducts.length]
+    dailyTen.length > 0
+      ? dailyTen[shuffleIndex % dailyTen.length]
       : { image: aesthetics[0].heroImage, shopUrl: "#" };
 
   const totalSignals = aesthetics.reduce((sum, a) => sum + a.signalCount, 0);
@@ -161,10 +164,10 @@ function Home() {
               href={currentDrop.shopUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group animate-settle w-full max-w-sm overflow-hidden rounded-2xl bg-cream p-3 ring-1 ring-border transition-transform hover:z-10 hover:scale-[1.02] hover:shadow-xl"
+              className="group animate-settle w-full max-w-md overflow-hidden rounded-2xl bg-cream p-3 ring-1 ring-border transition-transform hover:z-10 hover:scale-[1.02] hover:shadow-xl"
               style={{ "--tilt": "1deg" } as React.CSSProperties}
             >
-              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-paper">
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-paper">
                 <Photo
                   key={currentDrop.image}
                   src={currentDrop.image}
