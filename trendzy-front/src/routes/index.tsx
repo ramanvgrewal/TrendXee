@@ -104,7 +104,6 @@ function Home() {
       ? dailyTen[shuffleIndex % dailyTen.length]
       : { image: aesthetics[0].heroImage, shopUrl: "#", category: aesthetics[0].id };
 
-  const isSneaker = currentDrop.category === "sneakers";
 
   return (
     <div className="pb-24">
@@ -161,20 +160,16 @@ function Home() {
               style={{ "--tilt": "1deg" } as React.CSSProperties}
             >
               <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-paper">
-                {isSneaker && (
-                  <img
-                    src={currentDrop.image}
-                    aria-hidden="true"
-                    className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl"
-                  />
-                )}
+                <img
+                  src={currentDrop.image}
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl"
+                />
                 <Photo
                   key={currentDrop.image}
                   src={currentDrop.image}
                   alt="Trend drop"
-                  className={`absolute inset-0 h-full w-full transition-transform duration-700 group-hover:scale-[1.04] ${
-                    isSneaker ? "z-10 object-contain p-4" : "object-cover"
-                  }`}
+                  className="absolute inset-0 z-10 h-full w-full object-contain p-4 transition-transform duration-700 group-hover:scale-[1.04]"
                 />
                 {/* Subtle overlay on hover indicating it's clickable */}
                 <div className="absolute inset-0 z-20 bg-ink/0 transition-colors duration-300 group-hover:bg-ink/10" />
