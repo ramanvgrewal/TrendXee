@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { TrendCard } from "@/components/TrendCard";
-import { Stamp } from "@/components/Stamp";
+
 import type { Aesthetic, Trend } from "@/lib/mock-data";
 import { aesthetics } from "@/lib/mock-data";
 import { getTrends } from "@/lib/api";
@@ -103,38 +103,6 @@ function LanePage() {
                 Curated Lane
               </p>
               <h1 className="mt-2 font-display text-4xl tracking-tight sm:text-5xl">{aesthetic.name}</h1>
-              <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-ink/75">
-                {aesthetic.description}
-              </p>
-              <div className="mt-5 max-w-3xl border-l-2 border-clay pl-4">
-                <p className="text-[13px] leading-relaxed text-ink/60">
-                  <strong className="text-ink/80">Engine Process:</strong> We monitor activity across social feeds, marketplaces, and indie brand stores. Related chatter is clustered into single drops and scored based on signal volume, velocity, and shoppability. For each trend, we prioritize the original underdog brand behind the fit.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-6">
-              <div className="flex items-center gap-4">
-                <Stamp score={aesthetic.trendScore} size="lg" />
-                <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-ink/55">
-                  lane score
-                  <br />
-                  {aesthetic.signalCount.toLocaleString("en-IN")} signals
-                </p>
-              </div>
-
-              {aesthetic.vibeTags.length > 0 && (
-                <ul className="flex flex-wrap gap-1.5 sm:border-l sm:border-border sm:pl-6">
-                  {aesthetic.vibeTags.map((tag) => (
-                    <li
-                      key={tag}
-                      className="rounded-full border border-input px-3 py-1 text-[11px] font-semibold text-ink/60"
-                    >
-                      #{tag}
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
           </div>
         </div>
