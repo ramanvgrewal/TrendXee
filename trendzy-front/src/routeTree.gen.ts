@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as ArchiveRouteImport } from './routes/archive'
+import { Route as LanesRouteImport } from './routes/lanes'
 import { Route as AestheticIdRouteImport } from './routes/aesthetic.$id'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 
@@ -19,9 +21,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArchiveRoute = ArchiveRouteImport.update({
   id: '/archive',
   path: '/archive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LanesRoute = LanesRouteImport.update({
+  id: '/lanes',
+  path: '/lanes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AestheticIdRoute = AestheticIdRouteImport.update({
@@ -37,34 +49,51 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/archive': typeof ArchiveRoute
+  '/lanes': typeof LanesRoute
   '/aesthetic/$id': typeof AestheticIdRoute
   '/auth/callback': typeof AuthCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/archive': typeof ArchiveRoute
+  '/lanes': typeof LanesRoute
   '/aesthetic/$id': typeof AestheticIdRoute
   '/auth/callback': typeof AuthCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/archive': typeof ArchiveRoute
+  '/lanes': typeof LanesRoute
   '/aesthetic/$id': typeof AestheticIdRoute
   '/auth/callback': typeof AuthCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/archive' | '/aesthetic/$id' | '/auth/callback'
+  fullPaths:
+    '/' | '/about' | '/archive' | '/lanes' | '/aesthetic/$id' | '/auth/callback'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/archive' | '/aesthetic/$id' | '/auth/callback'
-  id: '__root__' | '/' | '/archive' | '/aesthetic/$id' | '/auth/callback'
+  to:
+    '/' | '/about' | '/archive' | '/lanes' | '/aesthetic/$id' | '/auth/callback'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/archive'
+    | '/lanes'
+    | '/aesthetic/$id'
+    | '/auth/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   ArchiveRoute: typeof ArchiveRoute
+  LanesRoute: typeof LanesRoute
   AestheticIdRoute: typeof AestheticIdRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
 }
@@ -78,11 +107,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/archive': {
       id: '/archive'
       path: '/archive'
       fullPath: '/archive'
       preLoaderRoute: typeof ArchiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lanes': {
+      id: '/lanes'
+      path: '/lanes'
+      fullPath: '/lanes'
+      preLoaderRoute: typeof LanesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/aesthetic/$id': {
@@ -104,7 +147,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   ArchiveRoute: ArchiveRoute,
+  LanesRoute: LanesRoute,
   AestheticIdRoute: AestheticIdRoute,
   AuthCallbackRoute: AuthCallbackRoute,
 }

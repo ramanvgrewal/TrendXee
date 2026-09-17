@@ -1,8 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Radio } from "lucide-react";
-import { motion } from "framer-motion";
-import { SiteHeader } from "@/components/SiteHeader";
+import { ArrowLeft } from "lucide-react";
 import { TrendCard } from "@/components/TrendCard";
+import { Stamp } from "@/components/Stamp";
 import type { Aesthetic, Trend } from "@/lib/mock-data";
 import { aesthetics } from "@/lib/mock-data";
 import { getTrends } from "@/lib/api";
@@ -15,140 +14,146 @@ export const Route = createFileRoute("/aesthetic/$id")({
     let queryCategory = params.id;
     if (params.id === "upper") queryCategory = "tees";
     try {
-      const trends = await getTrends(queryCategory, 100);
+      const allTrends = await getTrends(queryCategory, 100);
+      // Strictly enforce category matching on the frontend to protect against loose backend responses
+      const trends = allTrends.filter(t => t.aestheticId === queryCategory);
       return { aesthetic, trends };
     } catch (e) {
       console.error(e);
       return { aesthetic, trends: [] };
     }
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.aesthetic.name} — TrendXee` },
-          { name: "description", content: loaderData.aesthetic.description },
-        ]
-      : [],
-  }),
-  component: AestheticDetail,
+  head: ({ loaderData }) => {
+    const aesthetic = loaderData?.aesthetic;
+    const title = aesthetic
+      ? `${aesthetic.name} trends on TrendXee`
+      : "Lane — TrendXee";
+    const description = aesthetic
+      ? `${aesthetic.description}`
+      : "A TrendXee lane of rising fits.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+    };
+  },
+  component: LanePage,
+  errorComponent: () => (
+    <Shell>
+      <p className="hand text-xl text-clay">this page slipped off the board</p>
+      <p className="mt-2 text-ink/70">Something went wrong loading this lane. Try again.</p>
+    </Shell>
+  ),
   notFoundComponent: () => (
-    <div className="min-h-screen flex items-center justify-center text-foreground/40">Aesthetic not found</div>
+    <Shell>
+      <p className="hand text-xl text-clay">no such lane</p>
+      <p className="mt-2 text-ink/70">That lane isn't pinned to the board.</p>
+    </Shell>
   ),
 });
 
-function AestheticDetail() {
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto max-w-[1280px] px-5 py-20 sm:px-8">
+      <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-clay">
+        <ArrowLeft className="size-4" /> Back to the board
+      </Link>
+      <div className="mt-6">{children}</div>
+    </div>
+  );
+}
+
+const laneEmoji: Record<string, string> = {
+  streetwear: "👕",
+  upper: "🎽",
+  sneakers: "👟",
+  bottoms: "👖",
+  caps: "🧢",
+  sportswear: "💪",
+  fragrances: "🧴",
+};
+
+function LanePage() {
   const { aesthetic, trends } = Route.useLoaderData() as {
     aesthetic: Aesthetic;
     trends: Trend[];
   };
-  const laneIndex = aesthetics.findIndex((x) => x.id === aesthetic.id);
-  const number = String(Math.max(laneIndex, 0) + 1).padStart(2, "0");
-  const [firstWord, ...restWords] = aesthetic.name.split(" ");
-  const rest = restWords.join(" ");
+  const emoji = laneEmoji[aesthetic.id] ?? "✦";
 
   return (
-    <div className="relative min-h-screen">
-      <SiteHeader />
-
-      <section className="relative mx-auto max-w-7xl px-6 pb-16 pt-10 md:pt-14">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.22em] text-foreground/50 transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> All lanes
-        </Link>
-
-        <div className="mt-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col items-start gap-6"
+    <div className="pb-24">
+      <header className="border-b border-border">
+        <div className="mx-auto max-w-[1280px] px-5 py-12 sm:px-8">
+          <Link
+            to="/"
+            hash="lanes"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-clay"
           >
-            <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-foreground/50">
-              <span className="rounded-full bg-foreground px-2.5 py-1 text-background">Lane {number}</span>
-              <span className="inline-flex items-center gap-1.5 text-foreground/60">
-                <Radio className="h-3 w-3" />
-                {aesthetic.signalCount.toLocaleString()} signals
-              </span>
-              <span className="text-foreground/25">·</span>
-              <span className="text-[oklch(0.55_0.09_50)]">Score {aesthetic.trendScore}</span>
-            </div>
+            <ArrowLeft className="size-4" /> All lanes
+          </Link>
 
-            <h1 className="font-display text-[64px] font-bold leading-[0.95] tracking-tight text-foreground md:text-[112px]">
-              {rest ? (
-                <>
-                  {firstWord?.toLowerCase()}
-                  <br />
-                  <em className="font-serif italic font-bold uppercase text-[oklch(0.55_0.09_50)]">
-                    {rest}
-                  </em>
-                </>
-              ) : (
-                <span className="capitalize">{firstWord?.toLowerCase()}</span>
-              )}
-            </h1>
-
-            <p className="max-w-2xl text-lg leading-relaxed text-foreground/60">
-              {aesthetic.description}
-            </p>
-
-            <div className="flex flex-wrap gap-1.5">
-              {aesthetic.vibeTags.map((t) => (
-                <span
-                  key={t}
-                  className="rounded-full border border-foreground/15 bg-background px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/60"
-                >
-                  #{t}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 pb-32">
-        <div className="mb-10 flex items-end justify-between border-t border-foreground/10 pt-10">
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-foreground/40">
-              The Drops · {trends.length}
-            </div>
-            <h2 className="mt-2 font-display text-4xl font-bold tracking-tight text-foreground md:text-6xl">
-              Trending <em className="italic font-semibold text-[oklch(0.55_0.09_50)]">now</em>.
-            </h2>
-          </div>
-          <span className="hidden font-mono text-[11px] uppercase tracking-[0.22em] text-foreground/40 md:inline">
-            {aesthetic.signalCount.toLocaleString()} signals
-          </span>
-        </div>
-        {trends.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-foreground/5 bg-foreground/[0.02] px-6 py-16 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-foreground/10 bg-foreground/5">
-              <span className="text-xl">🔌</span>
-            </div>
+          <div className="mt-6 flex flex-col items-start gap-6">
             <div>
-              <div className="font-display text-xl text-foreground">Waiting for the backend</div>
-              <p className="mx-auto mt-2 max-w-md text-sm text-foreground/50">
+              <p className="hand text-lg text-clay">{emoji} lane</p>
+              <h1 className="font-display text-4xl tracking-tight sm:text-5xl">{aesthetic.name}</h1>
+              <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-ink/75">
+                {aesthetic.description}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="flex items-center gap-4">
+                <Stamp score={aesthetic.trendScore} size="lg" />
+                <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-ink/55">
+                  lane score
+                  <br />
+                  {aesthetic.signalCount.toLocaleString("en-IN")} signals
+                </p>
+              </div>
+
+              {aesthetic.vibeTags.length > 0 && (
+                <ul className="flex flex-wrap gap-1.5 sm:border-l sm:border-border sm:pl-6">
+                  {aesthetic.vibeTags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full border border-input px-3 py-1 text-[11px] font-semibold text-ink/60"
+                    >
+                      #{tag}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-[1280px] space-y-6 px-5 py-12 sm:px-8">
+        <p className="hand text-lg text-clay">
+          showing {trends.length} drops in this lane
+        </p>
+        {trends.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 rounded-2xl bg-cream/70 px-6 py-16 text-center ring-1 ring-border">
+            <span className="text-xl">🔌</span>
+            <div>
+              <div className="font-display text-xl">Waiting for the backend</div>
+              <p className="mx-auto mt-2 max-w-md text-sm text-ink/60">
                 Trends for this aesthetic will appear here once the TrendXee engine
                 is wired up.
               </p>
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
-            {trends.map((t) => (
-              <TrendCard key={t.id} trend={t} />
-            ))}
-          </div>
+          trends.map((t) => (
+            <TrendCard key={t.id} trend={t} />
+          ))
         )}
       </section>
-
-      <footer className="border-t border-foreground/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-8 text-xs text-foreground/40">
-          <span>© 2026 TrendXee · trendxee.com</span>
-          <span className="font-mono">v0.9.4-beta</span>
-        </div>
-      </footer>
     </div>
   );
 }
