@@ -74,9 +74,9 @@ export function SiteHeader() {
           ) : (
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              className="rounded-full bg-clay px-5 py-2 font-display text-sm italic text-paper transition-all hover:scale-105 hover:bg-clay/90 shadow-md"
+              className="rounded-full border border-input px-4 py-1.5 transition-colors hover:bg-ink hover:text-sand"
             >
-              Sign up / Sign in
+              Login
             </button>
           )}
         </div>
