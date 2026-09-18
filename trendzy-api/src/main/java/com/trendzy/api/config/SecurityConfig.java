@@ -59,6 +59,8 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(org.springframework.http.HttpMethod.OPTIONS).permitAll()
                         .pathMatchers("/api/v2/archive/**").authenticated()
+                        .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/v2/trends/**").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.PATCH, "/api/v2/trends/**").hasRole("ADMIN")
                         .anyExchange().permitAll()
                 )
                 .exceptionHandling(ex -> ex

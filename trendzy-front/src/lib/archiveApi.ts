@@ -65,3 +65,14 @@ export const deleteTrendPermanently = async (trendId: string) => {
   }
   return res.json();
 };
+
+export const updateTrendPrice = async (trendId: string, price: number) => {
+  const res = await apiFetch(`/api/v2/trends/${trendId}/price`, {
+    method: 'PATCH',
+    body: JSON.stringify({ price }),
+  });
+  if (!res.ok) {
+    throw new Error('Failed to update trend price');
+  }
+  return res.json();
+};

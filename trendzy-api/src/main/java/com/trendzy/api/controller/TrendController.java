@@ -54,4 +54,18 @@ public class TrendController {
                         "message", "Successfully deleted trend permanently"
                 )));
     }
+
+    @PatchMapping("/{id}/price")
+    public Mono<Trend> updateTrendPrice(@PathVariable String id, @RequestBody Map<String, Double> body) {
+        log.info("[CTRL] Updating price for trend ID: {}", id);
+        return trendRepository.findById(id)
+                .flatMap(trend -> {
+                    Double newPrice = body.get("price");
+                    if (newPrice != null && trend.getSignalProducts() != null && trend.getSignalProducts().getUnderdog() != null) {
+                        trend.getSignalProducts().getUnderdog().setPrice(newPrice);
+                        trend.setEstimatedPrice(newPrice);
+                    }
+                    return trendRepository.save(trend);
+                });
+    }
 }

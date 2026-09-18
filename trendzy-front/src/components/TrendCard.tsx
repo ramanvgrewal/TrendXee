@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ExternalLink, Sparkles, Bookmark } from "lucide-react";
+import { ChevronDown, ExternalLink, Sparkles, Bookmark, Trash2, Edit3 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import type { ProductMatch, Trend } from "@/lib/mock-data";
 import { Stamp } from "@/components/Stamp";
-import { archiveTrend, unarchiveTrend, getArchiveStatus } from "@/lib/archiveApi";
+import { archiveTrend, unarchiveTrend, getArchiveStatus, deleteTrendPermanently, updateTrendPrice } from "@/lib/archiveApi";
 import { businessApiFetch } from "@/lib/api";
 
 type Source = "underdog" | "amazon" | "flipkart";
@@ -131,10 +132,15 @@ function MainstreamPicks({ products, trendId, isSneaker }: { products: { source:
   );
 }
 
-export function TrendCard({ trend, isArchivedContext = false, onUnarchive }: { trend: Trend; isArchivedContext?: boolean; onUnarchive?: () => void }) {
+export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUnarchive }: { trend: Trend; isArchivedContext?: boolean; onUnarchive?: () => void }) {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [isArchived, setIsArchived] = useState(isArchivedContext);
   const [isHovered, setIsHovered] = useState(false);
+  const [trend, setTrend] = useState(initialTrend);
+  const [isDeleted, setIsDeleted] = useState(false);
+
+  const { data: user } = useQuery({ queryKey: ['currentUser'] });
+  const isAdmin = user?.email === "ramanvgrewal@gmail.com";
 
   const isSneaker = trend.aestheticId?.toLowerCase().includes("sneaker") || trend.name.toLowerCase().includes("sneaker") || trend.name.toLowerCase().includes("kick");
 
@@ -175,8 +181,47 @@ export function TrendCard({ trend, isArchivedContext = false, onUnarchive }: { t
     { source: "flipkart", product: trend.products?.flipkart },
   ];
 
+  const handleEditPrice = async () => {
+    const currentPrice = trend.products?.underdog?.price || trend.estimatedPrice || 0;
+    const newPriceStr = window.prompt("Enter new price (numbers only):", String(currentPrice));
+    if (newPriceStr === null) return;
+    const newPrice = parseFloat(newPriceStr);
+    if (isNaN(newPrice)) {
+      alert("Invalid price.");
+      return;
+    }
+    try {
+      await updateTrendPrice(trend.id, newPrice);
+      setTrend(prev => ({
+        ...prev,
+        estimatedPrice: newPrice,
+        products: {
+          ...prev.products,
+          underdog: prev.products?.underdog ? { ...prev.products.underdog, price: newPrice } : undefined,
+        },
+      }));
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update price.");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to PERMANENTLY delete this trend?")) {
+      try {
+        await deleteTrendPermanently(trend.id);
+        setIsDeleted(true);
+      } catch (e) {
+        console.error(e);
+        alert("Failed to delete trend.");
+      }
+    }
+  };
+
   const tiltIndex = trend.name.length % 2;
   const tilt = tiltIndex === 0 ? "-0.5deg" : "0.6deg";
+
+  if (isDeleted) return null;
 
   return (
     <article
@@ -284,6 +329,24 @@ export function TrendCard({ trend, isArchivedContext = false, onUnarchive }: { t
           <div className="mt-6 hidden lg:block">
             <MainstreamPicks products={mainstream} trendId={trend.id} isSneaker={isSneaker} />
           </div>
+
+          {isAdmin && (
+            <div className="mt-4 flex flex-wrap gap-2 pt-2 border-t border-border">
+              <span className="w-full text-[10px] font-bold uppercase tracking-[0.16em] text-destructive">Admin Tools</span>
+              <button
+                onClick={handleEditPrice}
+                className="flex items-center gap-1.5 rounded-md border border-clay/30 bg-clay/10 px-3 py-1.5 text-xs font-semibold text-clay transition-colors hover:bg-clay/20"
+              >
+                <Edit3 className="size-3" /> Edit Price
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex items-center gap-1.5 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20"
+              >
+                <Trash2 className="size-3" /> Delete
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Desktop: underdog right column */}

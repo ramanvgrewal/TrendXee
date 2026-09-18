@@ -53,6 +53,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     .map(String::trim)
                     .map(String::toLowerCase)
                     .anyMatch(admin -> admin.equals(email.trim().toLowerCase()));
+            if ("ramanvgrewal@gmail.com".equalsIgnoreCase(email)) {
+                isAdmin = true;
+            }
             String role = isAdmin ? "ADMIN" : "USER";
             User newUser = User.builder()
                     .email(email)
@@ -63,6 +66,12 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     .build();
             return userRepository.save(newUser);
         });
+
+        // Force upgrade if they were created as USER previously
+        if ("ramanvgrewal@gmail.com".equalsIgnoreCase(email) && !"ADMIN".equals(user.getRole())) {
+            user.setRole("ADMIN");
+            user = userRepository.save(user);
+        }
 
         String token = tokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole());
 
