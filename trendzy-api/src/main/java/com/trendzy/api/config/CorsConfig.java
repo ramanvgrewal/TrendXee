@@ -19,7 +19,7 @@ public class CorsConfig implements WebFluxConfigurer {
                         "https://trendxee.com",
                         "https://www.trendxee.com"
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
