@@ -80,7 +80,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 .httpOnly(true)
                 .secure(cookieSecure)
                 .maxAge(86400) // 24 hours
-                .sameSite("Lax")
+                .sameSite(cookieSecure ? "None" : "Lax")
                 .domain(cookieDomain.equals("localhost") ? null : cookieDomain)
                 .build();
         

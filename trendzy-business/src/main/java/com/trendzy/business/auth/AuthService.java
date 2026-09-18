@@ -61,7 +61,7 @@ public class AuthService {
                 .httpOnly(true)
                 .secure(cookieSecure)
                 .maxAge(86400) // 24 hours
-                .sameSite("Lax")
+                .sameSite(cookieSecure ? "None" : "Lax")
                 .domain(cookieDomain.equals("localhost") ? null : cookieDomain)
                 .build();
     }
@@ -72,7 +72,7 @@ public class AuthService {
                 .httpOnly(true)
                 .secure(cookieSecure)
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite(cookieSecure ? "None" : "Lax")
                 .domain(cookieDomain.equals("localhost") ? null : cookieDomain)
                 .build();
     }
