@@ -1,7 +1,7 @@
-import { businessApiFetch, normalizeTrend } from "@/lib/api";
+import { apiFetch, normalizeTrend } from "@/lib/api";
 
 export const archiveTrend = async (trendId: string) => {
-  const res = await businessApiFetch(`/api/v2/archive/trends/${trendId}`, {
+  const res = await apiFetch(`/api/v2/archive/trends/${trendId}`, {
     method: 'POST',
   });
   if (!res.ok) {
@@ -11,7 +11,7 @@ export const archiveTrend = async (trendId: string) => {
 };
 
 export const unarchiveTrend = async (trendId: string) => {
-  const res = await businessApiFetch(`/api/v2/archive/trends/${trendId}`, {
+  const res = await apiFetch(`/api/v2/archive/trends/${trendId}`, {
     method: 'DELETE',
   });
   if (!res.ok) {
@@ -20,7 +20,7 @@ export const unarchiveTrend = async (trendId: string) => {
 };
 
 export const getArchivedTrends = async () => {
-  const res = await businessApiFetch(`/api/v2/archive/trends`, {
+  const res = await apiFetch(`/api/v2/archive/trends`, {
     method: 'GET',
   });
   if (!res.ok) {
@@ -39,7 +39,7 @@ export const getArchiveStatus = async (trendId: string) => {
   if (statusCircuitBreaker) return false;
   
   try {
-    const res = await businessApiFetch(`/api/v2/archive/trends/${trendId}/status`, {
+    const res = await apiFetch(`/api/v2/archive/trends/${trendId}/status`, {
       method: 'GET',
     });
     if (!res.ok) {
@@ -57,7 +57,7 @@ export const getArchiveStatus = async (trendId: string) => {
 };
 
 export const deleteTrendPermanently = async (trendId: string) => {
-  const res = await businessApiFetch(`/api/v2/trends/${trendId}`, {
+  const res = await apiFetch(`/api/v2/trends/${trendId}`, {
     method: 'DELETE',
   });
   if (!res.ok) {

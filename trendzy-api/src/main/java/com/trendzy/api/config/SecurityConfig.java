@@ -84,9 +84,11 @@ public class SecurityConfig {
                 try {
                     RSAPublicKey rsaPublicKey = loadPublicKey();
                     ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
+                    com.nimbusds.jose.jwk.RSAKey rsaJWK = new com.nimbusds.jose.jwk.RSAKey.Builder(rsaPublicKey).build();
+                    JWKSource<SecurityContext> jwkSource = new com.nimbusds.jose.jwk.source.ImmutableJWKSet<>(new com.nimbusds.jose.jwk.JWKSet(rsaJWK));
                     JWSKeySelector<SecurityContext> keySelector = new JWSVerificationKeySelector<>(
                             JWSAlgorithm.RS256,
-                            (jwkSelector, context) -> List.of((com.nimbusds.jose.jwk.JWK) rsaPublicKey)
+                            jwkSource
                     );
                     jwtProcessor.setJWSKeySelector(keySelector);
                     JWTClaimsSet claimsSet = jwtProcessor.process(token, null);
