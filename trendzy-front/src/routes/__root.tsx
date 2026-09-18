@@ -128,6 +128,18 @@ function RootShell({ children }: { children: ReactNode }) {
             __html: `(function(){try{var t=localStorage.getItem('trendxee-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`,
           }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "TrendXee",
+              alternateName: ["Trendxee", "TrendXee AI"],
+              url: "https://trendxee.com/"
+            })
+          }}
+        />
       </head>
       <body>
         {children}
