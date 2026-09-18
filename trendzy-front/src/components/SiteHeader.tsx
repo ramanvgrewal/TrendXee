@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { businessApiFetch, getGoogleLoginUrl } from "@/lib/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AuthModal } from "@/components/AuthModal";
 
 export function SiteHeader() {
   const queryClient = useQueryClient();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -26,10 +28,6 @@ export function SiteHeader() {
     await businessApiFetch("/api/auth/logout", { method: "POST" });
     queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     window.location.reload();
-  };
-
-  const handleLogin = () => {
-    window.location.href = getGoogleLoginUrl();
   };
 
   return (
@@ -75,7 +73,7 @@ export function SiteHeader() {
             </button>
           ) : (
             <button
-              onClick={handleLogin}
+              onClick={() => setIsAuthModalOpen(true)}
               className="rounded-full border border-input px-4 py-1.5 transition-colors hover:bg-ink hover:text-sand"
             >
               Login
@@ -83,6 +81,7 @@ export function SiteHeader() {
           )}
         </div>
       </div>
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </nav>
   );
 }

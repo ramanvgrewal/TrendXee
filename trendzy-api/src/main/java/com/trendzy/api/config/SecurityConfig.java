@@ -53,6 +53,8 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .cors(cors -> {})
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(org.springframework.http.HttpMethod.OPTIONS).permitAll()
