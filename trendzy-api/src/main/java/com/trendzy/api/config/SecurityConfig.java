@@ -61,6 +61,11 @@ public class SecurityConfig {
                         .pathMatchers("/api/v2/archive/**").authenticated()
                         .anyExchange().permitAll()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((swe, e) -> 
+                            Mono.fromRunnable(() -> swe.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED))
+                        )
+                )
                 .addFilterAt(jwtAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }
