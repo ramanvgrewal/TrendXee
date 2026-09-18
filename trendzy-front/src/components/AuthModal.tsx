@@ -62,15 +62,10 @@ export function AuthModal({
       <DialogContent className="max-w-md bg-paper text-ink border border-border sm:rounded-2xl">
         <DialogHeader className="space-y-3">
           <DialogTitle className="font-display text-3xl tracking-tight text-center">
-            {isLogin ? "Welcome back" : "Join "}
-            {!isLogin && (
-              <span className="italic text-clay">TrendXee</span>
-            )}
+            Welcome to <span className="italic text-clay">TrendXee</span>
           </DialogTitle>
           <DialogDescription className="text-center text-ink/60 text-sm">
-            {isLogin
-              ? "Enter your details to access your account."
-              : "Create an account to start saving trends."}
+            Sign in to start saving your favorite trends.
           </DialogDescription>
         </DialogHeader>
 
@@ -101,84 +96,6 @@ export function AuthModal({
             </svg>
             Continue with Google
           </Button>
-
-          <div className="relative my-2">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-paper px-2 text-ink/40 tracking-wider font-semibold">Or continue with email</span>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-widest text-ink/70">Name</Label>
-                <Input
-                  id="name"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required={!isLogin}
-                  className="border-border bg-paper text-ink focus-visible:ring-clay"
-                />
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-widest text-ink/70">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border-border bg-paper text-ink focus-visible:ring-clay"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-widest text-ink/70">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border-border bg-paper text-ink focus-visible:ring-clay"
-              />
-            </div>
-
-            {error && (
-              <p className="text-sm font-semibold text-destructive">{error}</p>
-            )}
-
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="mt-2 w-full bg-ink text-sand hover:bg-ink/90 font-semibold"
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLogin ? "Sign In" : "Sign Up"}
-            </Button>
-          </form>
-        </div>
-
-        <div className="mt-2 text-center text-sm text-ink/60">
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <button
-            type="button"
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError("");
-            }}
-            className="font-semibold text-clay hover:underline underline-offset-4 transition-colors"
-          >
-            {isLogin ? "Sign up" : "Sign in"}
-          </button>
         </div>
       </DialogContent>
     </Dialog>
