@@ -41,10 +41,23 @@ public class AuthController {
     }
     
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
+    public ResponseEntity<Void> logout(jakarta.servlet.http.HttpServletRequest request) {
         ResponseCookie cookie = authService.generateLogoutCookie();
+        ResponseCookie jsessionCookie = ResponseCookie.from("JSESSIONID", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+        
+        // Invalidate the stateful OAuth2 session
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .header(HttpHeaders.SET_COOKIE, jsessionCookie.toString())
                 .build();
     }
 }
