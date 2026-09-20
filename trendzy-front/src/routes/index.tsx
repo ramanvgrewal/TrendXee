@@ -82,18 +82,25 @@ function Home() {
   // Combine all fetched products across all lanes
   const allProducts = Object.values(rotationMap).flat();
 
-  // Create a daily seeded shuffle so it changes once per day
-  const seed = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (Math.imul(31, hash) + seed.charCodeAt(i)) | 0;
+  // Create a daily seeded shuffle so it changes once per day at 12 AM local time
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  let seed = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    seed = (Math.imul(31, seed) + dateStr.charCodeAt(i)) | 0;
   }
+  seed = Math.abs(seed) || 1;
 
-  const shuffledProducts = [...allProducts].sort((a, b) => {
-    const hashA = (Math.imul(31, hash) + a.image.charCodeAt(0)) | 0;
-    const hashB = (Math.imul(31, hash) + b.image.charCodeAt(0)) | 0;
-    return hashA - hashB;
-  });
+  const seededRandom = () => {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+
+  const shuffledProducts = [...allProducts];
+  for (let i = shuffledProducts.length - 1; i > 0; i--) {
+    const j = Math.floor(seededRandom() * (i + 1));
+    [shuffledProducts[i], shuffledProducts[j]] = [shuffledProducts[j], shuffledProducts[i]];
+  }
 
   // Pick exactly 5 products for the day
   const dailyFive = shuffledProducts.slice(0, 5);
