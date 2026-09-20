@@ -16,16 +16,7 @@ export function LanePoster({
   heroOverride?: string;
   className?: string;
 }) {
-  const laneEmoji: Record<string, string> = {
-    streetwear: "👕",
-    upper: "🎽",
-    sneakers: "👟",
-    bottoms: "👖",
-    caps: "🧢",
-    sportswear: "💪",
-    fragrances: "🧴",
-  };
-  const emoji = laneEmoji[aesthetic.id] ?? "✦";
+
   const isSneaker = aesthetic.id === "sneakers" || aesthetic.name.toLowerCase().includes("sneaker");
   
   const rotation = rotationImages;
@@ -97,9 +88,7 @@ export function LanePoster({
       <span className="absolute left-4 top-4 z-30 font-mono text-[13px] font-bold tracking-[0.16em] text-sand/80">
         {String(index + 1).padStart(2, "0")}
       </span>
-      <span className="absolute right-4 top-4 z-30 grid size-10 place-items-center rounded-full bg-paper/90 text-lg">
-        {emoji}
-      </span>
+
 
       <div className="absolute inset-x-0 bottom-0 z-30 p-5">
         <h3 className="font-display text-2xl tracking-tight text-sand">{aesthetic.name}</h3>
