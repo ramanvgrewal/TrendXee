@@ -1,6 +1,13 @@
 import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 export function SiteFooter() {
+  const handleCopyEmail = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigator.clipboard.writeText("hello@trendxee.com");
+    toast.success("Email address copied to clipboard!");
+  };
+
   return (
     <footer className="border-t border-border">
       <div className="mx-auto flex w-full flex-col items-start justify-between gap-3 px-5 py-8 sm:flex-row sm:items-center sm:px-8">
@@ -17,9 +24,9 @@ export function SiteFooter() {
           <Link to="/archive" className="transition-colors hover:text-clay">
             Archive
           </Link>
-          <a href="mailto:hello@trendxee.com" className="transition-colors hover:text-clay">
+          <button onClick={handleCopyEmail} className="transition-colors hover:text-clay cursor-pointer">
             Contact
-          </a>
+          </button>
         </div>
       </div>
     </footer>
