@@ -17,6 +17,9 @@ export function SiteFooter() {
           <Link to="/archive" className="transition-colors hover:text-clay">
             Archive
           </Link>
+          <a href="mailto:hello@trendxee.com" className="transition-colors hover:text-clay">
+            Contact
+          </a>
         </div>
       </div>
     </footer>
