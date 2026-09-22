@@ -25,6 +25,17 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET:google-client-secret}
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope: [email, profile]
+  mail:
+    host: ${MAIL_HOST:smtp.office365.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:hello@trendxee.com}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 app:
   jwt:

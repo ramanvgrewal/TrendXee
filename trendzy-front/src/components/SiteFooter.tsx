@@ -17,16 +17,13 @@ function ContactModal({ user }: { user: any }) {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // const message = (e.target as HTMLFormElement).message.value;
+    const message = (e.target as HTMLFormElement).message.value;
 
     try {
-      // In a real app, this sends to your backend to fire the email
-      // await businessApiFetch("/api/contact", { 
-      //   method: "POST", 
-      //   body: JSON.stringify({ email: user.email, message }) 
-      // });
-      
-      await new Promise((resolve) => setTimeout(resolve, 800)); // Simulated network delay
+      await businessApiFetch("/api/contact", { 
+        method: "POST", 
+        body: JSON.stringify({ email: user.email, message }) 
+      });
       
       setOpen(false);
       toast.success("Your message has been sent. We will get back to you soon!");
