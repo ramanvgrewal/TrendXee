@@ -4,6 +4,8 @@ import { ArrowRight, AlertCircle } from 'lucide-react';
 import { TrendCard } from '@/components/TrendCard';
 import { getArchivedTrends } from '@/lib/archiveApi';
 import type { Trend } from '@/lib/mock-data';
+import { useQuery } from '@tanstack/react-query';
+import { AuthModal } from '@/components/AuthModal';
 
 export const Route = createFileRoute('/archive')({
   head: () => ({
@@ -27,9 +29,13 @@ export const Route = createFileRoute('/archive')({
 });
 
 function ArchivePage() {
+  const { data: user, isLoading: isUserLoading } = useQuery({ queryKey: ['currentUser'] });
+  const isAuthenticated = !!user;
+
   const [archivedTrends, setArchivedTrends] = useState<{ id: string; trendSnapshot: Trend }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const fetchArchive = async () => {
     try {
@@ -44,8 +50,10 @@ function ArchivePage() {
   };
 
   useEffect(() => {
-    fetchArchive();
-  }, []);
+    if (isAuthenticated) {
+      fetchArchive();
+    }
+  }, [isAuthenticated]);
 
   const handleUnarchive = () => {
     fetchArchive();
@@ -66,16 +74,25 @@ function ArchivePage() {
 
       <div className="mt-6 flex items-center justify-between">
         <span className="rounded-full bg-cream/70 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-ink/50 ring-1 ring-border">
-          {archivedTrends.length} saved
+          {isAuthenticated ? archivedTrends.length : 0} saved
         </span>
       </div>
 
-      {loading ? (
+      {isUserLoading ? (
+        <p className="mt-8 text-ink/60">Checking access…</p>
+      ) : !isAuthenticated ? (
+        <div className="mt-8 rounded-2xl bg-cream/70 p-6 ring-1 ring-border text-center">
+          <p className="text-ink/75">Login to see your archive.</p>
+          <button onClick={() => setIsAuthModalOpen(true)} className="mt-4 text-sm font-semibold text-clay underline hover:no-underline cursor-pointer">
+            Login now
+          </button>
+        </div>
+      ) : loading ? (
         <p className="mt-8 text-ink/60">Opening your archive…</p>
       ) : error ? (
         <div className="mt-8 rounded-2xl bg-cream/70 p-6 ring-1 ring-border text-center">
           <p className="text-ink/75">{error}</p>
-          <button onClick={fetchArchive} className="mt-4 text-sm font-semibold text-clay underline hover:no-underline">
+          <button onClick={fetchArchive} className="mt-4 text-sm font-semibold text-clay underline hover:no-underline cursor-pointer">
             Try again
           </button>
         </div>
@@ -104,6 +121,8 @@ function ArchivePage() {
           ))}
         </div>
       )}
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   );
 }
