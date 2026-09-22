@@ -26,7 +26,7 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope: [email, profile]
   mail:
-    host: ${MAIL_HOST:smtp.office365.com}
+    host: ${MAIL_HOST:smtp.titan.email}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:hello@trendxee.com}
     password: ${MAIL_PASSWORD:}
