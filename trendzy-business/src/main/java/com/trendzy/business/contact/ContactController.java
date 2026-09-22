@@ -26,9 +26,10 @@ public class ContactController {
 
         try {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
-            // Important for GoDaddy/Microsoft 365: From must match the authenticated user
+            // Important for GoDaddy: From must match the authenticated user
             mailMessage.setFrom("hello@trendxee.com");
             mailMessage.setTo("hello@trendxee.com");
+            mailMessage.setReplyTo(userEmail);
             mailMessage.setSubject("New Contact Message from " + userEmail);
             mailMessage.setText("Message from: " + userEmail + "\n\n" + message);
 
