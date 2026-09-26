@@ -73,7 +73,7 @@ export function SiteFooter() {
         <p className="hand text-ink/70">
           © 2026 TrendXee · trendxee.com — zero middlemen, straight to the brand.
         </p>
-        <div className="flex items-center gap-5 text-[13px] font-semibold">
+        <div className="flex flex-wrap items-center gap-5 text-[13px] font-semibold">
           <Link to="/" hash="lanes" className="transition-colors hover:text-clay">
             Lanes
           </Link>
@@ -82,6 +82,12 @@ export function SiteFooter() {
           </Link>
           <Link to="/archive" className="transition-colors hover:text-clay">
             Archive
+          </Link>
+          <Link to="/terms" className="transition-colors hover:text-clay">
+            Terms
+          </Link>
+          <Link to="/privacy" className="transition-colors hover:text-clay">
+            Privacy
           </Link>
           {isAuthenticated ? (
             <ContactModal user={user} />

@@ -351,10 +351,16 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
 
         {/* Desktop: underdog right column */}
         {trend.products?.underdog && (
-          <div className="hidden h-full min-h-0 lg:block">
+          <div className="hidden h-full min-h-0 flex-col lg:flex">
             <UnderdogHero product={trend.products.underdog} trendId={trend.id} isSneaker={isSneaker} fill />
           </div>
         )}
+      </div>
+
+      <div className="mt-6 border-t border-border/50 pt-4 text-center">
+        <p className="text-[11px] text-ink/40 leading-relaxed">
+          TrendXee is a discovery platform. You will be redirected to the third-party brand/store to view or purchase this product. TrendXee does not sell or fulfil this product.
+        </p>
       </div>
     </article>
   );
