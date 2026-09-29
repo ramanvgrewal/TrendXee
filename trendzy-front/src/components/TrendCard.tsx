@@ -139,8 +139,8 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
   const [trend, setTrend] = useState(initialTrend);
   const [isDeleted, setIsDeleted] = useState(false);
 
-  const { data: user } = useQuery({ queryKey: ['currentUser'] });
-  const isAdmin = user?.email === "ramanvgrewal@gmail.com";
+  const { data: user } = useQuery<{ email?: string; role?: string }>({ queryKey: ['currentUser'] });
+  const isAdmin = user?.role === "ADMIN";
 
   const isSneaker = trend.aestheticId?.toLowerCase().includes("sneaker") || trend.name.toLowerCase().includes("sneaker") || trend.name.toLowerCase().includes("kick");
 

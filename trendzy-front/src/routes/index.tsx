@@ -8,27 +8,29 @@ import { getTrends } from "@/lib/api";
 export const Route = createFileRoute("/")({
   loader: async () => {
     const rotationMap: Record<string, { brand: string; title: string; image: string; shopUrl: string; category?: string }[]> = {};
-    try {
-      await Promise.all(
-        aesthetics.map(async (a) => {
-          let queryCategory = a.id;
-          if (a.id === "upper") queryCategory = "tees";
-          const trends = await getTrends(queryCategory, 15);
-          rotationMap[a.id] = trends
-            .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
-            .slice(0, 5) // Fetch top 5 per lane for a good mix
-            .map((t) => ({
-              brand: t.products.underdog?.brandName || "",
-              title: t.products.underdog?.title || "",
-              image: t.products.underdog?.imageUrl || "",
-              shopUrl: t.products.underdog?.shopUrl || "",
-              category: a.id,
-            }));
-        }),
-      );
-    } catch (e) {
-      console.error("Failed to fetch rotations", e);
-    }
+    const results = await Promise.allSettled(
+      aesthetics.map(async (a) => {
+        let queryCategory = a.id;
+        if (a.id === "upper") queryCategory = "tees";
+        const trends = await getTrends(queryCategory, 15);
+        rotationMap[a.id] = trends
+          .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
+          .slice(0, 5) // Fetch top 5 per lane for a good mix
+          .map((t) => ({
+            brand: t.products.underdog?.brandName || "",
+            title: t.products.underdog?.title || "",
+            image: t.products.underdog?.imageUrl || "",
+            shopUrl: t.products.underdog?.shopUrl || "",
+            category: a.id,
+          }));
+      }),
+    );
+    // Log individual failures without blocking other lanes
+    results.forEach((result, i) => {
+      if (result.status === "rejected") {
+        console.error(`Failed to fetch lane "${aesthetics[i].id}":`, result.reason);
+      }
+    });
     return { rotationMap };
   },
   head: () => ({

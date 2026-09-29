@@ -1,11 +1,6 @@
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { businessApiFetch, getGoogleLoginUrl } from "@/lib/api";
-import { useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { getGoogleLoginUrl } from "@/lib/api";
 
 export function AuthModal({
   isOpen,
@@ -14,45 +9,6 @@ export function AuthModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  
-  const queryClient = useQueryClient();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    try {
-      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/signup";
-      const body = isLogin 
-        ? { email, password } 
-        : { email, password, name };
-
-      const res = await businessApiFetch(endpoint, {
-        method: "POST",
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        throw new Error(isLogin ? "Invalid credentials" : "Registration failed. Email might be in use.");
-      }
-
-      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      onClose();
-      window.location.reload(); 
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleGoogleLogin = () => {
     window.location.href = getGoogleLoginUrl();
   };
@@ -70,9 +26,9 @@ export function AuthModal({
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-4">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={handleGoogleLogin}
             className="w-full flex items-center justify-center gap-2 border-border hover:bg-cream hover:text-ink transition-colors"
           >

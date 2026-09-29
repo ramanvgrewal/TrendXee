@@ -11,12 +11,21 @@ export const Route = createFileRoute("/aesthetic/$id")({
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
+    // Map of aesthetic URL ID -> accepted backend category values (aliases)
+    const CATEGORY_ALIASES: Record<string, string[]> = {
+      upper: ["tees", "upper"],
+      caps: ["caps", "accessories"],
+    };
+
     let queryCategory = params.id;
     if (params.id === "upper") queryCategory = "tees";
+
+    const acceptedCategories = CATEGORY_ALIASES[params.id] ?? [params.id];
+
     try {
       const allTrends = await getTrends(queryCategory, 100);
-      // Strictly enforce category matching on the frontend to protect against loose backend responses
-      const trends = allTrends.filter(t => t.aestheticId === queryCategory);
+      // Accept all known aliases for this lane to prevent silent empty-state bugs
+      const trends = allTrends.filter(t => acceptedCategories.includes(t.aestheticId));
       return { aesthetic, trends };
     } catch (e) {
       console.error(e);
