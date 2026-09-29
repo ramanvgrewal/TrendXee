@@ -33,25 +33,31 @@ export const getArchivedTrends = async () => {
   }));
 };
 
-let statusCircuitBreaker = false;
+// Circuit breaker: tracks auth failures only (401/403), not transient network errors.
+// Resets after 60 seconds to recover from temporary outages.
+let authFailedAt: number | null = null;
+const AUTH_BREAKER_COOLDOWN_MS = 60_000;
 
 export const getArchiveStatus = async (trendId: string) => {
-  if (statusCircuitBreaker) return false;
-  
+  // Only trip breaker on confirmed auth failures, and auto-reset after cooldown
+  if (authFailedAt !== null && Date.now() - authFailedAt < AUTH_BREAKER_COOLDOWN_MS) {
+    return false;
+  }
+
   try {
     const res = await apiFetch(`/api/v2/archive/trends/${trendId}/status`, {
       method: 'GET',
     });
     if (!res.ok) {
       if (res.status === 401 || res.status === 403) {
-        statusCircuitBreaker = true; // Stop asking if unauthorized
+        authFailedAt = Date.now(); // Trip breaker only on auth failures
       }
       return false;
     }
+    authFailedAt = null; // Reset breaker on success
     return await res.json();
   } catch (err) {
-    // If it's a network error (like CORS or offline), trip the breaker so we don't spam the console 100 times
-    statusCircuitBreaker = true;
+    // Network error — do NOT trip the breaker, just return false for this call
     return false;
   }
 };
@@ -63,7 +69,7 @@ export const deleteTrendPermanently = async (trendId: string) => {
   if (!res.ok) {
     throw new Error('Failed to delete trend permanently');
   }
-  return res.json();
+  // Endpoint returns 204 No Content — there is no body to parse
 };
 
 export const updateTrendPrice = async (trendId: string, price: number) => {

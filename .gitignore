@@ -1,7 +1,11 @@
 # ── Secrets & Keys ──
 .env
+# RSA key files — never commit these
 *.pem
-GenerateKeys.java
+private.pem
+public.pem
+# Only ignore the stray root-level copy; scripts/GenerateKeys.java is tracked
+/GenerateKeys.java
 GenerateKeys.class
 
 # ── IDE ──

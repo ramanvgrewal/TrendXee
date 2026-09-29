@@ -114,6 +114,7 @@ export async function getTrends(category: string, size = 100): Promise<Trend[]> 
   });
   const response = await fetch(apiUrl(`/api/v2/trends?${params.toString()}`), {
     cache: "no-store",
+    credentials: "include",
   });
 
   if (!response.ok) {
