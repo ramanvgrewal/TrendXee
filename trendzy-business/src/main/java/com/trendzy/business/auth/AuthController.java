@@ -4,6 +4,7 @@ import com.trendzy.business.auth.dto.AuthResponse;
 import com.trendzy.business.auth.dto.LoginRequest;
 import com.trendzy.business.auth.dto.SignupRequest;
 import com.trendzy.business.user.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -21,7 +22,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         User user = authService.login(request);
         ResponseCookie cookie = authService.generateJwtCookie(user);
         
@@ -31,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest request) {
+    public ResponseEntity<AuthResponse> signup(@Valid @RequestBody SignupRequest request) {
         User user = authService.signup(request);
         ResponseCookie cookie = authService.generateJwtCookie(user);
         
