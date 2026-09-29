@@ -44,9 +44,19 @@ public class SecurityConfig {
     private String cookieName;
 
     private final ResourceLoader resourceLoader;
+    private RSAPublicKey cachedPublicKey;
 
     public SecurityConfig(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void initKeys() {
+        try {
+            this.cachedPublicKey = loadPublicKey();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load RSA public key at startup", e);
+        }
     }
 
     @Bean
@@ -92,7 +102,7 @@ public class SecurityConfig {
 
             if (token != null) {
                 try {
-                    RSAPublicKey rsaPublicKey = loadPublicKey();
+                    RSAPublicKey rsaPublicKey = cachedPublicKey;
                     ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
                     com.nimbusds.jose.jwk.RSAKey rsaJWK = new com.nimbusds.jose.jwk.RSAKey.Builder(rsaPublicKey).build();
                     JWKSource<SecurityContext> jwkSource = new com.nimbusds.jose.jwk.source.ImmutableJWKSet<>(new com.nimbusds.jose.jwk.JWKSet(rsaJWK));

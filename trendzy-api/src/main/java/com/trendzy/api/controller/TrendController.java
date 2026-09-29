@@ -46,24 +46,32 @@ public class TrendController {
     }
 
     @DeleteMapping("/{id}")
-    public Mono<Map<String, Object>> deleteTrendById(@PathVariable String id) {
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
+    public Mono<Void> deleteTrendById(@PathVariable String id) {
         log.info("[CTRL] Permanently deleting trend with ID: {}", id);
-        return trendRepository.deleteById(id)
-                .then(Mono.just(Map.of(
-                        "deletedId", id,
-                        "message", "Successfully deleted trend permanently"
-                )));
+        return trendRepository.findById(id)
+                .switchIfEmpty(Mono.error(new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Trend not found: " + id)))
+                .flatMap(trend -> trendRepository.deleteById(trend.getId()));
     }
 
     @PatchMapping("/{id}/price")
     public Mono<Trend> updateTrendPrice(@PathVariable String id, @RequestBody Map<String, Double> body) {
         log.info("[CTRL] Updating price for trend ID: {}", id);
+        Double newPrice = body.get("price");
+        if (newPrice == null || newPrice <= 0) {
+            return Mono.error(new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "A valid positive price is required"));
+        }
         return trendRepository.findById(id)
+                .switchIfEmpty(Mono.error(new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Trend not found")))
                 .flatMap(trend -> {
-                    Double newPrice = body.get("price");
-                    if (newPrice != null && trend.getSignalProducts() != null && trend.getSignalProducts().getUnderdog() != null) {
+                    // Always update estimatedPrice regardless of whether underdog product exists
+                    trend.setEstimatedPrice(newPrice);
+                    // Conditionally update the underdog product price if it exists
+                    if (trend.getSignalProducts() != null && trend.getSignalProducts().getUnderdog() != null) {
                         trend.getSignalProducts().getUnderdog().setPrice(newPrice);
-                        trend.setEstimatedPrice(newPrice);
                     }
                     return trendRepository.save(trend);
                 });
