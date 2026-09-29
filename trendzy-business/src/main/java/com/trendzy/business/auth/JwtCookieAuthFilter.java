@@ -47,16 +47,19 @@ public class JwtCookieAuthFilter extends OncePerRequestFilter {
             }
         }
 
-        if (jwt != null && tokenProvider.validateToken(jwt)) {
-            String userId = tokenProvider.getUserIdFromToken(jwt);
-            String role = tokenProvider.getRoleFromToken(jwt);
+        if (jwt != null) {
+            if (tokenProvider.validateToken(jwt)) {
+                String userId = tokenProvider.getUserIdFromToken(jwt);
+                String role = tokenProvider.getRoleFromToken(jwt);
 
-            // In Business API, we store userId in the principal for easy access, or email. Let's use userId.
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
-            
-            // To make sure SecurityContextHolder has it
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                // Token present but invalid — explicitly clear any stale authentication
+                SecurityContextHolder.clearContext();
+            }
         }
 
         filterChain.doFilter(request, response);
