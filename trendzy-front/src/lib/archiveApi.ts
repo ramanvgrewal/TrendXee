@@ -96,14 +96,5 @@ export const updateTrendScore = async (trendId: string, score: number) => {
   return normalizeTrend(await res.json());
 };
 
-const SCRAPER_BASE_URL =
-  import.meta.env?.DEV ? 'http://localhost:8082' : 'https://scraper.trendxee.com';
 
-export const refreshTrend = async (trendId: string, category: string) => {
-  const params = new URLSearchParams({ category, trendId });
-  const res = await fetch(`${SCRAPER_BASE_URL}/api/v2/ingestion/refresh-underdog?${params.toString()}`, {
-    method: 'POST',
-  });
-  if (!res.ok) throw new Error('Failed to refresh trend');
-  return res;
-};
+

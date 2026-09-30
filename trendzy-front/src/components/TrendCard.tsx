@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ExternalLink, Sparkles, Bookmark, Trash2, Edit3, RefreshCw } from "lucide-react";
+import { ChevronDown, ExternalLink, Sparkles, Bookmark, Trash2, Edit3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { ProductMatch, Trend } from "@/lib/mock-data";
 import { Stamp } from "@/components/Stamp";
-import { archiveTrend, unarchiveTrend, getArchiveStatus, deleteTrendPermanently, updateTrendPrice, updateTrendScore, updateTrendPriceType, refreshTrend } from "@/lib/archiveApi";
+import { archiveTrend, unarchiveTrend, getArchiveStatus, deleteTrendPermanently, updateTrendPrice, updateTrendScore, updateTrendPriceType } from "@/lib/archiveApi";
 import { businessApiFetch } from "@/lib/api";
 
 type Source = "underdog" | "amazon" | "flipkart";
@@ -116,7 +116,6 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
   const [isHovered, setIsHovered] = useState(false);
   const [trend, setTrend] = useState(initialTrend);
   const [isDeleted, setIsDeleted] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -228,20 +227,6 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
     }
   };
 
-  const handleRefreshTrend = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsRefreshing(true);
-    try {
-      await refreshTrend(trend.id, trend.aestheticId);
-      alert("Refresh triggered successfully! The trend will be updated shortly.");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to refresh trend.");
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
 
   const tiltIndex = trend.name.length % 2;
   const tilt = tiltIndex === 0 ? "-0.5deg" : "0.6deg";
@@ -379,14 +364,6 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
                 <Edit3 className="size-3" /> Edit Price
               </button>
               <button
-                onClick={handleRefreshTrend}
-                disabled={isRefreshing}
-                className="flex items-center gap-1.5 rounded-md border border-clay/30 bg-clay/10 px-3 py-1.5 text-xs font-semibold text-clay transition-colors hover:bg-clay/20 disabled:opacity-50"
-              >
-                <RefreshCw className={isRefreshing ? 'size-3 animate-spin' : 'size-3'} />
-                {isRefreshing ? 'Refreshing...' : 'Refresh Trend'}
-              </button>
-              <button
                 onClick={handleDelete}
                 className="flex items-center gap-1.5 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20"
               >
@@ -412,4 +389,6 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
     </article>
   );
 }
+
+
 
