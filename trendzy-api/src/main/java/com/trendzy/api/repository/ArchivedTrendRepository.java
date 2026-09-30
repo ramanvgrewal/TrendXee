@@ -11,7 +11,5 @@ public interface ArchivedTrendRepository extends ReactiveMongoRepository<Archive
     
     Flux<ArchivedTrend> findByUserIdOrderByArchivedAtDesc(String userId);
 
-    Mono<ArchivedTrend> findByUserIdAndOriginalTrendId(String userId, String originalTrendId);
-
-    Mono<Void> deleteByUserIdAndOriginalTrendId(String userId, String originalTrendId);
+    Flux<ArchivedTrend> findByUserIdAndOriginalTrendId(String userId, String originalTrendId);
 }

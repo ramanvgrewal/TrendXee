@@ -33,6 +33,20 @@ public class ArchiveController {
                 });
     }
 
+    private String getProductIdentifier(com.trendzy.api.model.Trend trend) {
+        if (trend == null || trend.getSignalProducts() == null) return "";
+        if (trend.getSignalProducts().getUnderdog() != null && trend.getSignalProducts().getUnderdog().getTitle() != null) {
+            return trend.getSignalProducts().getUnderdog().getTitle();
+        }
+        if (trend.getSignalProducts().getAmazon() != null && trend.getSignalProducts().getAmazon().getTitle() != null) {
+            return trend.getSignalProducts().getAmazon().getTitle();
+        }
+        if (trend.getSignalProducts().getFlipkart() != null && trend.getSignalProducts().getFlipkart().getTitle() != null) {
+            return trend.getSignalProducts().getFlipkart().getTitle();
+        }
+        return trend.getTrendName();
+    }
+
     @GetMapping
     public Flux<ArchivedTrend> getArchivedTrends() {
         return getAuthenticatedUserId()
@@ -42,38 +56,56 @@ public class ArchiveController {
     @PostMapping("/{trendId}")
     public Mono<ArchivedTrend> archiveTrend(@PathVariable String trendId) {
         return getAuthenticatedUserId()
-                .flatMap(userId -> archivedTrendRepository.findByUserIdAndOriginalTrendId(userId, trendId)
-                        .switchIfEmpty(Mono.defer(() -> trendRepository.findById(trendId)
-                                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Trend not found")))
-                                .flatMap(trend -> {
-                                    ArchivedTrend archivedTrend = ArchivedTrend.builder()
-                                            .userId(userId)
-                                            .originalTrendId(trend.getId())
-                                            .trendSnapshot(trend)
-                                            .archivedAt(LocalDateTime.now())
-                                            .build();
-                                    log.info("[ARCHIVE] User {} archived trend {}", userId, trendId);
-                                    return archivedTrendRepository.save(archivedTrend);
-                                }))
-                        ));
+                .flatMap(userId -> trendRepository.findById(trendId)
+                        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Trend not found")))
+                        .flatMap(currentTrend -> {
+                            String currentIdStr = getProductIdentifier(currentTrend);
+                            return archivedTrendRepository.findByUserIdAndOriginalTrendId(userId, trendId)
+                                    .filter(at -> getProductIdentifier(at.getTrendSnapshot()).equals(currentIdStr))
+                                    .next()
+                                    .switchIfEmpty(Mono.defer(() -> {
+                                        ArchivedTrend archivedTrend = ArchivedTrend.builder()
+                                                .userId(userId)
+                                                .originalTrendId(trendId)
+                                                .trendSnapshot(currentTrend)
+                                                .archivedAt(LocalDateTime.now())
+                                                .build();
+                                        log.info("[ARCHIVE] User {} archived trend {} with product '{}'", userId, trendId, currentIdStr);
+                                        return archivedTrendRepository.save(archivedTrend);
+                                    }));
+                        }));
     }
 
     @DeleteMapping("/{trendId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> unarchiveTrend(@PathVariable String trendId) {
         return getAuthenticatedUserId()
-                .flatMap(userId -> {
-                    log.info("[ARCHIVE] User {} unarchived trend {}", userId, trendId);
-                    return archivedTrendRepository.deleteByUserIdAndOriginalTrendId(userId, trendId);
-                });
+                .flatMap(userId -> trendRepository.findById(trendId)
+                        .flatMap(currentTrend -> {
+                            String currentIdStr = getProductIdentifier(currentTrend);
+                            return archivedTrendRepository.findByUserIdAndOriginalTrendId(userId, trendId)
+                                    .filter(at -> getProductIdentifier(at.getTrendSnapshot()).equals(currentIdStr))
+                                    .flatMap(at -> {
+                                        log.info("[ARCHIVE] User {} unarchived trend {} with product '{}'", userId, trendId, currentIdStr);
+                                        return archivedTrendRepository.delete(at);
+                                    })
+                                    .then();
+                        })
+                );
     }
     
     @GetMapping("/{trendId}/status")
     public Mono<Boolean> getArchiveStatus(@PathVariable String trendId) {
         return getAuthenticatedUserId()
-                .flatMap(userId -> archivedTrendRepository.findByUserIdAndOriginalTrendId(userId, trendId)
-                        .map(at -> true)
-                        .defaultIfEmpty(false))
+                .flatMap(userId -> trendRepository.findById(trendId)
+                        .flatMap(currentTrend -> {
+                            String currentIdStr = getProductIdentifier(currentTrend);
+                            return archivedTrendRepository.findByUserIdAndOriginalTrendId(userId, trendId)
+                                    .filter(at -> getProductIdentifier(at.getTrendSnapshot()).equals(currentIdStr))
+                                    .hasElements();
+                        })
+                        .defaultIfEmpty(false)
+                )
                 .onErrorReturn(false);
     }
 }
