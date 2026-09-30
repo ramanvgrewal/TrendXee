@@ -141,17 +141,6 @@ export const aesthetics: Aesthetic[] = [
     vibeTags: ["trucker", "snapback", "logo", "headwear"],
     underdogRotation: []
   },
-    {
-    id: "fragrances",
-    name: "FRAGRANCES",
-    description: "Niche perfumers and the bottles TikTok fragrance-tok wont shut up about.",
-    signalCount: 2140,
-    trendScore: 84,
-    colorPalette: ["#f5d0fe", "#c084fc", "#a855f7", "#1e1b4b"],
-    heroImage: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=900&q=80",
-    vibeTags: ["niche", "gourmand", "oud", "cloud"],
-    underdogRotation: []
-  }
   ];
 export const trends: Trend[] = [
   {
@@ -263,3 +252,4 @@ export function paletteVars(palette: string[]): React.CSSProperties {
     ["--aesthetic-4" as string]: d,
   };
 }
+

@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A scrapbook of India's rising fashion drops: bottoms, tees, outerwear, sneakers, sportswear, anime, polos, caps and fragrances, with the underdog brand behind each trend.",
+          "A scrapbook of India's rising fashion drops: bottoms, tees, outerwear, sneakers, sportswear, anime, polos, and caps, with the underdog brand behind each trend.",
       },
       { property: "og:title", content: "TrendXee — Fits before they go viral" },
       {

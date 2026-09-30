@@ -35,7 +35,7 @@ export const Route = createFileRoute("/lanes")({
       {
         name: "description",
         content:
-          "Every TrendXee lane in one place: bottoms, tees, outerwear, sneakers, sportswear, anime, polos, caps and fragrances, each scored by live signal volume.",
+          "Every TrendXee lane in one place: bottoms, tees, outerwear, sneakers, sportswear, anime, polos, and caps, each scored by live signal volume.",
       },
       { property: "og:title", content: "All lanes — TrendXee" },
       {

@@ -44,7 +44,7 @@ const notes = [
 ];
 
 const howTo = [
-  "Pick the lane closest to your wardrobe — bottoms, tees, outerwear, sneakers, sportswear, anime, polos, caps or fragrances.",
+  "Pick the lane closest to your wardrobe — bottoms, tees, outerwear, sneakers, sportswear, anime, polos, or caps.",
   "Read the drops from the top; the trend score tells you how hot each one is right now.",
   "Check 'why it's trending' before you buy, so you know whether it has legs.",
   "Bookmark the ones you like into your archive, then buy from the underdog or the mainstream pick.",
