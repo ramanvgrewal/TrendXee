@@ -81,6 +81,7 @@ public class Trend {
         private String currency;
         private Double price;
         private Double originalPrice;
+        private String priceType;
         private String shopUrl;
         private String imageUrl;
         private Boolean codAvailable;

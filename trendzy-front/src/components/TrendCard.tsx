@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ExternalLink, Sparkles, Bookmark, Trash2, Edit3 } from "lucide-react";
+import { ChevronDown, ExternalLink, Sparkles, Bookmark, Trash2, Edit3, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { ProductMatch, Trend } from "@/lib/mock-data";
 import { Stamp } from "@/components/Stamp";
-import { archiveTrend, unarchiveTrend, getArchiveStatus, deleteTrendPermanently, updateTrendPrice } from "@/lib/archiveApi";
+import { archiveTrend, unarchiveTrend, getArchiveStatus, deleteTrendPermanently, updateTrendPrice, updateTrendScore, updateTrendPriceType, refreshTrend } from "@/lib/archiveApi";
 import { businessApiFetch } from "@/lib/api";
 
 type Source = "underdog" | "amazon" | "flipkart";
@@ -21,7 +21,7 @@ const trackClick = (trendId: string, source: Source, url: string) => {
   }).catch(err => console.error("Failed to track click", err));
 };
 
-function UnderdogHero({ product, trendId, isSneaker, fill }: { product: ProductMatch; trendId: string; isSneaker?: boolean; fill?: boolean }) {
+function UnderdogHero({ product, trendId, fill }: { product: ProductMatch; trendId: string; fill?: boolean }) {
   return (
     <a
       href={product.shopUrl}
@@ -31,22 +31,11 @@ function UnderdogHero({ product, trendId, isSneaker, fill }: { product: ProductM
       className="group flex h-full flex-col overflow-hidden rounded-xl bg-cream ring-1 ring-clay/35 transition-transform duration-300 hover:-translate-y-1"
     >
       <div className={`relative w-full overflow-hidden bg-paper ${fill ? "min-h-0 flex-1" : "aspect-[4/5]"}`}>
-        {isSneaker && (
-          <img
-            src={product.imageUrl}
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl"
-          />
-        )}
         <img
           src={product.imageUrl}
           alt={product.title}
           loading="lazy"
-          className={`h-full w-full transition-transform duration-700 group-hover:scale-105 ${
-            isSneaker
-              ? "relative z-10 object-contain p-4"
-              : "absolute inset-0 object-cover"
-          }`}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <span className="absolute left-4 top-4 z-20 rounded-full bg-clay px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-paper">
           the underdog
@@ -60,7 +49,7 @@ function UnderdogHero({ product, trendId, isSneaker, fill }: { product: ProductM
           {product.title}
         </p>
         <p className="mt-2 flex items-center justify-between font-display text-2xl">
-          {product.currency}{product.price?.toLocaleString() ?? "N/A"}
+          {product.currency || "₹"}{product.price?.toLocaleString() ?? "N/A"}
           <ExternalLink className="size-4 text-ink/40 transition-transform group-hover:translate-x-0.5" />
         </p>
       </div>
@@ -68,7 +57,7 @@ function UnderdogHero({ product, trendId, isSneaker, fill }: { product: ProductM
   );
 }
 
-function CompactProduct({ source, product, trendId, isSneaker }: { source: Source; product: ProductMatch; trendId: string; isSneaker?: boolean }) {
+function CompactProduct({ source, product, trendId }: { source: Source; product: ProductMatch; trendId: string }) {
   return (
     <a
       href={product.shopUrl}
@@ -78,22 +67,11 @@ function CompactProduct({ source, product, trendId, isSneaker }: { source: Sourc
       className="group flex flex-col overflow-hidden rounded-xl bg-cream/70 ring-1 ring-border transition-transform duration-300 hover:-translate-y-0.5"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-paper">
-        {isSneaker && (
-          <img
-            src={product.imageUrl}
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full scale-125 object-cover blur-2xl"
-          />
-        )}
         <img
           src={product.imageUrl}
           alt={product.title}
           loading="lazy"
-          className={`h-full w-full transition-transform duration-700 group-hover:scale-105 ${
-            isSneaker
-              ? "relative z-10 object-contain p-2"
-              : "absolute inset-0 object-cover"
-          }`}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <span className="absolute left-2 top-2 z-20 rounded-full bg-paper/85 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-ink/70">
           {sourceLabels[source]}
@@ -107,7 +85,7 @@ function CompactProduct({ source, product, trendId, isSneaker }: { source: Sourc
           {product.title}
         </p>
         <p className="mt-auto flex items-center justify-between font-display text-base">
-          {product.currency}{product.price?.toLocaleString() ?? "N/A"}
+          {product.currency || "₹"}{product.price?.toLocaleString() ?? "N/A"}
           <ExternalLink className="size-3.5 text-ink/40" />
         </p>
       </div>
@@ -115,7 +93,7 @@ function CompactProduct({ source, product, trendId, isSneaker }: { source: Sourc
   );
 }
 
-function MainstreamPicks({ products, trendId, isSneaker }: { products: { source: Source; product?: ProductMatch }[]; trendId: string; isSneaker?: boolean }) {
+function MainstreamPicks({ products, trendId }: { products: { source: Source; product?: ProductMatch }[]; trendId: string }) {
   const validProducts = products.filter((p) => p.product);
   if (validProducts.length === 0) return null;
 
@@ -125,7 +103,7 @@ function MainstreamPicks({ products, trendId, isSneaker }: { products: { source:
       <div className="mt-2 grid grid-cols-2 gap-3">
         {validProducts.map(
           ({ source, product }) =>
-            product && <CompactProduct key={source} source={source} product={product} trendId={trendId} isSneaker={isSneaker} />,
+            product && <CompactProduct key={source} source={source} product={product} trendId={trendId} />,
         )}
       </div>
     </div>
@@ -138,11 +116,18 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
   const [isHovered, setIsHovered] = useState(false);
   const [trend, setTrend] = useState(initialTrend);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data: user } = useQuery({ queryKey: ['currentUser'] });
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const res = await businessApiFetch('/api/users/me');
+      if (!res.ok) throw new Error('Not logged in');
+      return res.json();
+    },
+    retry: false,
+  });
   const isAdmin = user?.email === "ramanvgrewal@gmail.com";
-
-  const isSneaker = trend.aestheticId?.toLowerCase().includes("sneaker") || trend.name.toLowerCase().includes("sneaker") || trend.name.toLowerCase().includes("kick");
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -181,7 +166,30 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
     { source: "flipkart", product: trend.products?.flipkart },
   ];
 
-  const handleEditPrice = async () => {
+
+  const handleEditTrendScore = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const currentScore = trend.trendScore || 0;
+    const newScoreStr = window.prompt("Enter new trend score (0-100):", String(currentScore));
+    if (newScoreStr === null) return;
+    const newScore = parseFloat(newScoreStr);
+    if (isNaN(newScore)) {
+      alert("Please enter a valid number.");
+      return;
+    }
+    try {
+      const res = await updateTrendScore(trend.id, newScore);
+      setTrend(res);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update trend score.");
+    }
+  };
+
+  const handleEditPrice = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const currentPrice = trend.products?.underdog?.price || trend.estimatedPrice || 0;
     const newPriceStr = window.prompt("Enter new price (numbers only):", String(currentPrice));
     if (newPriceStr === null) return;
@@ -206,7 +214,9 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (window.confirm("Are you sure you want to PERMANENTLY delete this trend?")) {
       try {
         await deleteTrendPermanently(trend.id);
@@ -215,6 +225,21 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
         console.error(e);
         alert("Failed to delete trend.");
       }
+    }
+  };
+
+  const handleRefreshTrend = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsRefreshing(true);
+    try {
+      await refreshTrend(trend.id, trend.aestheticId);
+      alert("Refresh triggered successfully! The trend will be updated shortly.");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to refresh trend.");
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -231,12 +256,20 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-8">
         {/* Story side + mainstream picks */}
         <div className="flex flex-col">
-          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-olive">
-            <span className="size-1.5 animate-pulse rounded-full bg-olive" /> {trend.active ? "active drop" : "archived"}
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-olive">
+            <span className="flex items-center gap-2">
+              <span className="size-1.5 animate-pulse rounded-full bg-olive" /> {trend.active ? "active drop" : "archived"}
+            </span>
+            {trend.subcategory && (
+              <>
+                <span className="text-ink/30">•</span>
+                <span className="rounded bg-olive/10 px-2 py-0.5 text-olive">{trend.subcategory}</span>
+              </>
+            )}
           </div>
 
           <div className="mt-2 flex items-start justify-between gap-3">
-            <h3 className="font-display text-2xl leading-tight tracking-tight sm:text-3xl">
+            <h3 className="font-display text-2xl leading-tight tracking-tight sm:text-3xl line-clamp-3">
               {trend.name}
             </h3>
             <button
@@ -296,11 +329,11 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
           {/* Mobile: underdog then mainstream picks */}
           {trend.products?.underdog && (
             <div className="mt-6 lg:hidden">
-              <UnderdogHero product={trend.products.underdog} trendId={trend.id} isSneaker={isSneaker} />
+              <UnderdogHero product={trend.products.underdog} trendId={trend.id} />
             </div>
           )}
           <div className="mt-6 lg:hidden">
-            <MainstreamPicks products={mainstream} trendId={trend.id} isSneaker={isSneaker} />
+            <MainstreamPicks products={mainstream} trendId={trend.id} />
           </div>
 
           {/* AI Summary toggle */}
@@ -327,17 +360,31 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
 
           {/* Desktop mainstream picks */}
           <div className="mt-6 hidden lg:block">
-            <MainstreamPicks products={mainstream} trendId={trend.id} isSneaker={isSneaker} />
+            <MainstreamPicks products={mainstream} trendId={trend.id} />
           </div>
 
           {isAdmin && (
             <div className="mt-4 flex flex-wrap gap-2 pt-2 border-t border-border">
               <span className="w-full text-[10px] font-bold uppercase tracking-[0.16em] text-destructive">Admin Tools</span>
               <button
+                onClick={handleEditTrendScore}
+                className="flex items-center gap-1.5 rounded-md border border-clay/30 bg-clay/10 px-3 py-1.5 text-xs font-semibold text-clay transition-colors hover:bg-clay/20"
+              >
+                <Edit3 className="size-3" /> Edit Score
+              </button>
+              <button
                 onClick={handleEditPrice}
                 className="flex items-center gap-1.5 rounded-md border border-clay/30 bg-clay/10 px-3 py-1.5 text-xs font-semibold text-clay transition-colors hover:bg-clay/20"
               >
                 <Edit3 className="size-3" /> Edit Price
+              </button>
+              <button
+                onClick={handleRefreshTrend}
+                disabled={isRefreshing}
+                className="flex items-center gap-1.5 rounded-md border border-clay/30 bg-clay/10 px-3 py-1.5 text-xs font-semibold text-clay transition-colors hover:bg-clay/20 disabled:opacity-50"
+              >
+                <RefreshCw className={isRefreshing ? 'size-3 animate-spin' : 'size-3'} />
+                {isRefreshing ? 'Refreshing...' : 'Refresh Trend'}
               </button>
               <button
                 onClick={handleDelete}
@@ -352,7 +399,7 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
         {/* Desktop: underdog right column */}
         {trend.products?.underdog && (
           <div className="hidden h-full min-h-0 flex-col lg:flex">
-            <UnderdogHero product={trend.products.underdog} trendId={trend.id} isSneaker={isSneaker} fill />
+            <UnderdogHero product={trend.products.underdog} trendId={trend.id} fill />
           </div>
         )}
       </div>
@@ -365,3 +412,4 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
     </article>
   );
 }
+

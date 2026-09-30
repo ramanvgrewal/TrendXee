@@ -68,4 +68,30 @@ public class TrendController {
                     return trendRepository.save(trend);
                 });
     }
+
+    @PatchMapping("/{id}/score")
+    public Mono<Trend> updateTrendScore(@PathVariable String id, @RequestBody Map<String, Number> body) {
+        log.info("[CTRL] Updating score for trend ID: {}", id);
+        return trendRepository.findById(id)
+                .flatMap(trend -> {
+                    Number newScore = body.get("score");
+                    if (newScore != null) {
+                        trend.setTrendScore(newScore.doubleValue());
+                    }
+                    return trendRepository.save(trend);
+                });
+    }
+
+    @PatchMapping("/{id}/priceType")
+    public Mono<Trend> updateTrendPriceType(@PathVariable String id, @RequestBody Map<String, String> body) {
+        log.info("[CTRL] Updating price type for trend ID: {}", id);
+        return trendRepository.findById(id)
+                .flatMap(trend -> {
+                    String newPriceType = body.get("priceType");
+                    if (newPriceType != null && trend.getSignalProducts() != null && trend.getSignalProducts().getUnderdog() != null) {
+                        trend.getSignalProducts().getUnderdog().setPriceType(newPriceType);
+                    }
+                    return trendRepository.save(trend);
+                });
+    }
 }

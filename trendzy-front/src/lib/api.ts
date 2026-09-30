@@ -65,13 +65,15 @@ export function normalizeTrendList(payload: unknown): Trend[] {
 export function normalizeTrend(raw: any): Trend {
   const signalProducts = normalizeSignalProducts(raw?.signalProducts);
   const productTriad = normalizeProductTriad(raw?.products ?? raw?.signalProducts);
-  const category = String(raw?.aestheticId ?? raw?.category ?? raw?.subcategory ?? "").toLowerCase();
+  const category = String(raw?.aestheticId ?? raw?.category ?? "").toLowerCase();
+  const subcategory = raw?.subcategory;
 
   return {
     ...raw,
     id: String(raw?.id ?? ""),
     name: raw?.trendName ?? raw?.name ?? "Untitled trend",
     aestheticId: category,
+    subcategory: subcategory,
     trendScore: Number(raw?.trendScore ?? 0),
     vibeTags: Array.isArray(raw?.vibeTags) ? raw.vibeTags : [],
     aiSummary: raw?.aiSummary ?? "",
@@ -106,12 +108,18 @@ function normalizeSignalProducts(raw: any): SignalProduct[] {
   return [raw as SignalProduct];
 }
 
-export async function getTrends(category: string, size = 100): Promise<Trend[]> {
-  const params = new URLSearchParams({
+export async function getTrends(category: string, size = 100, subcategory?: string): Promise<Trend[]> {
+  const queryObj: Record<string, string> = {
     category,
     size: String(size),
     _t: String(Date.now()), // Force bypass of any browser/CDN cache
-  });
+  };
+  
+  if (subcategory) {
+    queryObj.subcategory = subcategory;
+  }
+  
+  const params = new URLSearchParams(queryObj);
   const response = await fetch(apiUrl(`/api/v2/trends?${params.toString()}`), {
     cache: "no-store",
   });

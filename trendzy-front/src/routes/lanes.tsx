@@ -10,8 +10,7 @@ export const Route = createFileRoute("/lanes")({
     try {
       await Promise.all(
         aesthetics.map(async (a) => {
-          let queryCategory = a.id;
-          if (a.id === "upper") queryCategory = "tees";
+          const queryCategory = a.id;
           const trends = await getTrends(queryCategory, 15);
           rotationMap[a.id] = trends
             .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
@@ -36,12 +35,12 @@ export const Route = createFileRoute("/lanes")({
       {
         name: "description",
         content:
-          "Every TrendXee lane in one place: streetwear, sneakers, tees, bottoms, caps, sportswear and fragrances, each scored by live signal volume.",
+          "Every TrendXee lane in one place: bottoms, tees, outerwear, sneakers, sportswear, anime, polos, caps and fragrances, each scored by live signal volume.",
       },
       { property: "og:title", content: "All lanes — TrendXee" },
       {
         property: "og:description",
-        content: "Seven scored lanes of rising Indian fashion drops, with the underdog brand behind each.",
+        content: "Nine scored lanes of rising Indian fashion drops, with the underdog brand behind each.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

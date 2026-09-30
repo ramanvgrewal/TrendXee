@@ -11,8 +11,7 @@ export const Route = createFileRoute("/aesthetic/$id")({
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
-    let queryCategory = params.id;
-    if (params.id === "upper") queryCategory = "tees";
+    const queryCategory = params.id;
     try {
       const allTrends = await getTrends(queryCategory, 100);
       // Strictly enforce category matching on the frontend to protect against loose backend responses
