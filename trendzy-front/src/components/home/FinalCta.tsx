@@ -8,10 +8,10 @@ import { laneLabel } from "@/lib/format";
 /** 07 — The close: one line revealed by scrolling, then the lanes as the way in. */
 export function FinalCta() {
   return (
-    <section className="relative overflow-hidden border-t border-border">
-      <div className="mx-auto w-full max-w-[1440px] px-5 py-28 sm:px-8 lg:py-40">
-        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/50">
-          <span className="text-clay">07</span> · Start somewhere
+    <section className="relative overflow-hidden">
+      <div className="section-pad mx-auto w-full max-w-[1440px] px-5 sm:px-8">
+        <p className="eyebrow text-ink/70">
+          <span className="text-clay-ink">07</span> · Start somewhere
         </p>
         <ScrollTextReveal
           as="h2"
@@ -27,7 +27,7 @@ export function FinalCta() {
               <Link
                 to="/aesthetic/$id"
                 params={{ id: a.id }}
-                className="inline-flex h-11 items-center rounded-full border border-ink/15 px-5 text-sm font-semibold transition-colors hover:border-ink hover:bg-ink hover:text-paper"
+                className="inline-flex h-11 items-center rounded-full bg-raised/60 px-5 text-sm font-semibold shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--ink)_16%,transparent)] transition-colors hover:bg-ink hover:text-paper hover:shadow-none"
               >
                 {laneLabel(a.name)}
               </Link>
@@ -41,7 +41,7 @@ export function FinalCta() {
               Browse every lane <CtaArrow />
             </Link>
           </Cta>
-          <Link to="/about" className="text-sm font-semibold text-ink/65 underline decoration-ink/20 underline-offset-4 transition-colors hover:text-clay hover:decoration-clay">
+          <Link to="/about" className="hit ed-link-rest text-sm font-semibold text-ink/75 hover:text-clay">
             Why we built TrendXee
           </Link>
         </div>

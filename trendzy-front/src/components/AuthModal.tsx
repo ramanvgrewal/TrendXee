@@ -14,14 +14,14 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md overflow-hidden rounded-[28px] border border-border bg-paper p-0 text-ink">
+      <DialogContent className="max-w-md overflow-hidden rounded-[28px] border border-0 bg-raised shadow-lift p-0 text-ink">
         <div className="linen px-8 pb-8 pt-10">
-          <p className="hand text-lg text-clay">pin what you like</p>
+          <p className="hand text-lg text-clay-ink">pin what you like</p>
           <DialogHeader className="mt-1 space-y-3 text-left">
             <DialogTitle className="font-display text-[2.4rem] font-normal leading-[1.02] tracking-tight">
               Keep a board <em className="italic text-clay">of your own.</em>
             </DialogTitle>
-            <DialogDescription className="text-[15px] leading-relaxed text-ink/65">
+            <DialogDescription className="text-[15px] leading-relaxed text-ink/70">
               Sign in to save drops to your archive. They stay there even after they leave the live feed.
             </DialogDescription>
           </DialogHeader>
@@ -42,7 +42,7 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
             </svg>
             {redirecting ? "Opening Google…" : "Continue with Google"}
           </button>
-          <p className="mt-4 text-center text-[12px] leading-relaxed text-ink/45">
+          <p className="mt-4 text-center text-[12px] leading-relaxed text-ink/70">
             By continuing you agree to the TrendXee Terms of Use and Privacy Policy.
           </p>
         </div>

@@ -53,7 +53,7 @@ const howTo = [
 function AboutPage() {
   return (
     <div className="mx-auto w-full max-w-[1440px] px-5 pb-28 pt-12 sm:px-8 lg:pt-20">
-      <p className="enter-fade text-[11px] font-bold uppercase tracking-[0.24em] text-ink/50">About TrendXee</p>
+      <p className="enter-fade eyebrow text-ink/70">About TrendXee</p>
       <h1 className="mt-4 max-w-5xl font-display text-[clamp(2.8rem,6.4vw,6.2rem)] leading-[0.98] tracking-[-0.035em]">
         <span className="enter-fade block" style={{ "--d": "60ms" } as React.CSSProperties}>
           We find the fits before they go viral —{" "}
@@ -75,7 +75,7 @@ function AboutPage() {
 
       <section className="mt-28 grid gap-10 rounded-[30px] bg-cream/60 p-8 ring-1 ring-border sm:p-12 lg:grid-cols-12 lg:p-16">
         <div className="lg:col-span-4">
-          <p className="hand text-xl text-clay">how to use it</p>
+          <p className="hand text-xl text-clay-ink">how to use it</p>
           <h2 className="mt-2 font-display text-4xl leading-tight tracking-tight">Four steps, no noise.</h2>
         </div>
         <ol className="space-y-6 lg:col-span-8">
@@ -94,7 +94,7 @@ function AboutPage() {
             Start with the lanes <CtaArrow />
           </Link>
         </Cta>
-        <Link to="/" hash="engine" className="text-sm font-semibold text-ink/65 underline decoration-ink/20 underline-offset-4 hover:text-clay">
+        <Link to="/" hash="engine" className="hit ed-link-rest text-sm font-semibold text-ink/75 hover:text-clay">
           How the engine works
         </Link>
       </div>

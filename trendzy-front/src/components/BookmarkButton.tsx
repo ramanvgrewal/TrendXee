@@ -83,8 +83,8 @@ export function BookmarkButton({
             aria-pressed={archived}
             data-cursor="button"
             aria-label={archived ? `Remove ${trendName} from your archive` : `Save ${trendName} to your archive`}
-            className={`grid size-9 place-items-center rounded-full backdrop-blur-sm transition-colors ${
-              archived ? "bg-clay text-paper" : "bg-paper/85 text-ink/70 hover:bg-paper hover:text-clay"
+            className={`grid size-10 place-items-center rounded-full shadow-card backdrop-blur-sm transition-colors ${
+              archived ? "bg-clay text-paper" : "bg-raised/90 text-ink/75 hover:bg-raised hover:text-clay"
             }`}
           >
             {icon}
@@ -119,10 +119,10 @@ export function BookmarkButton({
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent className="max-w-md rounded-3xl border-border bg-paper p-7" onClick={(e) => e.stopPropagation()}>
+        <AlertDialogContent className="max-w-md rounded-3xl border-0 bg-raised shadow-lift p-7" onClick={(e) => e.stopPropagation()}>
           <AlertDialogHeader className="text-left">
             <AlertDialogTitle className="font-display text-2xl font-normal tracking-tight">Remove from your archive?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[15px] leading-relaxed text-ink/65">
+            <AlertDialogDescription className="text-[15px] leading-relaxed text-ink/70">
               If “{trendName}” has already left the live feed, you won't be able to find it again.
             </AlertDialogDescription>
           </AlertDialogHeader>

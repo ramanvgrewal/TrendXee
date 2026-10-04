@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { m, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { Parallax, PointerScope } from "@/motion/Parallax";
-import { ScrollReveal } from "@/motion/ScrollReveal";
+import { RevealHeading } from "@/motion/RevealHeading";
 import type { RotationItem } from "@/lib/lanes";
 import { formatPrice } from "@/lib/format";
 
@@ -26,22 +26,28 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
   const source = ms.source === "amazon" ? "Amazon" : "Flipkart";
 
   return (
-    <section ref={ref} className="relative overflow-hidden bg-cream/60 py-24 lg:py-36">
+    <section ref={ref} className="tone-invert relative mx-3 overflow-hidden rounded-[32px] py-20 sm:mx-5 sm:rounded-[40px] lg:mx-8 lg:py-32">
       <div className="mx-auto grid w-full max-w-[1440px] items-center gap-14 px-5 sm:px-8 lg:grid-cols-12 lg:gap-10">
-        <ScrollReveal className="lg:col-span-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/50">
-            <span className="text-clay">05</span> · Underdogs first
+        <div className="lg:col-span-4">
+          <p className="eyebrow text-ink/70">
+            <span className="text-clay-ink">05</span> · Underdogs first
           </p>
-          <h2 className="mt-4 font-display text-[clamp(2.4rem,4.6vw,4.25rem)] leading-[0.98] tracking-[-0.03em]">
-            Small labels make it <em className="italic text-clay">first.</em>
-          </h2>
+          <RevealHeading
+            className="mt-4 font-display text-[clamp(2.4rem,4.6vw,4.25rem)] leading-[0.98] tracking-[-0.03em]"
+            lines={[
+              "Small labels",
+              <>
+                make it <em className="italic text-clay">first.</em>
+              </>,
+            ]}
+          />
           <p className="mt-6 max-w-md text-[16px] leading-relaxed text-ink/70">
             The big names usually copy a fit after it takes off. Every drop on TrendXee leads with the
             indie brand behind it — then shows the mainstream lookalike, so the choice is yours.
           </p>
-          <p className="mt-8 text-[11px] font-bold uppercase tracking-[0.2em] text-ink/45">Today's example</p>
-          <p className="mt-2 font-display text-2xl leading-snug">{item.trendName}</p>
-        </ScrollReveal>
+          <p className="mt-8 eyebrow text-ink/70">Today's example</p>
+          <p className="mt-2 text-balance font-display text-2xl leading-snug">{item.trendName}</p>
+        </div>
 
         <PointerScope className="relative grid grid-cols-2 gap-4 sm:gap-6 lg:col-span-8 lg:pl-8">
           <m.figure style={reduced ? undefined : { x: leftX }} className="relative">
@@ -52,8 +58,8 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
                   style={reduced ? undefined : { clipPath: clip }}
                 >
                   <img src={item.image} alt={item.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-[1.04]" />
-                  <span className="absolute left-4 top-4 rounded-full bg-clay px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-paper">
-                    The underdog
+                  <span className="absolute left-4 top-4 rounded-full bg-stamp-clay px-3 py-1 eyebrow text-[11px] text-paper">
+                    <span className="max-sm:hidden">The </span>underdog
                   </span>
                 </m.div>
                 <figcaption className="mt-4 flex items-baseline justify-between gap-3">
@@ -69,11 +75,12 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
               <a href={ms.shopUrl} target="_blank" rel="noopener noreferrer" data-cursor="view" data-cursor-label="Compare" className="group block">
                 <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-sand/40 opacity-90 ring-1 ring-border transition-opacity duration-500 group-hover:opacity-100">
                   <img src={ms.image} alt={ms.title} loading="lazy" className="h-full w-full object-cover grayscale-[35%] transition duration-700 group-hover:scale-[1.03] group-hover:grayscale-0" />
-                  <span className="absolute left-4 top-4 rounded-full bg-paper/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-ink/70">
-                    The lookalike · {source}
+                  <span className="absolute left-4 top-4 rounded-full bg-paper/90 px-3 py-1 eyebrow text-[11px] text-ink/70">
+                    <span className="max-sm:hidden">The lookalike · </span>
+                    {source}
                   </span>
                 </div>
-                <figcaption className="mt-4 flex items-baseline justify-between gap-3 text-ink/65">
+                <figcaption className="mt-4 flex items-baseline justify-between gap-3 text-ink/70">
                   <span className="truncate text-sm font-semibold">{ms.brand || source}</span>
                   {mainstreamPrice && <span className="shrink-0 text-sm tabular-nums">{mainstreamPrice}</span>}
                 </figcaption>

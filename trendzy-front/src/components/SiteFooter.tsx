@@ -12,10 +12,10 @@ export function SiteFooter() {
   const [authOpen, setAuthOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
 
-  const linkClass = "text-[14px] text-ink/65 transition-colors hover:text-clay";
+  const linkClass = "ed-link inline-block py-1 text-[14px] text-ink/70 hover:text-clay";
 
   return (
-    <footer className="relative border-t border-border bg-cream/40">
+    <footer className="relative border-t border-border bg-deep">
       <div className="mx-auto grid w-full max-w-[1440px] gap-12 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:py-20">
         <div className="lg:col-span-5">
           <Link to="/" className="inline-flex items-center gap-2.5">
@@ -27,14 +27,14 @@ export function SiteFooter() {
           <p className="mt-5 max-w-sm font-display text-xl leading-snug text-ink/75">
             Fits before they go viral — and the small brands making them first.
           </p>
-          <p className="mt-4 max-w-sm text-[13px] leading-relaxed text-ink/50">
+          <p className="mt-4 max-w-sm text-[13px] leading-relaxed text-ink/70">
             Zero middlemen, straight to the brand. TrendXee is a discovery platform and doesn't sell or fulfil the
             products shown.
           </p>
         </div>
 
         <nav aria-label="Lanes" className="lg:col-span-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Lanes</p>
+          <p className="eyebrow text-ink/70">Lanes</p>
           <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5">
             {aesthetics.map((a) => (
               <li key={a.id}>
@@ -47,7 +47,7 @@ export function SiteFooter() {
         </nav>
 
         <nav aria-label="TrendXee" className="lg:col-span-2">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">TrendXee</p>
+          <p className="eyebrow text-ink/70">TrendXee</p>
           <ul className="mt-4 space-y-2.5">
             <li>
               <Link to="/about" className={linkClass}>
@@ -77,7 +77,7 @@ export function SiteFooter() {
         </nav>
 
         <nav aria-label="Legal" className="lg:col-span-2">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Legal</p>
+          <p className="eyebrow text-ink/70">Legal</p>
           <ul className="mt-4 space-y-2.5">
             <li>
               <Link to="/terms" className={linkClass}>
@@ -94,7 +94,7 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-5 py-6 text-[12px] text-ink/45 sm:px-8">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-5 py-6 text-[12px] text-ink/70 sm:px-8">
           <p>© 2026 TrendXee · trendxee.com</p>
           <p className="hand text-[13px]">pinned by hand, read from real signals</p>
         </div>

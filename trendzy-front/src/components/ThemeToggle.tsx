@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import { AnimatePresence, m } from "framer-motion";
 import { spring } from "@/motion/tokens";
 
@@ -20,23 +20,43 @@ function apply(theme: Theme) {
  * with a soft cross-dissolve (View Transitions) where the browser supports
  * it and motion is allowed.
  */
+// One source of truth: the class on <html> (set before first paint by the
+// shell script). Every toggle on the page subscribes to it.
+function subscribe(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => observer.disconnect();
+}
+const getSnapshot = (): Theme => (document.documentElement.classList.contains("dark") ? "dark" : "light");
+const getServerSnapshot = (): Theme => "light";
+
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>("light");
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
-  }, []);
-
-  const toggle = useCallback(() => {
-    const next: Theme = document.documentElement.classList.contains("dark") ? "light" : "dark";
+  /**
+   * Switch theme. With View Transitions (and motion allowed) the new theme is
+   * revealed as a circle growing from `origin` (the control that was used);
+   * otherwise it swaps instantly. Scroll position and layout never change.
+   */
+  const toggle = useCallback((origin?: { x: number; y: number }) => {
+    const root = document.documentElement;
+    const next: Theme = root.classList.contains("dark") ? "light" : "dark";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
-    const swap = () => {
-      apply(next);
-      setTheme(next);
+    const doc = document as Document & {
+      startViewTransition?: (cb: () => void) => { finished: Promise<void> };
     };
-    if (doc.startViewTransition && !reduced) doc.startViewTransition(swap);
-    else swap();
+    const swap = () => apply(next);
+    if (!doc.startViewTransition || reduced) return swap();
+
+    const x = origin?.x ?? window.innerWidth - 40;
+    const y = origin?.y ?? 32;
+    const r = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+    root.style.setProperty("--vt-x", `${x}px`);
+    root.style.setProperty("--vt-y", `${y}px`);
+    root.style.setProperty("--vt-r", `${r}px`);
+    root.classList.add("theme-vt");
+    const transition = doc.startViewTransition(swap);
+    transition.finished.finally(() => root.classList.remove("theme-vt"));
   }, []);
 
   return { theme, toggle };
@@ -80,8 +100,11 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       type="button"
       aria-label={theme === "dark" ? "Switch to day board" : "Switch to night board"}
       title={theme === "dark" ? "Day board" : "Night board"}
-      onClick={toggle}
-      className={`grid size-9 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink ${className}`}
+      onClick={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        toggle({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      }}
+      className={`grid size-10 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink ${className}`}
     >
       <ThemeIcon theme={theme} />
     </button>

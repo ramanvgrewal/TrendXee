@@ -19,11 +19,11 @@ import { ctaClass } from "@/components/Cta";
 function NotFoundComponent() {
   return (
     <div className="mx-auto flex min-h-[70svh] w-full max-w-[1440px] flex-col justify-center px-5 py-24 sm:px-8">
-      <p className="hand text-xl text-clay">this page slipped off the board</p>
+      <p className="hand text-xl text-clay-ink">this page slipped off the board</p>
       <h1 className="mt-3 font-display text-[clamp(5rem,16vw,13rem)] leading-[0.85] tracking-[-0.05em]">
         4<em className="italic text-clay">0</em>4
       </h1>
-      <p className="mt-6 max-w-md text-[17px] leading-relaxed text-ink/65">
+      <p className="mt-6 max-w-md text-[17px] leading-relaxed text-ink/70">
         The page you're looking for doesn't exist or has moved. The lanes are still here, though.
       </p>
       <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -48,11 +48,11 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
 
   return (
     <div className="mx-auto flex min-h-[70svh] w-full max-w-[1440px] flex-col justify-center px-5 py-24 sm:px-8">
-      <p className="hand text-xl text-clay">something came unpinned</p>
+      <p className="hand text-xl text-clay-ink">something came unpinned</p>
       <h1 className="mt-3 max-w-2xl font-display text-[clamp(2.6rem,6vw,5rem)] leading-[1] tracking-[-0.03em]">
         This page didn't load.
       </h1>
-      <p className="mt-5 max-w-md text-[17px] leading-relaxed text-ink/65">
+      <p className="mt-5 max-w-md text-[17px] leading-relaxed text-ink/70">
         It's on our side, not yours. Try again, or head back to the board.
       </p>
       <div className="mt-10 flex flex-wrap items-center gap-4">

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { m, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { LaneCard } from "@/components/LaneCard";
+import { RevealHeading } from "@/motion/RevealHeading";
 import { useMediaQuery } from "@/motion/hooks";
 import { follow } from "@/motion/tokens";
 import { aesthetics } from "@/lib/mock-data";
@@ -53,16 +54,22 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
       <div className={pinned ? "sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden" : "py-6"}>
         <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-end justify-between gap-6 px-5 pt-20 sm:px-8 lg:pt-16">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/50">
-              <span className="text-clay">04</span> · The lanes
+            <p className="eyebrow text-ink/70">
+              <span className="text-clay-ink">04</span> · The lanes
             </p>
-            <h2 className="mt-3 font-display text-[clamp(2.6rem,5.5vw,5rem)] leading-[0.95] tracking-[-0.03em]">
-              Eight lanes. <em className="italic text-clay">Pick a world.</em>
-            </h2>
+            <RevealHeading
+              className="mt-3 font-display text-[clamp(2.6rem,5.5vw,5rem)] leading-[0.95] tracking-[-0.03em]"
+              lines={[
+                "Eight lanes.",
+                <em key="w" className="italic text-clay">
+                  Pick a world.
+                </em>,
+              ]}
+            />
           </div>
           <div className="flex items-center gap-5">
             {pinned && (
-              <div className="flex items-center gap-3 font-mono text-[12px] font-bold tracking-[0.14em] text-ink/55">
+              <div className="flex items-center gap-3 font-mono text-[12px] font-bold tracking-[0.14em] text-ink/70">
                 <m.span className="text-ink">{counter}</m.span>
                 <span className="relative block h-px w-28 overflow-hidden bg-ink/15">
                   <m.span className="absolute inset-0 origin-left bg-clay" style={{ scaleX: bar }} />
@@ -72,7 +79,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
             )}
             <Link
               to="/lanes"
-              className="text-sm font-semibold text-ink/65 underline decoration-ink/20 underline-offset-4 transition-colors hover:text-clay hover:decoration-clay"
+              className="hit ed-link-rest text-sm font-semibold text-ink/75 hover:text-clay"
             >
               All lanes
             </Link>
@@ -82,7 +89,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
         <m.div
           ref={trackRef}
           className={`no-scrollbar mt-10 flex gap-5 px-5 sm:px-8 ${
-            pinned ? "w-max gap-6" : "snap-x snap-mandatory overflow-x-auto pb-6"
+            pinned ? "w-max gap-6" : "snap-x snap-mandatory scroll-px-5 overflow-x-auto pb-6 sm:scroll-px-8"
           }`}
           style={pinned ? { x } : undefined}
         >

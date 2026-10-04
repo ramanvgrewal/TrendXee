@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { Stamp } from "@/components/Stamp";
 import { BookmarkButton } from "@/components/BookmarkButton";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
-import { trendImage } from "@/components/TrendCard";
+import { trendImage, trendLane } from "@/components/TrendCard";
+import { Img } from "@/components/Img";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +21,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { ease, spring } from "@/motion/tokens";
 import type { ProductMatch, Trend } from "@/lib/mock-data";
-import { aesthetics } from "@/lib/mock-data";
 import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
 import { adminActions, trackProductClick, useSession } from "@/lib/useTrendActions";
 
@@ -67,13 +67,9 @@ export function TrendDetail({
               />
             </DialogPrimitive.Overlay>
             <DialogPrimitive.Content forceMount asChild aria-describedby={undefined}>
-              <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6 lg:p-10">
+              <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center p-2 sm:items-center sm:p-6 lg:p-10">
                 <m.div
-                  className="pointer-events-auto relative flex h-[92svh] w-full max-w-6xl flex-col overflow-hidden rounded-t-[28px] bg-paper shadow-lift ring-1 ring-border sm:h-[min(88svh,860px)] sm:rounded-[28px] lg:flex-row"
-                  initial={{ opacity: 0, y: reduced ? 0 : 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: reduced ? 0 : 30, transition: { duration: 0.22 } }}
-                  transition={{ duration: 0.45, ease: ease.drift }}
+                  className="pointer-events-auto relative h-[calc(100svh-1.5rem)] w-full max-w-6xl sm:h-[min(88svh,860px)]"
                   drag={reduced ? false : "y"}
                   dragControls={dragControls}
                   dragListener={false}
@@ -81,6 +77,14 @@ export function TrendDetail({
                   dragElastic={{ top: 0, bottom: 0.6 }}
                   onDragEnd={onDragEnd}
                 >
+                  {/* The card's own paper, expanded: shared layout with the card surface. */}
+                  <m.div
+                    layoutId={`trend-surface-${trend.id}`}
+                    transition={spring.layout}
+                    className="absolute inset-0 bg-raised shadow-lift"
+                    style={{ borderRadius: 28 }}
+                  />
+                  <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] lg:flex-row">
                   <DetailBody
                     trend={trend}
                     onClose={onClose}
@@ -90,6 +94,7 @@ export function TrendDetail({
                     onUnarchived={onUnarchived}
                     dragControls={dragControls}
                   />
+                  </div>
                 </m.div>
               </div>
             </DialogPrimitive.Content>
@@ -120,7 +125,7 @@ function DetailBody({
   const { isAdmin } = useSession();
   const underdog = trend.products?.underdog;
   const image = trendImage(trend);
-  const lane = aesthetics.find((a) => a.id === trend.aestheticId || (a.id === "caps" && trend.aestheticId === "accessories"));
+  const lane = trendLane(trend);
   const price = formatPrice(underdog?.price, underdog?.currency);
   const off = discountPercent(underdog?.price, underdog?.originalPrice);
   const score = Math.round(trend.trendScore || 0);
@@ -149,14 +154,15 @@ function DetailBody({
 
       {/* Media */}
       <PointerScope className="relative h-[42%] shrink-0 lg:h-full lg:w-[48%]">
-        <m.div layoutId={`trend-media-${trend.id}`} className="absolute inset-0 overflow-hidden bg-sand/40" transition={spring.layout}>
-          {image ? (
-            <Parallax depth={4} bleed className="absolute inset-0">
-              <img src={image} alt={underdog?.title || trend.name} className="h-full w-full object-cover" />
-            </Parallax>
-          ) : (
-            <div className="absolute inset-0 bg-cream" />
-          )}
+        <m.div
+          layoutId={`trend-media-${trend.id}`}
+          className="absolute inset-0 overflow-hidden bg-cream"
+          style={{ borderRadius: 0 }}
+          transition={spring.layout}
+        >
+          <Parallax depth={4} bleed className="absolute inset-0">
+            <Img src={image} alt={underdog?.title || trend.name} eager fallbackLabel={lane ? laneLabel(lane.name) : undefined} className="h-full w-full object-cover" />
+          </Parallax>
         </m.div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-scrim/50 to-transparent lg:hidden" />
         {score > 0 && (
@@ -166,16 +172,21 @@ function DetailBody({
             animate={{ scale: 1, rotate: -6, opacity: 1 }}
             transition={{ type: "spring", stiffness: 480, damping: 22, delay: 0.3 }}
           >
-            <Stamp score={score} size="lg" className="shadow-print" />
+            <Stamp score={score} size="lg" pressable className="shadow-print" />
           </m.div>
         )}
       </PointerScope>
 
       {/* Story */}
-      <div className="relative flex min-h-0 flex-1 flex-col">
+      <m.div
+        className="relative flex min-h-0 flex-1 flex-col"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: 0.3, delay: 0.12 } }}
+        exit={{ opacity: 0, transition: { duration: 0.12 } }}
+      >
         <div className="flex items-center justify-between gap-4 border-b border-border px-6 py-4 lg:px-10">
-          <p className="flex min-w-0 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-ink/50">
-            {lane && <span className="text-clay">{laneLabel(lane.name)}</span>}
+          <p className="flex min-w-0 items-center gap-2 eyebrow text-ink/70">
+            {lane && <span className="text-clay-ink">{laneLabel(lane.name)}</span>}
             {trend.subcategory && (
               <>
                 <span className="text-ink/25">/</span>
@@ -183,6 +194,8 @@ function DetailBody({
               </>
             )}
           </p>
+          <div className="flex shrink-0 items-center gap-1">
+          <ShareButton trend={trend} laneId={lane?.id} />
           <DialogPrimitive.Close
             className="grid size-10 shrink-0 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink"
             aria-label="Close story"
@@ -191,6 +204,7 @@ function DetailBody({
               <path d="M5 5l10 10M15 5L5 15" />
             </svg>
           </DialogPrimitive.Close>
+          </div>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-10 pt-6 lg:px-10 lg:pt-8">
@@ -204,7 +218,7 @@ function DetailBody({
             </m.h2>
           </DialogPrimitive.Title>
 
-          <m.div custom={0} variants={stagger} initial="hidden" animate="show" className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] font-semibold text-ink/55">
+          <m.div custom={0} variants={stagger} initial="hidden" animate="show" className="meta mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
             {score > 0 && <span>Trend score {score}</span>}
             {trend.totalSignals > 0 && (
               <span>
@@ -217,7 +231,7 @@ function DetailBody({
           {trend.vibeTags.length > 0 && (
             <m.ul custom={1} variants={stagger} initial="hidden" animate="show" className="mt-4 flex flex-wrap gap-1.5">
               {trend.vibeTags.map((tag) => (
-                <li key={tag} className="rounded-full bg-cream px-3 py-1 text-[12px] font-semibold text-ink/65 ring-1 ring-border">
+                <li key={tag} className="rounded-full bg-cream px-3 py-1 text-[13px] font-semibold text-ink/70">
                   #{tag}
                 </li>
               ))}
@@ -225,14 +239,14 @@ function DetailBody({
           )}
 
           {trend.aiSummary && (
-            <m.p custom={2} variants={stagger} initial="hidden" animate="show" className="mt-7 font-display text-[1.2rem] leading-relaxed text-ink/85">
+            <m.p custom={2} variants={stagger} initial="hidden" animate="show" className="mt-7 max-w-[60ch] text-pretty font-display text-[1.22rem] leading-[1.65] text-ink/85">
               {trend.aiSummary}
             </m.p>
           )}
 
           {trend.whyTrending.length > 0 && (
             <m.div custom={3} variants={stagger} initial="hidden" animate="show" className="mt-8">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-ink/45">Why it's climbing</p>
+              <p className="eyebrow text-ink/70">Why it's climbing</p>
               <ul className="mt-3 space-y-2.5">
                 {trend.whyTrending.map((reason) => (
                   <li key={reason} className="flex gap-3 text-[15px] leading-relaxed text-ink/75">
@@ -247,15 +261,15 @@ function DetailBody({
           {/* The underdog */}
           {underdog?.shopUrl && (
             <m.div custom={4} variants={stagger} initial="hidden" animate="show" className="mt-9 rounded-2xl bg-cream/70 p-5 ring-1 ring-clay/25">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-clay">The underdog</p>
+              <p className="eyebrow text-[11px] text-clay-ink">The underdog</p>
               <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
                 <div className="min-w-0">
                   <p className="truncate font-display text-2xl italic">{underdog.brandName || "Indie label"}</p>
-                  <p className="mt-0.5 line-clamp-2 text-[14px] text-ink/60">{underdog.title}</p>
+                  <p className="mt-0.5 line-clamp-2 text-[14px] text-ink/70">{underdog.title}</p>
                 </div>
                 {price && (
                   <div className="text-right">
-                    {off && <p className="text-[13px] text-ink/40 line-through">{formatPrice(underdog.originalPrice, underdog.currency)}</p>}
+                    {off && <p className="text-[13px] text-ink/70 line-through">{formatPrice(underdog.originalPrice, underdog.currency)}</p>}
                     <p className="font-display text-2xl tabular-nums">{price}</p>
                   </div>
                 )}
@@ -280,7 +294,7 @@ function DetailBody({
           {/* Mainstream lookalikes */}
           {mainstream.length > 0 && (
             <m.div custom={5} variants={stagger} initial="hidden" animate="show" className="mt-8">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-ink/45">Mainstream lookalikes</p>
+              <p className="eyebrow text-ink/70">Mainstream lookalikes</p>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 {mainstream.map(({ source, label, product }) => (
                   <a
@@ -299,10 +313,10 @@ function DetailBody({
                       )}
                     </div>
                     <div className="min-w-0 py-0.5">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45">{label}</p>
+                      <p className="eyebrow text-[11px] text-ink/70">{label}</p>
                       <p className="mt-0.5 line-clamp-2 text-[13px] font-semibold leading-snug text-ink/80">{product.title || product.brandName}</p>
                       {formatPrice(product.price, product.currency) && (
-                        <p className="mt-0.5 text-[13px] tabular-nums text-ink/60">{formatPrice(product.price, product.currency)}</p>
+                        <p className="mt-0.5 text-[13px] tabular-nums text-ink/70">{formatPrice(product.price, product.currency)}</p>
                       )}
                     </div>
                   </a>
@@ -313,12 +327,12 @@ function DetailBody({
 
           {isAdmin && <AdminTools trend={trend} onChanged={onChanged} onDeleted={(id) => (onDeleted?.(id), onClose())} />}
 
-          <p className="mt-10 border-t border-border pt-5 text-[12px] leading-relaxed text-ink/45">
+          <p className="mt-10 border-t border-border pt-5 text-[12px] leading-relaxed text-ink/70">
             TrendXee is a discovery platform. Product links open the brand's or marketplace's own store; TrendXee doesn't
             sell or fulfil these products.
           </p>
         </div>
-      </div>
+      </m.div>
     </>
   );
 }
@@ -374,7 +388,7 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
 
   return (
     <div className="mt-8 rounded-2xl border border-dashed border-destructive/30 p-4">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-destructive">Admin</p>
+      <p className="eyebrow text-[11px] text-destructive">Admin</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" onClick={() => open("score")} className={ctaClass("outline", "sm")}>
           Edit score
@@ -388,7 +402,7 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
       </div>
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
-        <DialogContent className="max-w-sm rounded-3xl border-border bg-paper p-7">
+        <DialogContent className="max-w-sm rounded-3xl border-0 bg-raised shadow-lift p-7">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl font-normal">{editing === "score" ? "Trend score" : "Underdog price (₹)"}</DialogTitle>
           </DialogHeader>
@@ -408,7 +422,7 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
       </Dialog>
 
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent className="max-w-md rounded-3xl border-border bg-paper p-7">
+        <AlertDialogContent className="max-w-md rounded-3xl border-0 bg-raised shadow-lift p-7">
           <AlertDialogHeader className="text-left">
             <AlertDialogTitle className="font-display text-2xl font-normal">Delete this trend permanently?</AlertDialogTitle>
             <AlertDialogDescription>“{trend.name}” will be removed from the board for everyone. This can't be undone.</AlertDialogDescription>
@@ -422,5 +436,48 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+/** Share the story: native share sheet where available, otherwise copy the link. */
+function ShareButton({ trend, laneId }: { trend: Trend; laneId?: string }) {
+  const [copied, setCopied] = useState(false);
+  const share = async () => {
+    const url = laneId
+      ? `${window.location.origin}/aesthetic/${laneId}?trend=${encodeURIComponent(trend.id)}`
+      : window.location.href;
+    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+    try {
+      if (nav.share && window.matchMedia("(pointer: coarse)").matches) {
+        await nav.share({ title: trend.name, text: `${trend.name} — on TrendXee`, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success("Link copied");
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* share sheet dismissed — nothing to do */
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={share}
+      aria-label={copied ? "Link copied" : "Share this story"}
+      className="grid size-10 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink"
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {copied ? (
+          <m.svg key="ok" viewBox="0 0 20 20" className="size-4 text-success" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={spring.tactile} aria-hidden>
+            <path d="M4.5 10.5l3.5 3.5 7.5-8" />
+          </m.svg>
+        ) : (
+          <m.svg key="share" viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={spring.tactile} aria-hidden>
+            <path d="M10 12.5V3m0 0L6.5 6.5M10 3l3.5 3.5M5 10H4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1h-1" />
+          </m.svg>
+        )}
+      </AnimatePresence>
+    </button>
   );
 }

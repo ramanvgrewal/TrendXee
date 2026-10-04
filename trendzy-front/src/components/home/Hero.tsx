@@ -44,7 +44,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
           className="relative z-10 flex flex-col justify-center lg:col-span-7 lg:pr-6"
           style={allowed ? { y: copyY, opacity: copyOpacity } : undefined}
         >
-          <div className="enter-fade flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.24em] text-ink/55" style={d(620)}>
+          <div className="enter-fade flex items-center gap-3 eyebrow text-ink/70" style={d(620)}>
             <span className="inline-block size-1.5 rounded-full bg-clay" />
             The daily board <span className="text-ink/30">/</span> {indiaDateLabel()}
           </div>
@@ -85,12 +85,9 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
             <Link
               to="/"
               hash="engine"
-              className="group/cta inline-flex items-center gap-2 text-sm font-semibold text-ink/75 transition-colors hover:text-clay"
+              className="hit ed-link-rest text-sm font-semibold text-ink/75 hover:text-clay"
             >
-              <span className="relative">
-                How the engine works
-                <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 group-hover/cta:scale-x-100" />
-              </span>
+              How the engine works
             </Link>
           </div>
         </m.div>
@@ -136,7 +133,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
                       {lead && (
                         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-on-scrim">
                           <div className="min-w-0">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-on-scrim/70">
+                            <p className="eyebrow text-[11px] text-on-scrim/70">
                               Today's underdog
                             </p>
                             <p className="mt-1 truncate font-display text-xl italic">{lead.brand}</p>
@@ -152,7 +149,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
               </Parallax>
 
               {lead && lead.score > 0 && (
-                <div className="absolute -left-5 -top-5 z-20 sm:-left-7 sm:-top-7">
+                <div className="absolute -left-1 -top-6 z-20 sm:-left-7 sm:-top-7">
                   <Parallax depth={7} follow>
                     <div className="enter-print" style={d(700)}>
                       <Stamp score={lead.score} size="lg" className="shadow-print" />
@@ -180,20 +177,20 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
 
         {/* Lane index + scroll cue along the bottom edge */}
         <div className="enter-fade relative z-10 flex items-end justify-between gap-6 border-t border-border pt-5 lg:col-span-12" style={d(760)}>
-          <nav aria-label="Lanes" className="no-scrollbar -mx-5 flex gap-x-6 overflow-x-auto px-5 text-[11px] font-bold uppercase tracking-[0.2em] sm:mx-0 sm:flex-wrap sm:px-0">
+          <nav aria-label="Lanes" className="no-scrollbar -mx-5 flex gap-x-6 overflow-x-auto px-5 eyebrow sm:mx-0 sm:flex-wrap sm:px-0">
             {aesthetics.map((a, i) => (
               <Link
                 key={a.id}
                 to="/aesthetic/$id"
                 params={{ id: a.id }}
-                className="group/lane shrink-0 py-1 text-ink/45 transition-colors hover:text-ink"
+                className="group/lane shrink-0 py-3 text-ink/70 transition-colors hover:text-ink"
               >
-                <span className="mr-1.5 font-mono text-[10px] text-clay/80">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mr-1.5 font-mono text-[10px] text-clay-ink">{String(i + 1).padStart(2, "0")}</span>
                 {laneLabel(a.name)}
               </Link>
             ))}
           </nav>
-          <div className="hidden shrink-0 items-center gap-3 text-[10px] font-bold uppercase tracking-[0.24em] text-ink/45 md:flex">
+          <div className="hidden shrink-0 items-center gap-3 eyebrow text-[11px] text-ink/70 md:flex">
             Scroll
             <span className="relative block h-10 w-px overflow-hidden bg-ink/10">
               <span className="scroll-cue absolute inset-0 bg-clay" />

@@ -63,7 +63,7 @@ export function SiteHeader() {
     <header
       className={`sticky top-0 z-40 transition-[background-color,box-shadow,border-color] duration-300 ${
         scrolled
-          ? "border-b border-border bg-paper/80 shadow-[0_8px_24px_-18px_hsl(var(--shadow-color)/0.5)] backdrop-blur-md"
+          ? "border-b border-border/70 bg-paper/75 shadow-[0_1px_0_var(--highlight),0_10px_30px_-20px_hsl(var(--shadow-color)/0.45)] backdrop-blur-xl backdrop-saturate-150"
           : "border-b border-transparent bg-transparent"
       }`}
     >
@@ -151,7 +151,7 @@ function NavLink({ to, hash, label, active = false }: { to: "/" | "/about" | "/a
         hash={hash}
         aria-current={active ? "page" : undefined}
         className={`group/nav relative inline-flex h-9 items-center rounded-full px-4 text-[13px] font-semibold transition-colors ${
-          active ? "text-ink" : "text-ink/65 hover:text-ink"
+          active ? "text-ink" : "text-ink/70 hover:text-ink"
         }`}
       >
         {active && <ActivePill />}
@@ -182,7 +182,7 @@ function LanesMenu({ active }: { active: boolean }) {
       <Magnetic max={4}>
         <DropdownMenuTrigger
           className={`group/nav relative inline-flex h-9 items-center gap-1 rounded-full px-4 text-[13px] font-semibold outline-none transition-colors data-[state=open]:text-ink ${
-            active ? "text-ink" : "text-ink/65 hover:text-ink"
+            active ? "text-ink" : "text-ink/70 hover:text-ink"
           }`}
         >
           {active && <ActivePill />}
@@ -193,23 +193,23 @@ function LanesMenu({ active }: { active: boolean }) {
       <DropdownMenuContent
         align="start"
         sideOffset={10}
-        className="w-[30rem] rounded-2xl border-border bg-paper p-3 shadow-lift"
+        className="w-[30rem] rounded-2xl border-0 bg-raised p-3 shadow-lift data-[state=open]:duration-200"
       >
         <div className="grid grid-cols-2 gap-1">
           {aesthetics.map((a, i) => (
-            <DropdownMenuItem key={a.id} asChild className="rounded-xl p-0 focus:bg-cream">
+            <DropdownMenuItem key={a.id} asChild className="rounded-xl p-0 focus:bg-ink/[0.05]">
               <Link to="/aesthetic/$id" params={{ id: a.id }} className="flex items-start gap-3 px-3 py-2.5">
-                <span className="mt-0.5 font-mono text-[10px] font-bold text-clay">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mt-0.5 font-mono text-[10px] font-bold text-clay-ink">{String(i + 1).padStart(2, "0")}</span>
                 <span className="min-w-0">
                   <span className="block font-display text-lg leading-tight">{laneLabel(a.name)}</span>
-                  <span className="block truncate text-[12px] text-ink/55">{a.vibeTags.slice(0, 3).join(" · ")}</span>
+                  <span className="block truncate text-[12px] text-ink/70">{a.vibeTags.slice(0, 3).join(" · ")}</span>
                 </span>
               </Link>
             </DropdownMenuItem>
           ))}
         </div>
         <DropdownMenuSeparator className="my-2 bg-border" />
-        <DropdownMenuItem asChild className="rounded-xl focus:bg-cream">
+        <DropdownMenuItem asChild className="rounded-xl focus:bg-ink/[0.05]">
           <Link to="/lanes" className="flex items-center justify-between px-3 py-2 text-[13px] font-semibold">
             See every lane <span aria-hidden>→</span>
           </Link>
@@ -240,27 +240,27 @@ function ProfileMenu({ user, onContact, onLogout }: { user: CurrentUser; onConta
       >
         <Avatar user={user} />
         <span className="max-w-[8rem] truncate">{first}</span>
-        <ChevronDown className="size-3.5 text-ink/50 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+        <ChevronDown className="size-3.5 text-ink/70 transition-transform duration-300 group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={10} className="w-64 rounded-2xl border-border bg-paper p-2 shadow-lift">
+      <DropdownMenuContent align="end" sideOffset={10} className="w-64 rounded-2xl border-0 bg-raised p-2 shadow-lift data-[state=open]:duration-200">
         <DropdownMenuLabel className="flex items-center gap-3 px-2 py-2 font-normal">
           <Avatar user={user} size="size-9" />
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{user.name || "Signed in"}</span>
-            <span className="block truncate text-xs text-ink/55">{user.email}</span>
+            <span className="block truncate text-xs text-ink/70">{user.email}</span>
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-border" />
-        <DropdownMenuItem asChild className="rounded-lg px-2 py-2 focus:bg-cream">
+        <DropdownMenuItem asChild className="rounded-lg px-2 py-2 focus:bg-ink/[0.05]">
           <Link to="/archive">
             <Bookmark /> Your archive
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem className="rounded-lg px-2 py-2 focus:bg-cream" onSelect={onContact}>
+        <DropdownMenuItem className="rounded-lg px-2 py-2 focus:bg-ink/[0.05]" onSelect={onContact}>
           <Mail /> Contact us
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="rounded-lg px-2 py-2 focus:bg-cream"
+          className="rounded-lg px-2 py-2 focus:bg-ink/[0.05]"
           onSelect={(e) => {
             e.preventDefault();
             toggle();
@@ -296,12 +296,12 @@ function MobileMenu({
   };
   let i = 0;
   return (
-    <SheetContent side="right" className="flex w-full flex-col overflow-y-auto border-l border-border bg-paper p-0 sm:max-w-md">
+    <SheetContent side="right" className="flex w-full flex-col overflow-y-auto border-l border-border bg-raised p-0 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:duration-200 data-[state=open]:duration-300 sm:max-w-md">
       <SheetTitle className="sr-only">Menu</SheetTitle>
-      <div className="flex h-16 items-center px-6 text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Menu</div>
+      <div className="flex h-16 items-center px-6 eyebrow text-ink/70">Menu</div>
       <AnimatePresence>
         <nav aria-label="Mobile" className="flex flex-1 flex-col px-6 pb-8">
-          <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.24em] text-clay">Lanes</p>
+          <p className="mt-2 eyebrow text-clay-ink">Lanes</p>
           <ul className="mt-3 grid grid-cols-2 gap-x-4">
             {aesthetics.map((a, idx) => (
               <m.li key={a.id} custom={i++} variants={item} initial="hidden" animate="show">
@@ -311,7 +311,7 @@ function MobileMenu({
                   onClick={onNavigate}
                   className="flex items-baseline gap-2 border-b border-border py-3 font-display text-2xl active:text-clay"
                 >
-                  <span className="font-mono text-[10px] font-bold text-clay/80">{String(idx + 1).padStart(2, "0")}</span>
+                  <span className="font-mono text-[10px] font-bold text-clay-ink">{String(idx + 1).padStart(2, "0")}</span>
                   {laneLabel(a.name)}
                 </Link>
               </m.li>
@@ -340,7 +340,7 @@ function MobileMenu({
                   <Avatar user={user} size="size-10" />
                   <div className="min-w-0">
                     <p className="truncate font-semibold">{user.name || "Signed in"}</p>
-                    <p className="truncate text-sm text-ink/55">{user.email}</p>
+                    <p className="truncate text-sm text-ink/70">{user.email}</p>
                   </div>
                 </div>
                 <div className="mt-4 flex gap-2">

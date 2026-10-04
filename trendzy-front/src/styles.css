@@ -67,11 +67,28 @@
   --color-cream: var(--cream);
   --color-scrim: var(--scrim);
   --color-on-scrim: var(--on-scrim);
+  /* Surfaces: page (paper) < raised (cards, menus, dialogs); deep = recessed sections. */
+  --color-raised: var(--raised);
+  --color-deep: var(--deep);
+  --color-clay-soft: var(--clay-soft);
+  /* Text-safe clay for small labels (≥4.5:1 on paper); stamps get a deeper ink. */
+  --color-clay-ink: var(--clay-ink);
+  --color-stamp-clay: var(--stamp-clay);
+  --color-stamp-olive: var(--stamp-olive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
 
-  --shadow-print: 0 1px 1px hsl(var(--shadow-color) / 0.08), 0 4px 8px -2px hsl(var(--shadow-color) / 0.12),
-    0 18px 36px -12px hsl(var(--shadow-color) / 0.28);
-  --shadow-lift: 0 2px 2px hsl(var(--shadow-color) / 0.08), 0 10px 20px -6px hsl(var(--shadow-color) / 0.18),
-    0 34px 60px -20px hsl(var(--shadow-color) / 0.38);
+  /* Layered, warm shadows — never one heavy blur. */
+  --shadow-card: 0 0 0 1px hsl(var(--shadow-color) / 0.06), 0 1px 2px hsl(var(--shadow-color) / 0.06),
+    0 10px 24px -14px hsl(var(--shadow-color) / 0.22), inset 0 1px 0 var(--highlight);
+  --shadow-print: 0 0 0 1px hsl(var(--shadow-color) / 0.05), 0 1px 2px hsl(var(--shadow-color) / 0.08),
+    0 6px 12px -4px hsl(var(--shadow-color) / 0.12), 0 22px 40px -18px hsl(var(--shadow-color) / 0.3),
+    inset 0 1px 0 var(--highlight);
+  --shadow-lift: 0 0 0 1px hsl(var(--shadow-color) / 0.05), 0 2px 4px hsl(var(--shadow-color) / 0.07),
+    0 14px 28px -10px hsl(var(--shadow-color) / 0.2), 0 40px 70px -28px hsl(var(--shadow-color) / 0.36),
+    inset 0 1px 0 var(--highlight);
+  --shadow-press: 0 0 0 1px hsl(var(--shadow-color) / 0.07), 0 1px 2px hsl(var(--shadow-color) / 0.1),
+    inset 0 1px 0 var(--highlight);
 
   --ease-drift: cubic-bezier(0.32, 0.72, 0, 1);
   --animate-rise: rise 0.7s var(--ease-drift) both;
@@ -100,9 +117,9 @@
 
   --background: var(--paper);
   --foreground: var(--ink);
-  --card: var(--paper);
+  --card: var(--raised);
   --card-foreground: var(--ink);
-  --popover: var(--paper);
+  --popover: var(--raised);
   --popover-foreground: var(--ink);
   --primary: var(--ink);
   --primary-foreground: var(--sand);
@@ -121,7 +138,18 @@
   /* Image overlays stay dark in both themes so photo captions keep contrast. */
   --scrim: oklch(0.2 0.02 47);
   --on-scrim: oklch(0.95 0.02 85);
-  --shadow-color: 30deg 30% 20%;
+  --shadow-color: 28deg 35% 22%;
+  --highlight: oklch(1 0 0 / 0.5);
+
+  /* Day board: warm paper; raised = cards/menus; deep = recessed editorial bands. */
+  --raised: oklch(0.966 0.014 84);
+  --deep: oklch(0.905 0.03 80);
+  --clay-soft: oklch(0.88 0.05 55);
+  --clay-ink: oklch(0.5 0.115 45);
+  --stamp-clay: oklch(0.51 0.125 44);
+  --stamp-olive: oklch(0.47 0.055 116);
+  --success: oklch(0.52 0.08 140);
+  --warning: oklch(0.66 0.12 75);
 
   --chart-1: var(--sand);
   --chart-2: var(--clay);
@@ -155,8 +183,18 @@
   --cream: oklch(0.252 0.022 50);
 
   --muted-foreground: oklch(0.928 0.022 85 / 0.62);
-  --shadow-color: 30deg 40% 2%;
-  --border: oklch(0.928 0.022 85 / 0.14);
+  --shadow-color: 25deg 40% 2%;
+  --highlight: oklch(0.95 0.03 80 / 0.05);
+  /* Night board: lamplit espresso. Raised surfaces get lighter, not just darker shadows. */
+  --raised: oklch(0.232 0.021 50);
+  --deep: oklch(0.163 0.016 45);
+  --clay-soft: oklch(0.32 0.05 47);
+  --clay-ink: oklch(0.74 0.11 50);
+  --stamp-clay: oklch(0.7 0.115 47);
+  --stamp-olive: oklch(0.66 0.055 116);
+  --success: oklch(0.7 0.09 140);
+  --warning: oklch(0.78 0.11 75);
+  --border: oklch(0.928 0.022 85 / 0.12);
   --input: oklch(0.928 0.022 85 / 0.22);
   --destructive: oklch(0.62 0.17 27);
   --destructive-foreground: var(--paper);
@@ -428,5 +466,212 @@ body::after {
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
+  }
+}
+
+/* ── Page lighting ───────────────────────────────────────────────────────────
+ * A very soft overhead light on the paper, fixed behind everything, so the
+ * board never reads as a flat fill. Grain (body::after) sits on top.
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% -20%, color-mix(in oklab, var(--raised) 85%, transparent), transparent 60%),
+    radial-gradient(80% 60% at 100% 100%, color-mix(in oklab, var(--deep) 45%, transparent), transparent 70%);
+}
+
+/* ── Section tones ───────────────────────────────────────────────────────────
+ * Each band fades in and out of the paper at its edges, so the homepage reads
+ * as one continuous object with tonal rhythm, not stacked websites.
+ */
+@utility tone-hero {
+  background:
+    radial-gradient(55% 65% at 80% 38%, color-mix(in oklab, var(--clay) 11%, transparent), transparent 70%),
+    radial-gradient(50% 55% at 6% 8%, color-mix(in oklab, var(--sand) 38%, transparent), transparent 72%);
+}
+
+@utility tone-deep {
+  background: linear-gradient(to bottom, transparent, var(--deep) 14%, var(--deep) 86%, transparent);
+}
+
+@utility tone-raised {
+  background: linear-gradient(to bottom, transparent, var(--raised) 16%, var(--raised) 84%, transparent);
+}
+
+@utility tone-lanes {
+  background:
+    radial-gradient(45% 55% at 12% 62%, color-mix(in oklab, var(--olive) 10%, transparent), transparent 72%),
+    radial-gradient(45% 55% at 88% 36%, color-mix(in oklab, var(--clay) 10%, transparent), transparent 72%),
+    linear-gradient(to bottom, transparent, color-mix(in oklab, var(--deep) 55%, transparent) 20%, color-mix(in oklab, var(--deep) 55%, transparent) 80%, transparent);
+}
+
+@utility tone-cta {
+  background:
+    radial-gradient(60% 75% at 50% 112%, color-mix(in oklab, var(--clay) 18%, transparent), transparent 70%),
+    linear-gradient(to bottom, transparent, var(--deep) 30%);
+}
+
+/*
+ * An inverted editorial insert (the underdog story): the section re-declares
+ * the palette, so every utility inside it (text-ink, bg-paper, borders…)
+ * flips together. Day board → a dark insert; night board → a light one.
+ */
+@utility tone-invert {
+  --ink: oklch(0.935 0.02 85);
+  --paper: oklch(0.215 0.02 47);
+  --cream: oklch(0.262 0.022 50);
+  --sand: oklch(0.3 0.026 50);
+  --raised: oklch(0.25 0.022 49);
+  --deep: oklch(0.18 0.018 46);
+  --clay: oklch(0.72 0.115 47);
+  --clay-ink: oklch(0.76 0.11 50);
+  --olive: oklch(0.66 0.055 116);
+  --border: oklch(0.935 0.02 85 / 0.13);
+  --shadow-color: 25deg 40% 2%;
+  --highlight: oklch(0.95 0.03 80 / 0.05);
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+.dark .tone-invert {
+  --ink: oklch(0.256 0.026 47);
+  --paper: oklch(0.935 0.02 82);
+  --cream: oklch(0.912 0.026 86);
+  --sand: oklch(0.84 0.04 84);
+  --raised: oklch(0.958 0.015 84);
+  --deep: oklch(0.89 0.03 80);
+  --clay: oklch(0.6 0.12 47);
+  --clay-ink: oklch(0.5 0.115 45);
+  --stamp-clay: oklch(0.51 0.125 44);
+  --olive: oklch(0.52 0.053 116);
+  --border: oklch(0.256 0.026 47 / 0.12);
+  --shadow-color: 28deg 35% 22%;
+  --highlight: oklch(1 0 0 / 0.5);
+}
+
+/* ── Type helpers ───────────────────────────────────────────────────────── */
+
+/* Small uppercase label above headings. Readable size and contrast. */
+@utility eyebrow {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Secondary metadata in sentence case. */
+@utility meta {
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+}
+
+/* Editorial link: the underline draws itself left → right on hover/focus. */
+@utility ed-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  padding-bottom: 2px;
+  transition:
+    background-size 0.35s var(--ease-drift),
+    color 0.2s ease;
+  &:hover,
+  &:focus-visible {
+    background-size: 100% 1px;
+  }
+}
+
+/* Same, but with a faint resting underline that strengthens on hover. */
+@utility ed-link-rest {
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(color-mix(in oklab, currentColor 28%, transparent), color-mix(in oklab, currentColor 28%, transparent));
+  background-repeat: no-repeat;
+  background-position:
+    0 100%,
+    0 100%;
+  background-size:
+    0% 1px,
+    100% 1px;
+  padding-bottom: 2px;
+  transition:
+    background-size 0.35s var(--ease-drift),
+    color 0.2s ease;
+  &:hover,
+  &:focus-visible {
+    background-size:
+      100% 1px,
+      100% 1px;
+  }
+}
+
+/* Generous, consistent vertical rhythm for page sections. */
+@utility section-pad {
+  padding-block: clamp(5rem, 9vw, 8.5rem);
+}
+
+/* Restrained loading surface: a slow, low-contrast sheen. */
+@keyframes tx-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@utility skeleton {
+  background-color: var(--cream);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in oklab, var(--raised) 70%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: tx-shimmer 1.8s ease-in-out infinite;
+}
+
+/* ── Theme switch ──────────────────────────────────────────────────────────
+ * The new theme is revealed as a soft circle opening from the toggle, so it
+ * feels like the material itself changing. Named view-transition elements
+ * are folded into the root snapshot during the switch so nothing pops.
+ */
+@keyframes tx-theme-reveal {
+  from {
+    clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 0%));
+  }
+  to {
+    clip-path: circle(var(--vt-r, 150vmax) at var(--vt-x, 50%) var(--vt-y, 0%));
+  }
+}
+
+html.theme-vt * {
+  view-transition-name: none !important;
+}
+
+html.theme-vt::view-transition-old(root) {
+  animation: none;
+}
+
+html.theme-vt::view-transition-new(root) {
+  animation: tx-theme-reveal 0.62s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Invisible, larger tap target for small inline links (≥44px tall), no layout change. */
+@utility hit {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -12px -8px;
   }
 }

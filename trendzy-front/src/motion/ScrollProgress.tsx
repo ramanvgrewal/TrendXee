@@ -38,11 +38,11 @@ export function ScrollProgress() {
       className="pointer-events-none fixed right-3 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-center gap-3 xl:flex"
       style={{ opacity }}
     >
-      <span className="font-mono text-[10px] font-bold tracking-[0.14em] text-ink/60">{chapter.n}</span>
+      <span className="font-mono text-[10px] font-bold tracking-[0.14em] text-ink/70">{chapter.n}</span>
       <span className="relative block h-24 w-px overflow-hidden bg-ink/12">
         <m.span className="absolute inset-0 origin-top bg-clay" style={{ scaleY: fill }} />
       </span>
-      <span className="max-h-40 overflow-hidden text-[9px] font-bold uppercase tracking-[0.24em] text-ink/40 [writing-mode:vertical-rl]">
+      <span className="max-h-40 overflow-hidden eyebrow text-[10px] text-ink/70 [writing-mode:vertical-rl]">
         {chapter.title}
       </span>
     </m.div>

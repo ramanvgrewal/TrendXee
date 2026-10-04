@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { m } from "framer-motion";
 import { Stamp } from "@/components/Stamp";
 import { BookmarkButton } from "@/components/BookmarkButton";
+import { Img } from "@/components/Img";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { spring } from "@/motion/tokens";
 import type { Trend } from "@/lib/mock-data";
@@ -12,6 +12,10 @@ export function trendImage(trend: Trend) {
   return trend.products?.underdog?.imageUrl || trend.products?.amazon?.imageUrl || trend.products?.flipkart?.imageUrl || "";
 }
 
+export function trendLane(trend: Trend) {
+  return aesthetics.find((a) => a.id === trend.aestheticId || (a.id === "caps" && trend.aestheticId === "accessories"));
+}
+
 export function firstSentence(text: string, max = 150) {
   const clean = (text || "").replace(/\s+/g, " ").trim();
   const sentence = clean.match(/^[^.!?]+[.!?]/)?.[0] ?? clean;
@@ -19,10 +23,12 @@ export function firstSentence(text: string, max = 150) {
 }
 
 /**
- * The editorial discovery card. Image first, then the brand, the trend and
- * one line of why. Hover lifts the card a few px, drifts the photo against
- * the pointer and nudges the stamp the other way for a sense of depth.
- * The whole card opens the story (shared-layout expansion, see TrendDetail).
+ * The editorial discovery card — a physical object:
+ * rest: quiet raised paper · hover: lifts 4px, photo drifts and scales to 1.03,
+ * "Open story" appears · press: settles to 0.98 · release: springs back.
+ *
+ * Its surface, photo and title carry shared layout ids, so opening it
+ * expands this very card into the story view (see TrendDetail).
  */
 export function TrendCard({
   trend,
@@ -37,53 +43,55 @@ export function TrendCard({
   onUnarchived?: () => void;
   priority?: boolean;
 }) {
-  const [imageFailed, setImageFailed] = useState(false);
   const underdog = trend.products?.underdog;
   const image = trendImage(trend);
   const price = formatPrice(underdog?.price, underdog?.currency);
   const off = discountPercent(underdog?.price, underdog?.originalPrice);
-  const lane = aesthetics.find((a) => a.id === trend.aestheticId || (a.id === "caps" && trend.aestheticId === "accessories"));
+  const lane = trendLane(trend);
   const score = Math.round(trend.trendScore || 0);
 
   return (
     <m.article
-      className="group/card relative flex h-full flex-col"
+      className="group/card relative h-full"
       whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.985 }}
+      whileTap={{ scale: 0.98, y: -1 }}
       transition={spring.soft}
       data-cursor="explore"
       data-cursor-label="Open"
     >
-      <PointerScope className="relative flex h-full flex-col overflow-hidden rounded-[22px] bg-paper ring-1 ring-border transition-shadow duration-500 group-hover/card:shadow-lift">
-        {/* Media */}
-        <m.div layoutId={`trend-media-${trend.id}`} className="relative aspect-[4/5] overflow-hidden bg-sand/40" transition={spring.layout}>
-          {image && !imageFailed ? (
-            <Parallax depth={3} bleed className="absolute inset-0">
-              <img
-                src={image}
-                alt=""
-                loading={priority ? "eager" : "lazy"}
-                onError={() => setImageFailed(true)}
-                className="h-full w-full object-cover transition-transform duration-[1100ms] ease-out group-hover/card:scale-[1.04]"
-              />
-            </Parallax>
-          ) : (
-            <div className="absolute inset-0 grid place-items-center bg-cream">
-              <span className="font-display text-3xl italic text-ink/25">{lane ? laneLabel(lane.name) : "TrendXee"}</span>
-            </div>
-          )}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-scrim/35 to-transparent" />
-          <div className="absolute left-4 top-4 flex max-w-[70%] flex-wrap gap-1.5">
+      {/* The paper surface (morphs into the story's background). */}
+      <m.div
+        layoutId={`trend-surface-${trend.id}`}
+        transition={spring.layout}
+        className="absolute inset-0 bg-raised shadow-card transition-shadow duration-500 group-hover/card:shadow-lift group-active/card:shadow-press"
+        style={{ borderRadius: 22 }}
+      />
+
+      <PointerScope className="relative flex h-full flex-col overflow-hidden rounded-[22px]">
+        {/* Photo */}
+        <m.div
+          layoutId={`trend-media-${trend.id}`}
+          transition={spring.layout}
+          className="relative aspect-[4/5] overflow-hidden bg-cream"
+          style={{ borderRadius: 0 }}
+        >
+          <Parallax depth={3} bleed className="absolute inset-0">
+            <Img
+              src={image}
+              eager={priority}
+              fallbackLabel={lane ? laneLabel(lane.name) : "TrendXee"}
+              className="h-full w-full object-cover group-hover/card:scale-[1.03]"
+            />
+          </Parallax>
+          {/* Only a light top veil, so the chips stay legible on bright photos. */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-scrim/30 to-transparent" />
+          <div className="absolute left-4 top-4 flex max-w-[72%] flex-wrap gap-1.5">
             {trend.subcategory && (
-              <span className="truncate rounded-full bg-paper/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-ink/75 backdrop-blur-sm">
+              <span className="truncate rounded-full bg-raised/90 px-2.5 py-1 text-[11px] font-semibold text-ink/80 backdrop-blur-sm">
                 {trend.subcategory}
               </span>
             )}
-            {off && (
-              <span className="rounded-full bg-clay px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-paper">
-                −{off}%
-              </span>
-            )}
+            {off && <span className="rounded-full bg-stamp-clay px-2.5 py-1 text-[11px] font-bold text-paper">−{off}%</span>}
           </div>
         </m.div>
 
@@ -92,31 +100,37 @@ export function TrendCard({
           {score > 0 && (
             <div className="absolute -top-7 right-5 z-10">
               <Parallax depth={4} follow>
-                <Stamp score={score} size="md" tone={trend.name.length % 2 === 0 ? "clay" : "olive"} className="shadow-print transition-transform duration-500 group-hover/card:-rotate-6" />
+                <Stamp
+                  score={score}
+                  size="md"
+                  tone={trend.name.length % 2 === 0 ? "clay" : "olive"}
+                  className="shadow-print transition-transform duration-500 group-hover/card:-rotate-6"
+                />
               </Parallax>
             </div>
           )}
-          <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-ink/45">
+
+          <p className="flex min-w-0 items-baseline gap-2 pr-14">
             {underdog?.brandName ? (
               <>
-                <span className="text-clay">Underdog</span>
-                <span className="truncate font-display text-[13px] normal-case italic tracking-normal text-ink/75">
-                  {underdog.brandName}
-                </span>
+                <span className="eyebrow shrink-0 text-[11px] text-clay-ink">Underdog</span>
+                <span className="truncate font-display text-[15px] italic text-ink/80">{underdog.brandName}</span>
               </>
             ) : (
-              <span>{lane ? laneLabel(lane.name) : "Trend"}</span>
+              <span className="eyebrow text-[11px] text-ink/70">{lane ? laneLabel(lane.name) : "Trend"}</span>
             )}
           </p>
+
           <m.h3
             layoutId={`trend-title-${trend.id}`}
             transition={spring.layout}
-            className="mt-2 line-clamp-2 font-display text-[1.45rem] leading-[1.12] tracking-[-0.01em]"
+            className="mt-2 line-clamp-2 text-balance font-display text-[1.4rem] leading-[1.15] tracking-[-0.01em]"
           >
             {trend.name}
           </m.h3>
+
           {trend.aiSummary && (
-            <p className="mt-2.5 line-clamp-2 text-[14px] leading-relaxed text-ink/60">{firstSentence(trend.aiSummary)}</p>
+            <p className="mt-2.5 line-clamp-2 text-pretty text-[14.5px] leading-relaxed text-ink/70">{firstSentence(trend.aiSummary)}</p>
           )}
 
           <div className="mt-auto flex items-end justify-between gap-3 pt-5">
@@ -125,16 +139,14 @@ export function TrendCard({
                 <>
                   <span className="font-display text-xl tabular-nums">{price}</span>
                   {off && (
-                    <span className="text-[13px] text-ink/40 line-through">
-                      {formatPrice(underdog?.originalPrice, underdog?.currency)}
-                    </span>
+                    <span className="text-[13px] text-ink/70 line-through">{formatPrice(underdog?.originalPrice, underdog?.currency)}</span>
                   )}
                 </>
               ) : (
-                <span className="text-[13px] text-ink/50">See price at store</span>
+                <span className="meta">Price at the store</span>
               )}
             </div>
-            <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-clay transition-all duration-300 md:translate-x-[-4px] md:opacity-0 md:group-hover/card:translate-x-0 md:group-hover/card:opacity-100">
+            <span className="flex items-center gap-1.5 text-[13px] font-semibold text-clay-ink transition-all duration-300 md:-translate-x-1 md:opacity-0 md:group-hover/card:translate-x-0 md:group-hover/card:opacity-100 md:group-focus-within/card:translate-x-0 md:group-focus-within/card:opacity-100">
               Open story
               <svg viewBox="0 0 20 20" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
                 <path d="M3.5 10h12.5M11.5 5l5 5-5 5" />

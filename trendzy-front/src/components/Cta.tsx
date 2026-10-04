@@ -34,20 +34,25 @@ export function Cta({
 }
 
 const base =
-  "group/cta relative inline-flex select-none items-center justify-center gap-2.5 whitespace-nowrap rounded-full font-semibold transition-[background-color,color,border-color,box-shadow] duration-200 disabled:pointer-events-none disabled:opacity-50";
+  "group/cta relative inline-flex select-none items-center justify-center gap-2.5 whitespace-nowrap rounded-full font-semibold tracking-[0.005em] transition-[background-color,color,box-shadow,opacity] duration-200 ease-out disabled:pointer-events-none disabled:opacity-45 disabled:shadow-none [&_svg]:shrink-0";
 
 const variants = {
-  primary: "bg-ink text-paper shadow-print hover:bg-clay hover:text-paper",
-  accent: "bg-clay text-paper shadow-print hover:bg-ink",
-  outline: "border border-ink/20 text-ink hover:border-ink/60 hover:bg-ink/[0.03]",
-  ghost: "text-ink hover:text-clay",
-  onScrim: "bg-on-scrim text-scrim hover:bg-clay hover:text-on-scrim",
+  /** The main action. Ink on paper, warms to clay on hover, compresses on press. */
+  primary: "bg-ink text-paper shadow-print hover:bg-clay hover:text-paper hover:shadow-lift active:shadow-press",
+  /** Clay accent — for "saved" and other affirmative states. */
+  accent: "bg-clay text-paper shadow-print hover:bg-ink hover:shadow-lift active:shadow-press",
+  /** Quiet secondary action. Ring, not border, so states never shift layout. */
+  outline:
+    "bg-raised/60 text-ink shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--ink)_18%,transparent)] hover:bg-raised hover:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--ink)_45%,transparent),var(--shadow-card)] active:shadow-press",
+  ghost: "text-ink hover:bg-ink/[0.05] hover:text-clay",
+  onScrim: "bg-on-scrim text-scrim shadow-print hover:bg-clay hover:text-on-scrim",
 } as const;
 
+/** Consistent heights: 36 / 44 / 52px. */
 const sizes = {
   sm: "h-9 px-4 text-[13px]",
   md: "h-11 px-6 text-sm",
-  lg: "h-14 px-8 text-[15px]",
+  lg: "h-13 px-7 text-[15px]",
 } as const;
 
 export function ctaClass(variant: keyof typeof variants = "primary", size: keyof typeof sizes = "md") {

@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, m, useAnimationFrame, useInView, useMotionValue, useReducedMotion, type MotionValue, type PanInfo } from "framer-motion";
 import { Stamp } from "@/components/Stamp";
+import { Img } from "@/components/Img";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
 import { Parallax, PointerScope } from "@/motion/Parallax";
-import { ScrollReveal } from "@/motion/ScrollReveal";
+import { RevealHeading } from "@/motion/RevealHeading";
 import { ease } from "@/motion/tokens";
 import { aesthetics } from "@/lib/mock-data";
 import type { RotationItem } from "@/lib/lanes";
@@ -25,6 +26,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
   const [paused, setPaused] = useState(false);
   const elapsed = useMotionValue(0);
   const regionRef = useRef<HTMLElement>(null);
+  const draggedRef = useRef(false);
   const count = items.length;
   const inView = useInView(regionRef, { amount: 0.35 });
 
@@ -69,8 +71,10 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
   const price = formatPrice(item.price, item.currency);
   const was = discountPercent(item.price, item.originalPrice) ? formatPrice(item.originalPrice, item.currency) : null;
 
+  // A swipe must never also count as a click on the shop link.
   const onDragEnd = (_: unknown, info: PanInfo) => {
     const swipe = info.offset.x + info.velocity.x * 0.2;
+    if (Math.abs(info.offset.x) > 6) draggedRef.current = true;
     if (swipe < -60) go(1);
     else if (swipe > 60) go(-1);
   };
@@ -88,7 +92,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
       id="daily-five"
       aria-roledescription="carousel"
       aria-label="The Daily Five"
-      className="relative mx-auto w-full max-w-[1440px] scroll-mt-20 px-5 py-24 sm:px-8 lg:py-32"
+      className="section-pad relative mx-auto w-full max-w-[1440px] scroll-mt-20 px-5 sm:px-8"
       onPointerEnter={(e) => e.pointerType === "mouse" && setPaused(true)}
       onPointerLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -100,45 +104,67 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
         if (e.key === "ArrowLeft") go(-1);
       }}
     >
-      <ScrollReveal className="flex flex-wrap items-end justify-between gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/50">
-            <span className="text-clay">03</span> · Pinned today
+          <p className="eyebrow text-ink/70">
+            <span className="text-clay-ink">03</span> · Pinned today
           </p>
-          <h2 className="mt-3 font-display text-[clamp(2.6rem,5.5vw,5rem)] leading-[0.95] tracking-[-0.03em]">
-            The Daily <em className="italic text-clay">Five</em>
-          </h2>
+          <RevealHeading
+            className="mt-3 font-display text-[clamp(2.6rem,5.5vw,5rem)] leading-[0.95] tracking-[-0.03em]"
+            lines={[
+              <>
+                The Daily <em className="italic text-clay">Five</em>
+              </>,
+            ]}
+          />
         </div>
-        <p className="max-w-sm text-[15px] leading-relaxed text-ink/65">
+        <p className="max-w-sm text-pretty text-[15px] leading-relaxed text-ink/70">
           Five underdog drops from across the lanes, reshuffled every midnight. Swipe, use the arrows, or let it turn.
         </p>
-      </ScrollReveal>
+      </div>
 
       <div className="mt-12 grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
         {/* Visual */}
         <PointerScope className="relative lg:col-span-7">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-sand/50 shadow-lift ring-1 ring-border sm:aspect-[5/4]">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-cream shadow-lift sm:aspect-[5/4]">
             <AnimatePresence initial={false} custom={direction} mode="popLayout">
               <m.a
                 key={item.id + index}
                 href={item.shopUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={track}
+                onClick={(e) => {
+                  if (draggedRef.current) {
+                    e.preventDefault();
+                    draggedRef.current = false;
+                    return;
+                  }
+                  track();
+                }}
                 data-cursor="drag"
-                data-cursor-label="Shop"
+                data-cursor-label="Drag · Shop"
                 aria-label={`Shop ${item.title} by ${item.brand}`}
                 className="absolute inset-0 block touch-pan-y"
                 custom={direction}
-                variants={{
-                  enter: (dir: number) => ({ x: dir >= 0 ? "14%" : "-14%", opacity: 0, scale: 1.04 }),
-                  center: { x: 0, opacity: 1, scale: 1 },
-                  exit: (dir: number) => ({ x: dir >= 0 ? "-10%" : "10%", opacity: 0, scale: 0.98 }),
-                }}
+                variants={
+                  reduced
+                    ? { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { opacity: 0 } }
+                    : {
+                        // Page turn: the next photo wipes in from the side you're heading to,
+                        // settling from a slight zoom; the previous one recedes the other way.
+                        enter: (dir: number) => ({
+                          clipPath: dir >= 0 ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)",
+                          scale: 1.06,
+                          zIndex: 2,
+                        }),
+                        center: { clipPath: "inset(0% 0% 0% 0%)", scale: 1, x: 0, opacity: 1, zIndex: 2 },
+                        exit: (dir: number) => ({ x: dir >= 0 ? "-8%" : "8%", opacity: 0.35, zIndex: 1 }),
+                      }
+                }
                 initial="enter"
                 animate="center"
                 exit="exit"
-                transition={{ duration: 0.65, ease: ease.drift }}
+                transition={{ duration: 0.7, ease: ease.drift }}
                 drag={count > 1 ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.18}
@@ -146,20 +172,14 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                 draggable={false}
               >
                 <Parallax depth={5} bleed className="absolute inset-0">
-                  <img
-                    src={item.image}
-                    alt=""
-                    draggable={false}
-                    loading="lazy"
-                    className="h-full w-full select-none object-cover"
-                  />
+                  <Img src={item.image} draggable={false} eager className="h-full w-full select-none object-cover" />
                 </Parallax>
               </m.a>
             </AnimatePresence>
 
             {/* Folio */}
-            <div className="pointer-events-none absolute left-5 top-5 z-10 rounded-full bg-paper/90 px-3 py-1.5 font-mono text-[11px] font-bold tracking-[0.14em] text-ink backdrop-blur-sm">
-              N° {String(index + 1).padStart(2, "0")} <span className="text-ink/40">/ {String(count).padStart(2, "0")}</span>
+            <div className="pointer-events-none absolute left-5 top-5 z-10 rounded-full bg-raised/90 px-3 py-1.5 font-mono text-[12px] font-bold tracking-[0.12em] text-ink shadow-card backdrop-blur-sm">
+              N° {String(index + 1).padStart(2, "0")} <span className="text-ink/70">/ {String(count).padStart(2, "0")}</span>
             </div>
           </div>
 
@@ -174,7 +194,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                     exit={{ scale: 0.8, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 520, damping: 24, delay: 0.25 }}
                   >
-                    <Stamp score={item.score} size="lg" className="shadow-print" />
+                    <Stamp score={item.score} size="lg" pressable className="shadow-print" />
                   </m.div>
                 </AnimatePresence>
               </Parallax>
@@ -198,9 +218,9 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
               }}
               aria-live={autoplay ? "off" : "polite"}
             >
-              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-[0.2em] text-ink/50">
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 eyebrow text-ink/70">
                 {lane && (
-                  <Link to="/aesthetic/$id" params={{ id: lane.id }} className="text-clay transition-colors hover:text-ink">
+                  <Link to="/aesthetic/$id" params={{ id: lane.id }} className="text-clay-ink transition-colors hover:text-ink">
                     {laneLabel(lane.name)}
                   </Link>
                 )}
@@ -218,13 +238,13 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
 
               <div className="mt-8 flex items-end justify-between gap-6 border-t border-border pt-5">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">The underdog</p>
+                  <p className="eyebrow text-[11px] text-ink/70">The underdog</p>
                   <p className="mt-1 truncate font-display text-2xl italic">{item.brand || "Indie label"}</p>
-                  <p className="mt-0.5 line-clamp-1 text-[13px] text-ink/55">{item.title}</p>
+                  <p className="mt-0.5 line-clamp-1 text-[13px] text-ink/70">{item.title}</p>
                 </div>
                 {price && (
                   <div className="shrink-0 text-right">
-                    {was && <p className="text-[13px] text-ink/40 line-through">{was}</p>}
+                    {was && <p className="text-[13px] text-ink/70 line-through">{was}</p>}
                     <p className="font-display text-2xl tabular-nums">{price}</p>
                   </div>
                 )}
@@ -240,7 +260,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                   <Link
                     to="/aesthetic/$id"
                     params={{ id: lane.id }}
-                    className="text-sm font-semibold text-ink/65 underline decoration-ink/20 underline-offset-4 transition-colors hover:text-clay hover:decoration-clay"
+                    className="hit ed-link-rest text-sm font-semibold text-ink/75 hover:text-clay"
                   >
                     More in {laneLabel(lane.name)}
                   </Link>
@@ -260,7 +280,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                   aria-selected={i === index}
                   aria-label={`Story ${i + 1}: ${it.trendName}`}
                   onClick={() => goTo(i)}
-                  className="group/seg relative h-6 flex-1"
+                  className="group/seg relative h-9 flex-1"
                 >
                   <span className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 overflow-hidden rounded-full bg-ink/12 transition-colors group-hover/seg:bg-ink/25">
                     {i < index && <span className="absolute inset-0 bg-ink/55" />}

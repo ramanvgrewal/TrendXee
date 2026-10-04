@@ -16,7 +16,7 @@ import { follow, spring } from "@/motion/tokens";
  * Desktop fine pointers only — touch devices never mount it.
  */
 type CursorKind = "default" | "link" | "button" | "label" | "native" | "hidden";
-type CursorState = { kind: CursorKind; label?: string };
+type CursorState = { kind: CursorKind; label?: string; tone?: "ink" | "clay" };
 
 const DEFAULT_LABELS: Record<string, string> = {
   view: "View",
@@ -34,7 +34,8 @@ function resolveState(target: EventTarget | null): CursorState {
     if (key === "link") return { kind: "link" };
     if (key === "button") return { kind: "button" };
     const label = tagged.dataset.cursorLabel || DEFAULT_LABELS[key];
-    if (label) return { kind: "label", label };
+    // Explore = entering somewhere (clay, with an arrow); view/drag = looking at a product (ink).
+    if (label) return { kind: "label", label, tone: key === "explore" ? "clay" : "ink" };
   }
 
   if (target.closest('input:not([type="button"]):not([type="submit"]), textarea, select, [contenteditable="true"]')) {
@@ -47,7 +48,7 @@ function resolveState(target: EventTarget | null): CursorState {
   return { kind: "default" };
 }
 
-const sameState = (a: CursorState, b: CursorState) => a.kind === b.kind && a.label === b.label;
+const sameState = (a: CursorState, b: CursorState) => a.kind === b.kind && a.label === b.label && a.tone === b.tone;
 
 export function Cursor() {
   const { x, y, present, enabled } = usePointer();
@@ -91,7 +92,7 @@ export function Cursor() {
 
   if (!enabled) return null;
 
-  const { kind, label } = state;
+  const { kind, label, tone } = state;
   const showLabel = kind === "label";
   const hide = kind === "hidden" || kind === "native";
   const press = pressed ? 0.82 : 1;
@@ -149,14 +150,21 @@ export function Cursor() {
         <AnimatePresence>
           {showLabel && (
             <m.span
-              key={label}
-              className="absolute left-0 top-0 block -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-ink px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-sand shadow-[0_6px_18px_-8px_color-mix(in_oklab,var(--ink)_60%,transparent)]"
-              initial={{ scale: 0.6, opacity: 0 }}
+              key={`${label}-${tone}`}
+              className={`absolute left-0 top-0 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] shadow-[0_8px_20px_-10px_hsl(var(--shadow-color)/0.6)] ${
+                tone === "clay" ? "bg-clay text-paper" : "bg-ink text-paper"
+              }`}
+              initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: press, opacity: 1 }}
-              exit={{ scale: 0.6, opacity: 0 }}
+              exit={{ scale: 0.5, opacity: 0, transition: { duration: 0.12 } }}
               transition={spring.tactile}
             >
               {label}
+              {tone === "clay" && (
+                <svg viewBox="0 0 20 20" className="size-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                  <path d="M4 10h11M11 6l4 4-4 4" />
+                </svg>
+              )}
             </m.span>
           )}
         </AnimatePresence>

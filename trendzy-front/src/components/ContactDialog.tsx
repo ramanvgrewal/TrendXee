@@ -40,19 +40,19 @@ export function ContactDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-3xl border border-border bg-paper p-7 text-ink">
+      <DialogContent className="max-w-md rounded-3xl border border-0 bg-raised shadow-lift p-7 text-ink">
         <DialogHeader className="space-y-2 text-left">
           <DialogTitle className="font-display text-3xl font-normal tracking-tight">
             Write to <em className="italic text-clay">us</em>
           </DialogTitle>
-          <DialogDescription className="text-sm text-ink/60">
+          <DialogDescription className="text-sm text-ink/70">
             Sending as <strong className="font-semibold text-ink/80">{user?.email || "your account"}</strong>. We'll
             reply to this email.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-5">
           <div className="space-y-2">
-            <Label htmlFor="message" className="text-[11px] font-bold uppercase tracking-[0.2em] text-ink/55">
+            <Label htmlFor="message" className="eyebrow text-ink/70">
               Message
             </Label>
             <Textarea

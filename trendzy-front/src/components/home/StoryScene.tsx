@@ -36,7 +36,7 @@ const SLOTS: Slot[] = [
   { left: "13%", top: "54%", width: "clamp(90px,9vw,150px)", drift: -420, depth: 5, aspect: "1/1" },
   { left: "2%", top: "80%", width: "clamp(100px,10vw,160px)", drift: -340, depth: 2 },
   { left: "77%", top: "8%", width: "clamp(100px,10vw,165px)", drift: -380, depth: 4 },
-  { left: "76%", top: "58%", width: "clamp(112px,14vw,220px)", drift: -200, depth: 3, mobile: true, mLeft: "58%", mTop: "70%" }, // ← the underdog
+  { left: "76%", top: "58%", width: "clamp(112px,14vw,220px)", drift: -200, depth: 3, mobile: true, mLeft: "calc(50% - 56px)", mTop: "76%" }, // ← the underdog
   { left: "90%", top: "38%", width: "clamp(80px,8vw,130px)", drift: -480, depth: 6, aspect: "1/1" },
   { left: "86%", top: "86%", width: "clamp(90px,9vw,140px)", drift: -300, depth: 2 },
 ];
@@ -49,7 +49,7 @@ export function StoryScene({ items }: { items: RotationItem[] }) {
   if (reduced) return <StaticStory chosen={products[CHOSEN]} />;
 
   return (
-    <ScrollScene length={4.2} mobileLength={3.2} stageClassName="bg-background" id="story">
+    <ScrollScene length={4.2} mobileLength={3.2} id="story">
       {(progress) => <Stage progress={progress} products={products} />}
     </ScrollScene>
   );
@@ -107,7 +107,7 @@ function Stage({ progress, products }: { progress: MotionValue<number>; products
               progress={progress}
               range={[0.52, 0.64]}
               text="We filter the noise into one honest drop."
-              className="mt-3 text-balance font-display text-[clamp(1.9rem,4.4vw,4.4rem)] leading-[1.04] tracking-[-0.025em] text-ink/55"
+              className="mt-3 text-balance font-display text-[clamp(1.9rem,4.4vw,4.4rem)] leading-[1.04] tracking-[-0.025em] text-ink/70"
             />
             <ScrollTextReveal
               as="p"
@@ -122,8 +122,8 @@ function Stage({ progress, products }: { progress: MotionValue<number>; products
       </div>
 
       {/* Chapter rail */}
-      <div className="pointer-events-none absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-4 text-[10px] font-bold uppercase tracking-[0.28em] text-ink/45">
-        <span>How TrendXee reads the feed</span>
+      <div className="pointer-events-none absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-4 eyebrow text-[11px] text-ink/70">
+        <span className="max-sm:hidden">How TrendXee reads the feed</span>
         <span className="relative block h-px w-24 overflow-hidden bg-ink/15">
           <m.span className="absolute inset-0 origin-left bg-clay" style={{ scaleX: rail }} />
         </span>
@@ -187,7 +187,7 @@ function FeedPrint({
                 style={{ opacity: ring }}
               />
               <m.p
-                className="absolute -bottom-9 left-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.2em] text-clay"
+                className="absolute -bottom-9 left-1/2 -translate-x-1/2 whitespace-nowrap md:left-0 md:translate-x-0 eyebrow text-[11px] text-clay-ink"
                 style={{ opacity: ring }}
               >
                 The underdog · <span className="font-display text-xs normal-case italic tracking-normal">{item.brand}</span>
@@ -211,7 +211,7 @@ function StaticStory({ chosen }: { chosen?: RotationItem }) {
       </p>
       <p className="mt-8 font-display text-[clamp(2rem,4.5vw,4rem)] italic text-clay">And we find the underdogs.</p>
       {chosen && (
-        <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.2em] text-ink/55">Today: {chosen.brand}</p>
+        <p className="mt-6 eyebrow text-ink/70">Today: {chosen.brand}</p>
       )}
     </section>
   );

@@ -12,19 +12,19 @@ export function LegalPage({
 }) {
   return (
     <div className="mx-auto w-full max-w-[1440px] px-5 pb-28 pt-12 sm:px-8 lg:pt-20">
-      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/50">Legal</p>
+      <p className="eyebrow text-ink/70">Legal</p>
       <h1 className="mt-4 max-w-3xl font-display text-[clamp(2.6rem,5.5vw,4.75rem)] leading-[1] tracking-[-0.03em]">{title}</h1>
-      <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-ink/65">{intro}</p>
+      <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-ink/70">{intro}</p>
 
       <div className="mt-16 grid gap-12 lg:grid-cols-12">
         <nav aria-label="Contents" className="lg:col-span-3">
           <div className="lg:sticky lg:top-24">
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Contents</p>
-            <ol className="mt-4 space-y-2.5">
+            <p className="eyebrow text-ink/70">Contents</p>
+            <ol className="mt-2">
               {sections.map((s, i) => (
                 <li key={s.id}>
-                  <a href={`#${s.id}`} className="flex gap-3 text-[14px] text-ink/65 transition-colors hover:text-clay">
-                    <span className="font-mono text-[11px] text-clay/80">{String(i + 1).padStart(2, "0")}</span>
+                  <a href={`#${s.id}`} className="flex gap-3 py-2 text-[14px] text-ink/70 transition-colors hover:text-clay">
+                    <span className="font-mono text-[11px] text-clay-ink">{String(i + 1).padStart(2, "0")}</span>
                     {s.heading}
                   </a>
                 </li>

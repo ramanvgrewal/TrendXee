@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { m, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
-import { ScrollReveal } from "@/motion/ScrollReveal";
+import { RevealHeading } from "@/motion/RevealHeading";
 import { follow } from "@/motion/tokens";
 
 const STEPS = [
@@ -33,20 +33,26 @@ export function EngineSection() {
   const line = useSpring(useTransform(scrollYProgress, [0, 1], [0, 1]), follow.scroll);
 
   return (
-    <section ref={ref} id="engine" className="mx-auto w-full max-w-[1440px] scroll-mt-20 px-5 py-28 sm:px-8 lg:py-36">
-      <ScrollReveal className="grid gap-6 lg:grid-cols-12">
+    <section ref={ref} id="engine" className="section-pad mx-auto w-full max-w-[1440px] scroll-mt-20 px-5 sm:px-8">
+      <div className="grid gap-6 lg:grid-cols-12">
         <div className="lg:col-span-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/50">
-            <span className="text-clay">06</span> · How the engine works
+          <p className="eyebrow text-ink/70">
+            <span className="text-clay-ink">06</span> · How the engine works
           </p>
-          <h2 className="mt-4 font-display text-[clamp(2.4rem,4.6vw,4.25rem)] leading-[0.98] tracking-[-0.03em]">
-            Noise in, <em className="italic text-clay">one honest drop</em> out.
-          </h2>
+          <RevealHeading
+            className="mt-4 font-display text-[clamp(2.4rem,4.6vw,4.25rem)] leading-[0.98] tracking-[-0.03em]"
+            lines={[
+              "Noise in,",
+              <>
+                <em className="italic text-clay">one honest drop</em> out.
+              </>,
+            ]}
+          />
         </div>
-        <p className="self-end text-[16px] leading-relaxed text-ink/65 lg:col-span-4 lg:col-start-9">
+        <p className="self-end text-[16px] leading-relaxed text-ink/70 lg:col-span-4 lg:col-start-9">
           Every drop on the board went through the same four steps. Scores move as the chatter moves.
         </p>
-      </ScrollReveal>
+      </div>
 
       <div className="relative mt-16">
         {/* The drawn line */}
@@ -55,13 +61,13 @@ export function EngineSection() {
         </div>
         <ol className="grid gap-10 md:grid-cols-4 md:gap-8">
           {STEPS.map((step, i) => (
-            <ScrollReveal as="li" key={step.title} index={i} className="relative">
-              <span className="relative z-10 inline-grid size-9 place-items-center rounded-full bg-background font-display text-sm italic text-clay ring-1 ring-clay/40">
+            <li key={step.title} className="relative">
+              <span className="relative z-10 inline-grid size-9 place-items-center rounded-full bg-paper font-display text-sm italic text-clay shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--clay)_45%,transparent)]">
                 {i + 1}
               </span>
               <h3 className="mt-6 font-display text-3xl tracking-tight">{step.title}</h3>
-              <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-ink/65">{step.body}</p>
-            </ScrollReveal>
+              <p className="mt-3 max-w-xs text-pretty text-[15px] leading-relaxed text-ink/70">{step.body}</p>
+            </li>
           ))}
         </ol>
       </div>

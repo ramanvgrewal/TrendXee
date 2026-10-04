@@ -53,11 +53,12 @@ function castTheBoard(rotationMap: Record<string, RotationItem[]>, dailyFive: Ro
   }
   const pool = interleaved.length ? interleaved : rest;
 
-  const lead = dailyFive[0] ?? pool[0];
-  const heroPrints = pool.slice(0, 2);
-  const story = pool.slice(2, 9);
+  // The hero takes a product that is NOT in the Daily Five, so nothing repeats.
+  const lead = pool[0] ?? dailyFive[0];
+  const heroPrints = pool.slice(1, 3);
+  const story = pool.slice(3, 10);
   const underdog =
-    pool.slice(9).find((i) => i.mainstream?.image) ?? [...dailyFive, ...pool].find((i) => i.mainstream?.image);
+    pool.slice(10).find((i) => i.mainstream?.image) ?? [...dailyFive, ...pool].find((i) => i.mainstream?.image);
   return { lead, heroPrints, story, underdog };
 }
 
@@ -68,29 +69,29 @@ function Home() {
   return (
     <div className="relative">
       <ScrollProgress />
-      <div data-chapter="01" data-chapter-title="The board">
+      <div data-chapter="01" data-chapter-title="The board" className="tone-hero -mt-16 pt-16">
         <Hero lead={lead} prints={heroPrints} />
       </div>
       {story.length >= 5 && (
-        <div data-chapter="02" data-chapter-title="The story">
+        <div data-chapter="02" data-chapter-title="The story" className="tone-deep">
           <StoryScene items={story} />
         </div>
       )}
-      <div data-chapter="03" data-chapter-title="Daily five">
+      <div data-chapter="03" data-chapter-title="Daily five" className="tone-raised">
         <DailyFive items={dailyFive} />
       </div>
-      <div data-chapter="04" data-chapter-title="The lanes">
+      <div data-chapter="04" data-chapter-title="The lanes" className="tone-lanes">
         <LaneUniverse rotationMap={rotationMap} />
       </div>
       {underdog && (
-        <div data-chapter="05" data-chapter-title="Underdogs first">
+        <div data-chapter="05" data-chapter-title="Underdogs first" className="py-10 lg:py-16">
           <UnderdogStory item={underdog} />
         </div>
       )}
       <div data-chapter="06" data-chapter-title="The engine">
         <EngineSection />
       </div>
-      <div data-chapter="07" data-chapter-title="Start">
+      <div data-chapter="07" data-chapter-title="Start" className="tone-cta">
         <FinalCta />
       </div>
     </div>
