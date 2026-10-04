@@ -13,6 +13,9 @@ export const getRouter = () => {
     // page (and any transition into it) is ready by the time it's clicked.
     defaultPreload: "intent",
     defaultPreloadStaleTime: 30_000,
+    // Short cross-fade between routes via the View Transitions API, where
+    // supported (styles in styles.css). Unsupported browsers navigate normally.
+    defaultViewTransition: true,
     // Routes opt into longer caching via their own `staleTime`.
     defaultStaleTime: 0,
   });

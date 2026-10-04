@@ -1,13 +1,81 @@
 import { getTrends } from "@/lib/api";
 import { aesthetics, type Trend } from "@/lib/mock-data";
 
+export type MainstreamPick = {
+  source: "amazon" | "flipkart";
+  brand: string;
+  title: string;
+  image: string;
+  shopUrl: string;
+  price?: number;
+  currency?: string;
+};
+
 export type RotationItem = {
+  /** Trend id (for click tracking). */
+  id: string;
   brand: string;
   title: string;
   image: string;
   shopUrl: string;
   category?: string;
+  trendName: string;
+  /** First sentence or two of the AI summary. */
+  summary: string;
+  score: number;
+  price?: number;
+  originalPrice?: number;
+  currency?: string;
+  subcategory?: string;
+  mainstream?: MainstreamPick;
 };
+
+function shortSummary(text: string, max = 190) {
+  const clean = (text || "").replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const sentences = clean.match(/[^.!?]+[.!?]+/g) ?? [clean];
+  let out = "";
+  for (const sentence of sentences) {
+    if ((out + sentence).length > max) break;
+    out += sentence;
+  }
+  return (out || clean.slice(0, max - 1).replace(/\s+\S*$/, "") + "…").trim();
+}
+
+function toRotationItem(t: Trend, laneId: string): RotationItem {
+  const u = t.products.underdog!;
+  const ms = t.products.amazon?.imageUrl
+    ? { source: "amazon" as const, p: t.products.amazon }
+    : t.products.flipkart?.imageUrl
+      ? { source: "flipkart" as const, p: t.products.flipkart }
+      : null;
+  return {
+    id: t.id,
+    brand: u.brandName || "",
+    title: u.title || "",
+    image: u.imageUrl || "",
+    shopUrl: u.shopUrl || "",
+    category: laneId,
+    trendName: t.name,
+    summary: shortSummary(t.aiSummary),
+    score: Math.round(t.trendScore || 0),
+    price: u.price || undefined,
+    originalPrice: u.originalPrice || undefined,
+    currency: u.currency || undefined,
+    subcategory: t.subcategory || undefined,
+    mainstream: ms
+      ? {
+          source: ms.source,
+          brand: ms.p.brandName || "",
+          title: ms.p.title || "",
+          image: ms.p.imageUrl,
+          shopUrl: ms.p.shopUrl || "",
+          price: ms.p.price || undefined,
+          currency: ms.p.currency || undefined,
+        }
+      : undefined,
+  };
+}
 
 export type RotationMap = Record<string, RotationItem[]>;
 
@@ -59,13 +127,7 @@ export function fetchLaneRotations(): Promise<RotationMap> {
       const items = trends
         .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
         .slice(0, 5)
-        .map((t) => ({
-          brand: t.products.underdog?.brandName || "",
-          title: t.products.underdog?.title || "",
-          image: t.products.underdog?.imageUrl || "",
-          shopUrl: t.products.underdog?.shopUrl || "",
-          category: a.id,
-        }));
+        .map((t) => toRotationItem(t, a.id));
       return [a.id, items] as const;
     }),
   ).then((results) => {

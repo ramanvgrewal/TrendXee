@@ -14,24 +14,25 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MotionProvider } from "@/motion/MotionProvider";
+import { ctaClass } from "@/components/Cta";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
+    <div className="mx-auto flex min-h-[70svh] w-full max-w-[1440px] flex-col justify-center px-5 py-24 sm:px-8">
+      <p className="hand text-xl text-clay">this page slipped off the board</p>
+      <h1 className="mt-3 font-display text-[clamp(5rem,16vw,13rem)] leading-[0.85] tracking-[-0.05em]">
+        4<em className="italic text-clay">0</em>4
+      </h1>
+      <p className="mt-6 max-w-md text-[17px] leading-relaxed text-ink/65">
+        The page you're looking for doesn't exist or has moved. The lanes are still here, though.
+      </p>
+      <div className="mt-10 flex flex-wrap items-center gap-4">
+        <Link to="/" className={ctaClass("primary", "lg")}>
+          Back to the board
+        </Link>
+        <Link to="/lanes" className={ctaClass("outline", "lg")}>
+          Browse lanes
+        </Link>
       </div>
     </div>
   );
@@ -46,31 +47,28 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   }, [reportableError]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
-        </div>
+    <div className="mx-auto flex min-h-[70svh] w-full max-w-[1440px] flex-col justify-center px-5 py-24 sm:px-8">
+      <p className="hand text-xl text-clay">something came unpinned</p>
+      <h1 className="mt-3 max-w-2xl font-display text-[clamp(2.6rem,6vw,5rem)] leading-[1] tracking-[-0.03em]">
+        This page didn't load.
+      </h1>
+      <p className="mt-5 max-w-md text-[17px] leading-relaxed text-ink/65">
+        It's on our side, not yours. Try again, or head back to the board.
+      </p>
+      <div className="mt-10 flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
+          className={ctaClass("primary", "lg")}
+        >
+          Try again
+        </button>
+        <a href="/" className={ctaClass("outline", "lg")}>
+          Back to the board
+        </a>
       </div>
     </div>
   );

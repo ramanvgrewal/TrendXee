@@ -1,105 +1,107 @@
-import { Link } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AuthModal } from "@/components/AuthModal";
-import { businessApiFetch } from "@/lib/api";
+import { ContactDialog } from "@/components/ContactDialog";
 import { currentUserQuery } from "@/lib/user";
-
-function ContactModal({ user }: { user: any }) {
-  const [open, setOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    const message = (e.target as HTMLFormElement).message.value;
-
-    try {
-      await businessApiFetch("/api/contact", { 
-        method: "POST", 
-        body: JSON.stringify({ email: user.email, message }) 
-      });
-      
-      setOpen(false);
-      toast.success("Your message has been sent. We will get back to you soon!");
-    } catch (err) {
-      toast.error("Failed to send message. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button className="transition-colors hover:text-clay cursor-pointer">
-          Contact
-        </button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Contact Us</DialogTitle>
-          <DialogDescription>
-            Sending as <strong>{user?.email || "your account"}</strong>. We'll reply to this email.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="message">Message</Label>
-            <Textarea required id="message" rows={5} placeholder="Type your message here..." />
-          </div>
-          <Button disabled={isSubmitting} type="submit" className="w-full mt-2">
-            {isSubmitting ? "Sending..." : "Send Message"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
+import { aesthetics } from "@/lib/mock-data";
+import { laneLabel } from "@/lib/format";
 
 export function SiteFooter() {
   const { data: user } = useQuery(currentUserQuery);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const isAuthenticated = !!user;
+  const [authOpen, setAuthOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+
+  const linkClass = "text-[14px] text-ink/65 transition-colors hover:text-clay";
 
   return (
-    <footer className="border-t border-border">
-      <div className="mx-auto flex w-full flex-col items-start justify-between gap-3 px-5 py-8 sm:flex-row sm:items-center sm:px-8">
-        <p className="hand text-ink/70">
-          © 2026 TrendXee · trendxee.com — zero middlemen, straight to the brand.
-        </p>
-        <div className="flex flex-wrap items-center gap-5 text-[13px] font-semibold">
-          <Link to="/" hash="lanes" className="transition-colors hover:text-clay">
-            Lanes
+    <footer className="relative border-t border-border bg-cream/40">
+      <div className="mx-auto grid w-full max-w-[1440px] gap-12 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:py-20">
+        <div className="lg:col-span-5">
+          <Link to="/" className="inline-flex items-center gap-2.5">
+            <img src="/logo.png" alt="" className="size-8 object-contain" />
+            <span className="font-display text-2xl tracking-tight">
+              Trend<em className="italic text-clay">Xee</em>
+            </span>
           </Link>
-          <Link to="/about" className="transition-colors hover:text-clay">
-            About
-          </Link>
-          <Link to="/archive" className="transition-colors hover:text-clay">
-            Archive
-          </Link>
-          <Link to="/terms" className="transition-colors hover:text-clay">
-            Terms
-          </Link>
-          <Link to="/privacy" className="transition-colors hover:text-clay">
-            Privacy
-          </Link>
-          {isAuthenticated ? (
-            <ContactModal user={user} />
-          ) : (
-            <button onClick={() => setIsAuthModalOpen(true)} className="transition-colors hover:text-clay cursor-pointer">
-              Contact
-            </button>
-          )}
+          <p className="mt-5 max-w-sm font-display text-xl leading-snug text-ink/75">
+            Fits before they go viral — and the small brands making them first.
+          </p>
+          <p className="mt-4 max-w-sm text-[13px] leading-relaxed text-ink/50">
+            Zero middlemen, straight to the brand. TrendXee is a discovery platform and doesn't sell or fulfil the
+            products shown.
+          </p>
+        </div>
+
+        <nav aria-label="Lanes" className="lg:col-span-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Lanes</p>
+          <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5">
+            {aesthetics.map((a) => (
+              <li key={a.id}>
+                <Link to="/aesthetic/$id" params={{ id: a.id }} className={linkClass}>
+                  {laneLabel(a.name)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <nav aria-label="TrendXee" className="lg:col-span-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">TrendXee</p>
+          <ul className="mt-4 space-y-2.5">
+            <li>
+              <Link to="/about" className={linkClass}>
+                About
+              </Link>
+            </li>
+            <li>
+              <Link to="/" hash="engine" className={linkClass}>
+                The engine
+              </Link>
+            </li>
+            <li>
+              <Link to="/archive" className={linkClass}>
+                Archive
+              </Link>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={() => (user ? setContactOpen(true) : setAuthOpen(true))}
+                className={linkClass}
+              >
+                Contact
+              </button>
+            </li>
+          </ul>
+        </nav>
+
+        <nav aria-label="Legal" className="lg:col-span-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Legal</p>
+          <ul className="mt-4 space-y-2.5">
+            <li>
+              <Link to="/terms" className={linkClass}>
+                Terms of use
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacy" className={linkClass}>
+                Privacy
+              </Link>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div className="border-t border-border">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-5 py-6 text-[12px] text-ink/45 sm:px-8">
+          <p>© 2026 TrendXee · trendxee.com</p>
+          <p className="hand text-[13px]">pinned by hand, read from real signals</p>
         </div>
       </div>
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
+      <ContactDialog open={contactOpen} onOpenChange={setContactOpen} user={user} />
     </footer>
   );
 }

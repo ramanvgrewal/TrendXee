@@ -25,6 +25,8 @@ type Props = {
   dim?: number;
   /** How much neighbouring units overlap while revealing (0–3). Higher = smoother. */
   softness?: number;
+  /** Self-tracking window, as useScroll offsets. Defaults suit mid-page text. */
+  offset?: [string, string];
 };
 
 export function ScrollTextReveal({
@@ -36,10 +38,11 @@ export function ScrollTextReveal({
   className = "",
   dim = 0,
   softness = 1.5,
+  offset = ["start 85%", "end 45%"],
 }: Props) {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 85%", "end 45%"] });
+  const { scrollYProgress } = useScroll({ target: ref, offset: offset as never });
   const source = progress ?? scrollYProgress;
 
   if (reduced) {

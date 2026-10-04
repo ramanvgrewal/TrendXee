@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode, type RefObject } from "react";
-import { useMotionValue, useReducedMotion, useSpring, type MotionValue } from "framer-motion";
+import { motionValue, useMotionValue, useReducedMotion, useSpring, type MotionValue } from "framer-motion";
 import { follow } from "@/motion/tokens";
 import { useFinePointer } from "@/motion/hooks";
 
@@ -78,10 +78,19 @@ export function PointerProvider({ children }: { children: ReactNode }) {
   return <PointerContext.Provider value={value}>{children}</PointerContext.Provider>;
 }
 
+// Inert values for anything rendered outside the provider (or during a dev
+// hot-reload): effects simply stay off instead of crashing the page.
+const INERT: PointerContextValue = {
+  x: motionValue(-100),
+  y: motionValue(-100),
+  nx: motionValue(0),
+  ny: motionValue(0),
+  present: motionValue(0),
+  enabled: false,
+};
+
 export function usePointer() {
-  const ctx = useContext(PointerContext);
-  if (!ctx) throw new Error("usePointer must be used inside <PointerProvider>");
-  return ctx;
+  return useContext(PointerContext) ?? INERT;
 }
 
 /**

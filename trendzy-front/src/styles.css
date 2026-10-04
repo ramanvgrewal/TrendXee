@@ -65,6 +65,13 @@
   --color-olive: var(--olive);
   --color-paper: var(--paper);
   --color-cream: var(--cream);
+  --color-scrim: var(--scrim);
+  --color-on-scrim: var(--on-scrim);
+
+  --shadow-print: 0 1px 1px hsl(var(--shadow-color) / 0.08), 0 4px 8px -2px hsl(var(--shadow-color) / 0.12),
+    0 18px 36px -12px hsl(var(--shadow-color) / 0.28);
+  --shadow-lift: 0 2px 2px hsl(var(--shadow-color) / 0.08), 0 10px 20px -6px hsl(var(--shadow-color) / 0.18),
+    0 34px 60px -20px hsl(var(--shadow-color) / 0.38);
 
   --ease-drift: cubic-bezier(0.32, 0.72, 0, 1);
   --animate-rise: rise 0.7s var(--ease-drift) both;
@@ -111,6 +118,11 @@
   --input: oklch(0.256 0.026 47 / 0.18);
   --ring: var(--clay);
 
+  /* Image overlays stay dark in both themes so photo captions keep contrast. */
+  --scrim: oklch(0.2 0.02 47);
+  --on-scrim: oklch(0.95 0.02 85);
+  --shadow-color: 30deg 30% 20%;
+
   --chart-1: var(--sand);
   --chart-2: var(--clay);
   --chart-3: var(--olive);
@@ -143,6 +155,7 @@
   --cream: oklch(0.252 0.022 50);
 
   --muted-foreground: oklch(0.928 0.022 85 / 0.62);
+  --shadow-color: 30deg 40% 2%;
   --border: oklch(0.928 0.022 85 / 0.14);
   --input: oklch(0.928 0.022 85 / 0.22);
   --destructive: oklch(0.62 0.17 27);
@@ -261,5 +274,159 @@ html.has-custom-cursor :is(input, textarea, select, [contenteditable="true"]) {
   .animate-spin {
     animation-duration: 1s !important;
     animation-iteration-count: infinite !important;
+  }
+}
+
+/* ── Atmosphere ──────────────────────────────────────────────────────────── */
+
+/* Fine paper grain over the whole board. Static, so it costs nothing per frame. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.1 0 0 0 0 0.05 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+.dark body::after {
+  opacity: 0.07;
+}
+
+/* Visible, on-brand keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--clay);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ── Hero entrance ───────────────────────────────────────────────────────────
+ * Pure CSS so it plays from the server-rendered HTML, before any JavaScript.
+ * Nothing waits on hydration and nothing stays hidden if scripts are slow.
+ */
+@keyframes tx-line-up {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes tx-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tx-clip-up {
+  from {
+    clip-path: inset(18% 0 0 0 round 24px);
+    transform: scale(1.06);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 24px);
+    transform: scale(1);
+  }
+}
+
+@keyframes tx-print-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@utility enter-line {
+  animation: tx-line-up 0.75s var(--ease-drift) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@utility enter-fade {
+  animation: tx-fade-up 0.6s var(--ease-drift) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@utility enter-clip {
+  animation: tx-clip-up 0.9s var(--ease-drift) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@utility enter-print {
+  animation: tx-print-in 0.7s var(--ease-drift) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* A slow hairline that invites scrolling. */
+@keyframes tx-scroll-cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  45% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  55% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+@utility scroll-cue {
+  animation: tx-scroll-cue 2.4s var(--ease-drift) infinite;
+}
+
+/* Hairline rule used between editorial sections. */
+@utility rule {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border) 12%, var(--border) 88%, transparent);
+}
+
+/* Large outlined numerals for lane indexes. */
+@utility numeral-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--ink) 45%, transparent);
+}
+
+/* Hide scrollbars on horizontal rails while keeping them scrollable. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Route transitions (View Transitions API, where supported) ─────────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+::view-transition-group(*) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
