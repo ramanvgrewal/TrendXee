@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
-import { aesthetics } from "@/lib/mock-data";
+import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
+import { ScrollReveal } from "@/motion/ScrollReveal";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -14,8 +14,7 @@ export const Route = createFileRoute("/about")({
       { property: "og:title", content: "About TrendXee" },
       {
         property: "og:description",
-        content:
-          "Trends read from real signals, underdog brands credited first, and links straight to the official store.",
+        content: "Trends read from real signals, underdog brands credited first, and links straight to the official store.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -39,56 +38,66 @@ const notes = [
   },
   {
     title: "Signals, not guesses",
-    body: "We read thousands of signals to pin the drops currently on the board across all lanes. Scores move as the chatter moves.",
+    body: "We read what people post and search to pin the drops currently on the board across all lanes. Scores move as the chatter moves.",
   },
 ];
 
 const howTo = [
   "Pick the lane closest to your wardrobe — bottoms, tees, outerwear, sneakers, sportswear, anime, polos, or caps.",
   "Read the drops from the top; the trend score tells you how hot each one is right now.",
-  "Check 'why it's trending' before you buy, so you know whether it has legs.",
-  "Bookmark the ones you like into your archive, then buy from the underdog or the mainstream pick.",
+  "Open a drop and check why it's climbing before you buy, so you know whether it has legs.",
+  "Save the ones you like to your archive, then buy from the underdog or the mainstream pick.",
 ];
 
+/** About is a reading page: calm type, almost no motion. */
 function AboutPage() {
   return (
-    <div className="mx-auto w-full px-5 py-14 sm:px-8">
-      <p className="hand text-lg text-clay">about</p>
-      <h1 className="max-w-3xl font-display text-4xl leading-tight tracking-tight sm:text-5xl">
-        We find the fits before they go viral — and name who made them first.
+    <div className="mx-auto w-full max-w-[1440px] px-5 pb-28 pt-12 sm:px-8 lg:pt-20">
+      <p className="enter-fade text-[11px] font-bold uppercase tracking-[0.24em] text-ink/50">About TrendXee</p>
+      <h1 className="mt-4 max-w-5xl font-display text-[clamp(2.8rem,6.4vw,6.2rem)] leading-[0.98] tracking-[-0.035em]">
+        <span className="enter-fade block" style={{ "--d": "60ms" } as React.CSSProperties}>
+          We find the fits before they go viral —{" "}
+          <em className="italic text-clay">and name who made them first.</em>
+        </span>
       </h1>
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-2">
-        {notes.map((note) => (
-          <section
-            key={note.title}
-            className="rounded-2xl bg-cream/70 p-6 ring-1 ring-border"
-          >
-            <h2 className="font-display text-2xl tracking-tight">{note.title}</h2>
-            <p className="mt-2 text-[15px] leading-relaxed text-ink/75">{note.body}</p>
-          </section>
+      <div className="rule mt-16" />
+
+      <div className="mt-16 grid gap-x-16 gap-y-14 md:grid-cols-2">
+        {notes.map((note, i) => (
+          <ScrollReveal key={note.title} index={i}>
+            <p className="font-mono text-[11px] font-bold tracking-[0.14em] text-clay">{String(i + 1).padStart(2, "0")}</p>
+            <h2 className="mt-3 font-display text-[2.2rem] leading-tight tracking-tight">{note.title}</h2>
+            <p className="mt-3 max-w-lg text-[17px] leading-relaxed text-ink/70">{note.body}</p>
+          </ScrollReveal>
         ))}
       </div>
 
-      <section className="mt-12">
-        <p className="hand text-lg text-clay">how to use TrendXee</p>
-        <ol className="mt-4 max-w-3xl space-y-3">
-          {howTo.map((step, index) => (
-            <li key={step} className="flex gap-4 rounded-xl bg-paper p-4 ring-1 ring-border">
-              <span className="hand text-2xl text-clay">{index + 1}</span>
-              <p className="text-[15px] leading-relaxed text-ink/75">{step}</p>
+      <section className="mt-28 grid gap-10 rounded-[30px] bg-cream/60 p-8 ring-1 ring-border sm:p-12 lg:grid-cols-12 lg:p-16">
+        <div className="lg:col-span-4">
+          <p className="hand text-xl text-clay">how to use it</p>
+          <h2 className="mt-2 font-display text-4xl leading-tight tracking-tight">Four steps, no noise.</h2>
+        </div>
+        <ol className="space-y-6 lg:col-span-8">
+          {howTo.map((step, i) => (
+            <li key={step} className="flex gap-6 border-b border-border pb-6 last:border-0 last:pb-0">
+              <span className="font-display text-3xl italic leading-none text-clay">{i + 1}</span>
+              <p className="text-[17px] leading-relaxed text-ink/75">{step}</p>
             </li>
           ))}
         </ol>
       </section>
 
-      <Link
-        to="/"
-        hash="lanes"
-        className="mt-12 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-sand"
-      >
-        Start with the lanes <ArrowRight className="size-4" />
-      </Link>
+      <div className="mt-16 flex flex-wrap items-center gap-6">
+        <Cta magnetic>
+          <Link to="/lanes" className={ctaClass("primary", "lg")}>
+            Start with the lanes <CtaArrow />
+          </Link>
+        </Cta>
+        <Link to="/" hash="engine" className="text-sm font-semibold text-ink/65 underline decoration-ink/20 underline-offset-4 hover:text-clay">
+          How the engine works
+        </Link>
+      </div>
     </div>
   );
 }

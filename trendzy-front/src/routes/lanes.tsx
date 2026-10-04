@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
-import { LanePoster } from "@/components/LanePoster";
+import { createFileRoute } from "@tanstack/react-router";
+import { LaneCard } from "@/components/LaneCard";
+import { ScrollReveal } from "@/motion/ScrollReveal";
 import { aesthetics } from "@/lib/mock-data";
 import { fetchLaneRotations, LANE_STALE_TIME } from "@/lib/lanes";
 
@@ -13,12 +13,12 @@ export const Route = createFileRoute("/lanes")({
       {
         name: "description",
         content:
-          "Every TrendXee lane in one place: bottoms, tees, outerwear, sneakers, sportswear, anime, polos, and caps, each scored by live signal volume.",
+          "Every TrendXee lane in one place: bottoms, tees, outerwear, sneakers, sportswear, anime, polos, and caps, each read from live signals.",
       },
       { property: "og:title", content: "All lanes — TrendXee" },
       {
         property: "og:description",
-        content: "Nine scored lanes of rising Indian fashion drops, with the underdog brand behind each.",
+        content: "Eight lanes of rising Indian fashion drops, with the underdog brand behind each.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -29,37 +29,40 @@ export const Route = createFileRoute("/lanes")({
 
 function LanesPage() {
   const { rotationMap } = Route.useLoaderData();
-  const totalSignals = aesthetics.reduce((sum, a) => sum + a.signalCount, 0);
 
   return (
-    <div className="mx-auto w-full px-5 py-8 sm:px-8">
-      <Link
-        to="/"
-        className="mb-8 inline-flex items-center gap-1.5 text-sm font-semibold text-clay transition-colors hover:text-ink"
-      >
-        <ArrowLeft className="size-4" /> Previous
-      </Link>
+    <div className="mx-auto w-full max-w-[1440px] px-5 pb-28 pt-12 sm:px-8 lg:pt-20">
+      <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+        <div className="lg:col-span-8">
+          <p className="enter-fade text-[11px] font-bold uppercase tracking-[0.24em] text-ink/50">The collection</p>
+          <h1 className="mt-3 overflow-hidden pb-[0.1em] font-display text-[clamp(3.2rem,8vw,7.5rem)] leading-[0.9] tracking-[-0.04em]">
+            <span className="enter-line block">
+              Every <em className="italic text-clay">lane.</em>
+            </span>
+          </h1>
+        </div>
+        <p className="enter-fade max-w-md text-[16px] leading-relaxed text-ink/65 lg:col-span-4" style={{ "--d": "200ms" } as React.CSSProperties}>
+          Eight worlds, each read from what people are posting right now. Open one to see its drops, why they're
+          climbing, and the small brands making them first.
+        </p>
+      </div>
 
-      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">the collection</p>
-      <h1 className="mt-2 font-display text-4xl tracking-tight sm:text-5xl">
-        All <em className="italic text-clay">lanes</em>.
-      </h1>
-      <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-ink/70">
-        {totalSignals.toLocaleString("en-IN")} signals read across all live drops. Open a
-        lane to read its drops, the reasons behind them, and the brands making them.
-      </p>
-
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {aesthetics.map((aesthetic, index) => (
-          <LanePoster
-            key={aesthetic.id}
-            aesthetic={aesthetic}
-            index={index}
-            rotationImages={rotationMap?.[aesthetic.id] || []}
-            heroOverride={rotationMap?.[aesthetic.id]?.[0]?.image}
-            className="w-full"
-          />
-        ))}
+      <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {aesthetics.map((aesthetic, i) => {
+          const first = rotationMap?.[aesthetic.id]?.[0];
+          return (
+            <ScrollReveal key={aesthetic.id} index={i}>
+              <LaneCard
+                aesthetic={aesthetic}
+                index={i}
+                image={first?.image}
+                brand={first?.brand}
+                eager={i < 3}
+                className="h-[min(72svh,560px)]"
+              />
+            </ScrollReveal>
+          );
+        })}
       </div>
     </div>
   );
