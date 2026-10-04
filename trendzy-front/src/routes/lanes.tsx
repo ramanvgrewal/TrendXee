@@ -2,33 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { LanePoster } from "@/components/LanePoster";
 import { aesthetics } from "@/lib/mock-data";
-import { getTrends } from "@/lib/api";
+import { fetchLaneRotations, LANE_STALE_TIME } from "@/lib/lanes";
 
 export const Route = createFileRoute("/lanes")({
-  loader: async () => {
-    const rotationMap: Record<string, { brand: string; title: string; image: string; shopUrl: string; category?: string }[]> = {};
-    try {
-      await Promise.all(
-        aesthetics.map(async (a) => {
-          const queryCategory = a.id;
-          const trends = await getTrends(queryCategory, 15);
-          rotationMap[a.id] = trends
-            .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
-            .slice(0, 5)
-            .map((t) => ({
-              brand: t.products.underdog?.brandName || "",
-              title: t.products.underdog?.title || "",
-              image: t.products.underdog?.imageUrl || "",
-              shopUrl: t.products.underdog?.shopUrl || "",
-              category: a.id,
-            }));
-        }),
-      );
-    } catch (e) {
-      console.error("Failed to fetch rotations", e);
-    }
-    return { rotationMap };
-  },
+  loader: async () => ({ rotationMap: await fetchLaneRotations() }),
+  staleTime: LANE_STALE_TIME,
   head: () => ({
     meta: [
       { title: "All lanes — TrendXee" },
@@ -61,7 +39,7 @@ function LanesPage() {
       >
         <ArrowLeft className="size-4" /> Previous
       </Link>
-      
+
       <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">the collection</p>
       <h1 className="mt-2 font-display text-4xl tracking-tight sm:text-5xl">
         All <em className="italic text-clay">lanes</em>.
@@ -73,13 +51,13 @@ function LanesPage() {
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {aesthetics.map((aesthetic, index) => (
-          <LanePoster 
-            key={aesthetic.id} 
-            aesthetic={aesthetic} 
-            index={index} 
+          <LanePoster
+            key={aesthetic.id}
+            aesthetic={aesthetic}
+            index={index}
             rotationImages={rotationMap?.[aesthetic.id] || []}
             heroOverride={rotationMap?.[aesthetic.id]?.[0]?.image}
-            className="w-full" 
+            className="w-full"
           />
         ))}
       </div>

@@ -6,6 +6,7 @@ import { getArchivedTrends } from '@/lib/archiveApi';
 import type { Trend } from '@/lib/mock-data';
 import { useQuery } from '@tanstack/react-query';
 import { AuthModal } from '@/components/AuthModal';
+import { currentUserQuery } from '@/lib/user';
 
 export const Route = createFileRoute('/archive')({
   head: () => ({
@@ -29,7 +30,7 @@ export const Route = createFileRoute('/archive')({
 });
 
 function ArchivePage() {
-  const { data: user, isLoading: isUserLoading } = useQuery({ queryKey: ['currentUser'] });
+  const { data: user, isLoading: isUserLoading } = useQuery(currentUserQuery);
   const isAuthenticated = !!user;
 
   const [archivedTrends, setArchivedTrends] = useState<{ id: string; trendSnapshot: Trend }[]>([]);

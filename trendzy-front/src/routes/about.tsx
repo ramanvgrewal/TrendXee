@@ -59,11 +59,10 @@ function AboutPage() {
       </h1>
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2">
-        {notes.map((note, index) => (
+        {notes.map((note) => (
           <section
             key={note.title}
-            className="animate-settle rounded-2xl bg-cream/70 p-6 ring-1 ring-border"
-            style={{ "--tilt": index % 2 === 0 ? "-0.6deg" : "0.6deg" } as React.CSSProperties}
+            className="rounded-2xl bg-cream/70 p-6 ring-1 ring-border"
           >
             <h2 className="font-display text-2xl tracking-tight">{note.title}</h2>
             <p className="mt-2 text-[15px] leading-relaxed text-ink/75">{note.body}</p>

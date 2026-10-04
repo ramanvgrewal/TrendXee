@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { MotionProvider } from "@/motion/MotionProvider";
 
 function NotFoundComponent() {
   return (
@@ -172,14 +173,17 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col">
-        <SiteHeader />
-        <div className="flex-1">
-          <Outlet />
+      {/* Mounted once at the root so the cursor and pointer state persist across routes. */}
+      <MotionProvider>
+        <div className="flex min-h-screen flex-col">
+          <SiteHeader />
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          <SiteFooter />
         </div>
-        <SiteFooter />
-      </div>
-      <Toaster />
+        <Toaster />
+      </MotionProvider>
     </QueryClientProvider>
   );
 }

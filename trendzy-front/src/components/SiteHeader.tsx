@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { LogOut, Archive } from "lucide-react";
-import { useEffect, useState } from "react";
+import { LogOut } from "lucide-react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { businessApiFetch, getGoogleLoginUrl } from "@/lib/api";
+import { businessApiFetch } from "@/lib/api";
+import { currentUserQuery } from "@/lib/user";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AuthModal } from "@/components/AuthModal";
 
@@ -10,17 +11,7 @@ export function SiteHeader() {
   const queryClient = useQueryClient();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      const res = await businessApiFetch("/api/users/me");
-      if (!res.ok) {
-        throw new Error("Not authenticated");
-      }
-      return res.json();
-    },
-    retry: false,
-  });
+  const { data: user } = useQuery(currentUserQuery);
 
   const isAuthenticated = !!user;
 

@@ -1,27 +1,27 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { TrendCard } from "@/components/TrendCard";
 
 import type { Aesthetic, Trend } from "@/lib/mock-data";
 import { aesthetics } from "@/lib/mock-data";
-import { getTrends } from "@/lib/api";
+import { fetchLanePage, LANE_STALE_TIME } from "@/lib/lanes";
 
 export const Route = createFileRoute("/aesthetic/$id")({
-  loader: async ({ params }): Promise<{ aesthetic: Aesthetic; trends: Trend[] }> => {
+  loader: async ({ params }): Promise<{ aesthetic: Aesthetic; trends: Trend[]; hasMore: boolean }> => {
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
-    const queryCategory = params.id;
     try {
-      const allTrends = await getTrends(queryCategory, 100);
-      // Strictly enforce category matching on the frontend to protect against loose backend responses
-      const trends = allTrends.filter(t => t.aestheticId === queryCategory);
-      return { aesthetic, trends };
+      // First page only; the rest loads on demand (backend sorts by score).
+      const { trends, hasMore } = await fetchLanePage(params.id, 0);
+      return { aesthetic, trends, hasMore };
     } catch (e) {
       console.error(e);
-      return { aesthetic, trends: [] };
+      return { aesthetic, trends: [], hasMore: false };
     }
   },
+  staleTime: LANE_STALE_TIME,
   head: ({ loaderData }) => {
     const aesthetic = loaderData?.aesthetic;
     const title = aesthetic
@@ -70,9 +70,10 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 
 function LanePage() {
-  const { aesthetic, trends } = Route.useLoaderData() as {
+  const { aesthetic, trends, hasMore } = Route.useLoaderData() as {
     aesthetic: Aesthetic;
     trends: Trend[];
+    hasMore: boolean;
   };
 
   return (
@@ -106,27 +107,80 @@ function LanePage() {
         </div>
       </header>
 
-      <section className="mx-auto w-full space-y-6 px-5 py-12 sm:px-8">
-        <p className="hand text-lg text-clay">
-          showing {trends.length} drops in this lane
-        </p>
-        {trends.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 rounded-2xl bg-cream/70 px-6 py-16 text-center ring-1 ring-border">
-            <span className="text-xl">🔌</span>
-            <div>
-              <div className="font-display text-xl">Waiting for the backend</div>
-              <p className="mx-auto mt-2 max-w-md text-sm text-ink/60">
-                Trends for this aesthetic will appear here once the TrendXee engine
-                is wired up.
-              </p>
-            </div>
-          </div>
-        ) : (
-          trends.map((t) => (
-            <TrendCard key={t.id} trend={t} />
-          ))
-        )}
-      </section>
+      {/* Keyed by lane so switching lanes resets the loaded pages. */}
+      <LaneFeed key={aesthetic.id} laneId={aesthetic.id} initialTrends={trends} initialHasMore={hasMore} />
     </div>
+  );
+}
+
+function LaneFeed({
+  laneId,
+  initialTrends,
+  initialHasMore,
+}: {
+  laneId: string;
+  initialTrends: Trend[];
+  initialHasMore: boolean;
+}) {
+  const [trends, setTrends] = useState(initialTrends);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  const loadMore = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const next = await fetchLanePage(laneId, page + 1);
+      setTrends((prev) => {
+        const seen = new Set(prev.map((t) => t.id));
+        return [...prev, ...next.trends.filter((t) => !seen.has(t.id))];
+      });
+      setHasMore(next.hasMore);
+      setPage((p) => p + 1);
+    } catch (e) {
+      console.error(e);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="mx-auto w-full space-y-6 px-5 py-12 sm:px-8">
+      <p className="hand text-lg text-clay">
+        showing {trends.length} drops in this lane
+      </p>
+      {trends.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 rounded-2xl bg-cream/70 px-6 py-16 text-center ring-1 ring-border">
+          <span className="text-xl">🔌</span>
+          <div>
+            <div className="font-display text-xl">Waiting for the backend</div>
+            <p className="mx-auto mt-2 max-w-md text-sm text-ink/60">
+              Trends for this aesthetic will appear here once the TrendXee engine
+              is wired up.
+            </p>
+          </div>
+        </div>
+      ) : (
+        trends.map((t) => <TrendCard key={t.id} trend={t} />)
+      )}
+
+      {hasMore && (
+        <div className="flex flex-col items-center gap-2 pt-4">
+          <button
+            type="button"
+            onClick={loadMore}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-full border border-input px-6 py-3 text-sm font-semibold transition-colors hover:border-clay hover:text-clay disabled:opacity-60"
+          >
+            {loading && <Loader2 className="size-4 animate-spin" />}
+            {loading ? "Loading drops…" : "Load more drops"}
+          </button>
+          {error && <p className="text-sm text-ink/60">Couldn't load more. Try again.</p>}
+        </div>
+      )}
+    </section>
   );
 }

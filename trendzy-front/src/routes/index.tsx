@@ -3,33 +3,14 @@ import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { LanePoster } from "@/components/LanePoster";
 import { aesthetics } from "@/lib/mock-data";
-import { getTrends } from "@/lib/api";
+import { fetchLaneRotations, LANE_STALE_TIME, pickDailyFive } from "@/lib/lanes";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const rotationMap: Record<string, { brand: string; title: string; image: string; shopUrl: string; category?: string }[]> = {};
-    try {
-      await Promise.all(
-        aesthetics.map(async (a) => {
-          const queryCategory = a.id;
-          const trends = await getTrends(queryCategory, 15);
-          rotationMap[a.id] = trends
-            .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
-            .slice(0, 5) // Fetch top 5 per lane for a good mix
-            .map((t) => ({
-              brand: t.products.underdog?.brandName || "",
-              title: t.products.underdog?.title || "",
-              image: t.products.underdog?.imageUrl || "",
-              shopUrl: t.products.underdog?.shopUrl || "",
-              category: a.id,
-            }));
-        }),
-      );
-    } catch (e) {
-      console.error("Failed to fetch rotations", e);
-    }
-    return { rotationMap };
+    const rotationMap = await fetchLaneRotations();
+    return { rotationMap, dailyFive: pickDailyFive(rotationMap) };
   },
+  staleTime: LANE_STALE_TIME,
   head: () => ({
     meta: [
       { title: "TrendXee — Fits before they go viral" },
@@ -75,34 +56,8 @@ const engineSteps = [
 ];
 
 function Home() {
-  const { rotationMap } = Route.useLoaderData();
+  const { rotationMap, dailyFive } = Route.useLoaderData();
   const [rotationIndex, setRotationIndex] = useState(0);
-
-  // Combine all fetched products across all lanes
-  const allProducts = Object.values(rotationMap).flat();
-
-  // Create a daily seeded shuffle so it changes once per day at 12 AM local time
-  const today = new Date();
-  const dateStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-  let seed = 0;
-  for (let i = 0; i < dateStr.length; i++) {
-    seed = (Math.imul(31, seed) + dateStr.charCodeAt(i)) | 0;
-  }
-  seed = Math.abs(seed) || 1;
-
-  const seededRandom = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-
-  const shuffledProducts = [...allProducts];
-  for (let i = shuffledProducts.length - 1; i > 0; i--) {
-    const j = Math.floor(seededRandom() * (i + 1));
-    [shuffledProducts[i], shuffledProducts[j]] = [shuffledProducts[j], shuffledProducts[i]];
-  }
-
-  // Pick exactly 5 products for the day
-  const dailyFive = shuffledProducts.slice(0, 5);
 
   useEffect(() => {
     if (dailyFive.length < 2) return;
@@ -157,8 +112,8 @@ function Home() {
               href={dailyFive[rotationIndex]?.shopUrl || "#"}
               target="_blank"
               rel="noopener noreferrer"
-              className="group animate-settle w-full max-w-lg overflow-hidden rounded-2xl bg-cream p-3 ring-1 ring-border transition-transform hover:z-10 hover:scale-[1.02] hover:shadow-xl"
-              style={{ "--tilt": "1deg" } as React.CSSProperties}
+              data-cursor="view"
+              className="group w-full max-w-lg overflow-hidden rounded-2xl bg-cream p-3 ring-1 ring-border transition-transform hover:z-10 hover:scale-[1.02] hover:shadow-xl"
             >
               <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-paper">
                 {dailyFive.length > 0 ? (
@@ -172,7 +127,8 @@ function Home() {
                       <img
                         src={r.image}
                         alt={r.title}
-                        loading="lazy"
+                        loading={i === 0 ? "eager" : "lazy"}
+                        fetchPriority={i === 0 ? "high" : "auto"}
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                       />
                     </div>
@@ -181,7 +137,7 @@ function Home() {
                   <img
                     src={aesthetics[0].heroImage}
                     alt="Trend drop"
-                    loading="lazy"
+                    fetchPriority="high"
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                   />
                 )}
@@ -237,11 +193,10 @@ function Home() {
           Noise in, one honest drop out
         </h2>
         <ol className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {engineSteps.map((step, index) => (
+          {engineSteps.map((step) => (
             <li
               key={step.label}
-              className="animate-settle rounded-2xl bg-cream/70 p-5 ring-1 ring-border"
-              style={{ "--tilt": index % 2 === 0 ? "0.6deg" : "-0.6deg" } as React.CSSProperties}
+              className="rounded-2xl bg-cream/70 p-5 ring-1 ring-border"
             >
               <span className="hand text-2xl text-clay">{step.label}</span>
               <h3 className="mt-1 font-display text-xl tracking-tight">{step.title}</h3>

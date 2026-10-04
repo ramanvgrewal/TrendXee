@@ -67,19 +67,7 @@
   --color-cream: var(--cream);
 
   --ease-drift: cubic-bezier(0.32, 0.72, 0, 1);
-  --animate-settle: settle 0.9s var(--ease-drift) both;
   --animate-rise: rise 0.7s var(--ease-drift) both;
-}
-
-@keyframes settle {
-  from {
-    opacity: 0;
-    transform: translateY(16px) rotate(0deg);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) rotate(var(--tilt, 0deg));
-  }
 }
 
 @keyframes rise {
@@ -244,4 +232,34 @@
 @utility hand {
   font-family: var(--font-display);
   font-style: italic;
+}
+
+/*
+ * Custom cursor (see src/motion/Cursor.tsx). The class is only added on
+ * fine-pointer devices with motion allowed; text fields keep the native caret.
+ */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
+}
+
+html.has-custom-cursor :is(input, textarea, select, [contenteditable="true"]) {
+  cursor: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Loading spinners still need to spin to communicate "working". */
+  .animate-spin {
+    animation-duration: 1s !important;
+    animation-iteration-count: infinite !important;
+  }
 }

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useQuery } from "@tanstack/react-query";
 import { AuthModal } from "@/components/AuthModal";
 import { businessApiFetch } from "@/lib/api";
+import { currentUserQuery } from "@/lib/user";
 
 function ContactModal({ user }: { user: any }) {
   const [open, setOpen] = useState(false);
@@ -63,7 +64,7 @@ function ContactModal({ user }: { user: any }) {
 }
 
 export function SiteFooter() {
-  const { data: user } = useQuery({ queryKey: ['currentUser'] });
+  const { data: user } = useQuery(currentUserQuery);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const isAuthenticated = !!user;
 

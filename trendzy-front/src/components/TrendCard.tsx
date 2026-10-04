@@ -5,6 +5,7 @@ import type { ProductMatch, Trend } from "@/lib/mock-data";
 import { Stamp } from "@/components/Stamp";
 import { archiveTrend, unarchiveTrend, getArchiveStatus, deleteTrendPermanently, updateTrendPrice, updateTrendScore, updateTrendPriceType } from "@/lib/archiveApi";
 import { businessApiFetch } from "@/lib/api";
+import { currentUserQuery } from "@/lib/user";
 
 type Source = "underdog" | "amazon" | "flipkart";
 const sourceLabels: Record<Source, string> = {
@@ -28,6 +29,8 @@ function UnderdogHero({ product, trendId, fill }: { product: ProductMatch; trend
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackClick(trendId, 'underdog', product.shopUrl)}
+      data-cursor="view"
+      data-cursor-label="Shop"
       className="group flex h-full flex-col overflow-hidden rounded-xl bg-cream ring-1 ring-clay/35 transition-transform duration-300 hover:-translate-y-1"
     >
       <div className={`relative w-full overflow-hidden bg-paper ${fill ? "min-h-0 flex-1" : "aspect-[4/5]"}`}>
@@ -64,6 +67,8 @@ function CompactProduct({ source, product, trendId }: { source: Source; product:
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackClick(trendId, source, product.shopUrl)}
+      data-cursor="view"
+      data-cursor-label="Shop"
       className="group flex flex-col overflow-hidden rounded-xl bg-cream/70 ring-1 ring-border transition-transform duration-300 hover:-translate-y-0.5"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-paper">
@@ -117,15 +122,7 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
   const [trend, setTrend] = useState(initialTrend);
   const [isDeleted, setIsDeleted] = useState(false);
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      const res = await businessApiFetch('/api/users/me');
-      if (!res.ok) throw new Error('Not logged in');
-      return res.json();
-    },
-    retry: false,
-  });
+  const { data: user } = useQuery(currentUserQuery);
   const isAdmin = user?.email === "ramanvgrewal@gmail.com";
 
   useEffect(() => {
@@ -228,16 +225,13 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
   };
 
 
-  const tiltIndex = trend.name.length % 2;
-  const tilt = tiltIndex === 0 ? "-0.5deg" : "0.6deg";
+  // Alternates the score stamp's ink between clay and olive.
+  const toneIndex = trend.name.length % 2;
 
   if (isDeleted) return null;
 
   return (
-    <article
-      className="animate-settle rounded-2xl bg-paper p-4 ring-1 ring-border sm:p-6"
-      style={{ "--tilt": tilt } as React.CSSProperties}
-    >
+    <article className="rounded-2xl bg-paper p-4 ring-1 ring-border sm:p-6">
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-8">
         {/* Story side + mainstream picks */}
         <div className="flex flex-col">
@@ -274,7 +268,7 @@ export function TrendCard({ trend: initialTrend, isArchivedContext = false, onUn
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-4">
-            <Stamp score={Math.round(trend.trendScore)} size="lg" tone={tiltIndex === 0 ? "clay" : "olive"} />
+            <Stamp score={Math.round(trend.trendScore)} size="lg" tone={toneIndex === 0 ? "clay" : "olive"} />
             <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-ink/55">
               trend score
               <br />
