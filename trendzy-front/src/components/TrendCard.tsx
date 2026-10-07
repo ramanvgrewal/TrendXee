@@ -3,7 +3,7 @@ import { Stamp } from "@/components/Stamp";
 import { BookmarkButton } from "@/components/BookmarkButton";
 import { Img } from "@/components/Img";
 import { Parallax, PointerScope } from "@/motion/Parallax";
-import { spring } from "@/motion/tokens";
+import { lift, spring } from "@/motion/tokens";
 import type { Trend } from "@/lib/mock-data";
 import { aesthetics } from "@/lib/mock-data";
 import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
@@ -53,8 +53,8 @@ export function TrendCard({
   return (
     <m.article
       className="group/card relative h-full"
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.98, y: -1 }}
+      whileHover={lift.card}
+      whileTap={lift.press}
       tabIndex={-1}
       transition={spring.soft}
       data-cursor="explore"
@@ -64,7 +64,7 @@ export function TrendCard({
       <m.div
         layoutId={`trend-surface-${trend.id}`}
         transition={spring.layout}
-        className="absolute inset-0 bg-raised shadow-card transition-shadow duration-500 group-hover/card:shadow-lift group-active/card:shadow-press"
+        className="fibre absolute inset-0 bg-raised shadow-card transition-shadow duration-[350ms] group-hover/card:shadow-lift group-active/card:shadow-press"
         style={{ borderRadius: 20 }}
       />
 
@@ -85,7 +85,7 @@ export function TrendCard({
             />
           </Parallax>
           {/* Only a light top veil, so the chips stay legible on bright photos. */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-scrim/30 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-scrim/25 to-transparent" />
           {off && (
             <span className="absolute left-4 top-4 rounded-full bg-stamp-clay px-2.5 py-1 text-[11px] font-bold text-paper">
               −{off}%

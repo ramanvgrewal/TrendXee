@@ -54,7 +54,7 @@ function AboutPage() {
   return (
     <div className="mx-auto w-full max-w-[1440px] px-5 pb-28 pt-12 sm:px-8 lg:pt-20">
       <p className="enter-fade eyebrow text-ink/70">About TrendXee</p>
-      <h1 className="mt-4 max-w-5xl font-display text-[clamp(2.8rem,6.4vw,6.2rem)] leading-[0.98] tracking-[-0.035em]">
+      <h1 className="mt-4 max-w-5xl text-balance font-display text-[clamp(2.6rem,5.4vw,5.25rem)] leading-[1] tracking-[-0.035em]">
         <span className="enter-fade block" style={{ "--d": "60ms" } as React.CSSProperties}>
           We find the fits before they go viral —{" "}
           <em className="italic text-clay">and name who made them first.</em>
@@ -73,7 +73,7 @@ function AboutPage() {
         ))}
       </div>
 
-      <section className="mt-28 grid gap-10 rounded-[28px] bg-cream/60 p-8 ring-1 ring-border sm:p-12 lg:grid-cols-12 lg:p-16">
+      <section className="fibre mt-28 grid gap-10 rounded-[28px] bg-cream/60 p-8 ring-1 ring-border sm:p-12 lg:grid-cols-12 lg:p-16">
         <div className="lg:col-span-4">
           <p className="hand text-xl text-clay-ink">how to use it</p>
           <h2 className="mt-2 font-display text-4xl leading-tight tracking-tight">Four steps, no noise.</h2>

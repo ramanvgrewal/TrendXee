@@ -6,7 +6,7 @@ import { Img } from "@/components/Img";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { RevealHeading } from "@/motion/RevealHeading";
-import { ease } from "@/motion/tokens";
+import { ease, spring } from "@/motion/tokens";
 import { aesthetics } from "@/lib/mock-data";
 import type { RotationItem } from "@/lib/lanes";
 import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
@@ -110,7 +110,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
             <span className="text-clay-ink">03</span> · Pinned today
           </p>
           <RevealHeading
-            className="mt-3 font-display text-[clamp(2.6rem,5.5vw,5rem)] leading-[0.95] tracking-[-0.03em]"
+            className="mt-4 h-section"
             lines={[
               <>
                 The Daily <em className="italic text-clay">Five</em>
@@ -118,7 +118,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
             ]}
           />
         </div>
-        <p className="max-w-sm text-pretty text-[15px] leading-relaxed text-ink/70">
+        <p className="lede max-w-sm">
           Five underdog drops from across the lanes, reshuffled every midnight. Swipe, use the arrows, or let it turn.
         </p>
       </div>
@@ -194,7 +194,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                     initial={{ scale: 1.35, rotate: -14, opacity: 0 }}
                     animate={{ scale: 1, rotate: -6, opacity: 1 }}
                     exit={{ scale: 0.8, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 520, damping: 24, delay: 0.25 }}
+                    transition={{ ...spring.settle, delay: 0.25 }}
                   >
                     <Stamp score={item.score} size="lg" pressable className="shadow-print" />
                   </m.div>

@@ -15,7 +15,7 @@ export function SiteFooter() {
   const linkClass = "ed-link inline-block py-1 text-[14px] text-ink/70 hover:text-clay";
 
   return (
-    <footer className="relative border-t border-border bg-deep">
+    <footer className="fibre relative border-t border-border bg-deep before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-20 before:bg-gradient-to-b before:from-transparent before:to-deep/70">
       <div className="mx-auto grid w-full max-w-[1440px] grid-cols-2 gap-x-6 gap-y-12 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:py-20">
         <div className="col-span-2 lg:col-span-5">
           <Link to="/" className="inline-flex items-center gap-2.5">

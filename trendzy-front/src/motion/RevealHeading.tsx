@@ -34,7 +34,7 @@ export function RevealHeading({
           <m.span
             className="block"
             variants={{ hidden: { y: "108%" }, shown: { y: "0%" } }}
-            transition={{ duration: 0.75, ease: ease.drift, delay: delay + i * 0.08 }}
+            transition={{ duration: 0.9, ease: ease.drift, delay: delay + i * 0.1 }}
           >
             {line}
           </m.span>

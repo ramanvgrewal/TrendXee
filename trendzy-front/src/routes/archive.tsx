@@ -59,14 +59,14 @@ function ArchivePage() {
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="enter-fade eyebrow text-ink/70">Your corner of the board</p>
-          <h1 className="mt-3 overflow-hidden pb-[0.1em] font-display text-[clamp(3.2rem,8vw,7rem)] leading-[0.9] tracking-[-0.04em]">
+          <h1 className="h-page mt-4 overflow-hidden pb-[0.1em]">
             <span className="enter-line block">
               The <em className="italic text-clay">archive.</em>
             </span>
           </h1>
         </div>
         {isAuthenticated && !loading && !error && trends.length > 0 && (
-          <p className="text-[13px] font-semibold text-ink/70">
+          <p className="meta">
             {trends.length} saved {trends.length === 1 ? "drop" : "drops"}
           </p>
         )}
@@ -153,7 +153,7 @@ function Notice({
   steps?: boolean;
 }) {
   return (
-    <div className="grid gap-12 rounded-[28px] bg-raised px-6 py-14 ring-1 ring-border sm:px-12 sm:py-16 lg:grid-cols-12 lg:px-16">
+    <div className="fibre grid gap-12 rounded-[28px] bg-raised px-6 py-14 ring-1 ring-border sm:px-12 sm:py-16 lg:grid-cols-12 lg:px-16">
       <div className={steps ? "lg:col-span-7" : "lg:col-span-9"}>
         <h2 className="max-w-xl font-display text-[clamp(2rem,4vw,3.2rem)] leading-[1.05] tracking-tight">{title}</h2>
         <p className="mt-4 max-w-lg text-[16px] leading-relaxed text-ink/70">{body}</p>

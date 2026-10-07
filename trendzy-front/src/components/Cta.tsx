@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { m } from "framer-motion";
 import { Magnetic } from "@/motion/Magnetic";
-import { spring } from "@/motion/tokens";
+import { lift, spring } from "@/motion/tokens";
 
 /**
  * Tactile call-to-action shell. Wrap a <Link>, <a> or <button> in it:
@@ -23,8 +23,8 @@ export function Cta({
   const body = (
     <m.span
       className={`inline-flex ${className}`}
-      whileHover={{ y: -1 }}
-      whileTap={{ scale: 0.97, y: 0 }}
+      whileHover={lift.button}
+      whileTap={lift.pressButton}
       // Motion makes tap targets focusable; the real link/button inside already is.
       tabIndex={-1}
       transition={spring.tactile}
@@ -38,11 +38,18 @@ export function Cta({
 const base =
   "group/cta relative inline-flex select-none items-center justify-center gap-2.5 whitespace-nowrap rounded-full font-semibold tracking-[0.005em] transition-[background-color,color,box-shadow,opacity] duration-200 ease-out disabled:pointer-events-none disabled:opacity-45 disabled:shadow-none [&_svg]:shrink-0";
 
+/**
+ * A lacquered surface for the solid buttons: a soft top highlight that wakes
+ * on hover and dulls on press, so the button reads as a physical object.
+ */
+const sheen =
+  "isolate before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-[linear-gradient(to_bottom,rgb(255_255_255/0.16),transparent_58%)] before:opacity-50 before:transition-opacity before:duration-300 hover:before:opacity-100 active:before:opacity-20";
+
 const variants = {
   /** The main action. Ink on paper, warms to clay on hover, compresses on press. */
-  primary: "bg-ink text-paper shadow-print hover:bg-clay hover:text-paper hover:shadow-lift active:shadow-press",
+  primary: `bg-ink text-paper shadow-print hover:bg-clay hover:text-paper hover:shadow-lift active:shadow-press ${sheen}`,
   /** Clay accent — for "saved" and other affirmative states. */
-  accent: "bg-clay text-paper shadow-print hover:bg-ink hover:shadow-lift active:shadow-press",
+  accent: `bg-clay text-paper shadow-print hover:bg-ink hover:shadow-lift active:shadow-press ${sheen}`,
   /** Quiet secondary action. Ring, not border, so states never shift layout. */
   outline:
     "bg-raised/60 text-ink shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--ink)_18%,transparent)] hover:bg-raised hover:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--ink)_45%,transparent),var(--shadow-card)] active:shadow-press",

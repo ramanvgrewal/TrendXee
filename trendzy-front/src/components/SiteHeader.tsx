@@ -61,6 +61,7 @@ export function SiteHeader() {
 
   return (
     <header
+      style={{ viewTransitionName: "site-header" }}
       className={`sticky top-0 z-40 transition-[background-color,box-shadow,border-color] duration-300 ${
         scrolled
           ? "border-b border-border/70 bg-paper/75 shadow-[0_1px_0_var(--highlight),0_10px_30px_-20px_hsl(var(--shadow-color)/0.45)] backdrop-blur-xl backdrop-saturate-150"
@@ -296,7 +297,7 @@ function MobileMenu({
   };
   let i = 0;
   return (
-    <SheetContent side="right" className="flex w-full flex-col overflow-y-auto border-l border-border bg-raised p-0 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:duration-200 data-[state=open]:duration-300 sm:max-w-md">
+    <SheetContent side="right" className="fibre flex w-full flex-col overflow-y-auto border-l border-border bg-raised p-0 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:duration-200 data-[state=open]:duration-300 sm:max-w-md">
       <SheetTitle className="sr-only">Menu</SheetTitle>
       <div className="flex h-16 items-center px-6 eyebrow text-ink/70">Menu</div>
       <AnimatePresence>

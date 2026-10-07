@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, m } from "framer-motion";
 import { spring } from "@/motion/tokens";
 
@@ -62,7 +62,42 @@ export function useTheme() {
   return { theme, toggle };
 }
 
+const SUN = (
+  <>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2m-7.07-17.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+  </>
+);
+const MOON = <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />;
+const iconProps = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "1.8",
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+  "aria-hidden": true,
+};
+
 export function ThemeIcon({ theme }: { theme: Theme }) {
+  // The server can't know the saved theme, so until hydration settles the
+  // icon is chosen by CSS from the <html> class — no spin on page load.
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
+
+  if (!ready) {
+    return (
+      <>
+        <svg className="size-4 dark:hidden" {...iconProps}>
+          {MOON}
+        </svg>
+        <svg className="hidden size-4 dark:block" {...iconProps}>
+          {SUN}
+        </svg>
+      </>
+    );
+  }
+
   return (
     <AnimatePresence mode="wait" initial={false}>
       <m.svg
@@ -80,14 +115,7 @@ export function ThemeIcon({ theme }: { theme: Theme }) {
         transition={spring.tactile}
         aria-hidden
       >
-        {theme === "dark" ? (
-          <>
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2M12 20v2m-7.07-17.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-          </>
-        ) : (
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-        )}
+        {theme === "dark" ? SUN : MOON}
       </m.svg>
     </AnimatePresence>
   );

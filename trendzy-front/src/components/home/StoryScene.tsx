@@ -73,6 +73,12 @@ function Stage({ progress, products }: { progress: MotionValue<number>; products
         <FeedPrint key={`${item.id}-${i}`} item={item} slot={SLOTS[i]} chosen={i === CHOSEN} progress={progress} />
       ))}
 
+      {/* A low lamp behind the copy, so the dark chapter has a source of light. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(38%_42%_at_50%_50%,color-mix(in_oklab,var(--clay)_8%,transparent),transparent_72%)]"
+      />
+
       {/* Copy, centred on clean paper */}
       <div className="pointer-events-none absolute inset-0 grid place-items-center px-6">
         <div className="relative w-full max-w-[min(52rem,54vw)] text-center max-md:max-w-full">
@@ -81,6 +87,7 @@ function Stage({ progress, products }: { progress: MotionValue<number>; products
               as="p"
               progress={progress}
               range={[0.02, 0.14]}
+              dim={0.14}
               text="The internet moves fast."
               className="text-balance font-display text-[clamp(2.4rem,6.2vw,6.25rem)] leading-[0.98] tracking-[-0.03em]"
             />
@@ -89,6 +96,7 @@ function Stage({ progress, products }: { progress: MotionValue<number>; products
               progress={progress}
               range={[0.14, 0.27]}
               by="char"
+              dim={0.14}
               text="Trends move faster."
               className="mt-2 text-balance font-display text-[clamp(2.4rem,6.2vw,6.25rem)] italic leading-[0.98] tracking-[-0.03em] text-clay"
             />

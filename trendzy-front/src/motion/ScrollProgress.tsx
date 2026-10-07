@@ -25,6 +25,9 @@ export function ScrollProgress() {
     for (const node of nodes.current) if (node.getBoundingClientRect().top <= mid) current = node;
     const next = current ?? nodes.current[0];
     if (!next) return;
+    // The room light reads the chapter from <html> (CSS only, no re-render).
+    const root = document.documentElement;
+    if (root.dataset.chapter !== next.dataset.chapter) root.dataset.chapter = next.dataset.chapter ?? "";
     setChapter((prev) =>
       prev.n === next.dataset.chapter ? prev : { n: next.dataset.chapter ?? "", title: next.dataset.chapterTitle ?? "" },
     );
@@ -33,7 +36,10 @@ export function ScrollProgress() {
   useEffect(() => {
     nodes.current = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
     measure();
-    return () => cancelAnimationFrame(frame.current);
+    return () => {
+      cancelAnimationFrame(frame.current);
+      delete document.documentElement.dataset.chapter;
+    };
   }, []);
 
   useMotionValueEvent(scrollY, "change", () => {

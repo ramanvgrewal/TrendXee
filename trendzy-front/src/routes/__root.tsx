@@ -181,6 +181,8 @@ function RootComponent() {
           <SiteFooter />
         </div>
         <Toaster />
+        {/* Soft edge light over the whole board (static, pointer-transparent). */}
+        <div aria-hidden className="page-vignette" />
       </MotionProvider>
     </QueryClientProvider>
   );

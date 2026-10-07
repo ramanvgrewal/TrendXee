@@ -19,6 +19,8 @@ export const duration = {
   fast: 0.18,
   base: 0.28,
   slow: 0.45,
+  /** Content settling in as it scrolls into view: slow, weighted. */
+  reveal: 0.75,
   hero: 0.7,
 } as const;
 
@@ -30,14 +32,31 @@ export const spring = {
   soft: { type: "spring", stiffness: 220, damping: 26, mass: 0.8 },
   /** Shared-layout moves: active pills, expanding cards. */
   layout: { type: "spring", stiffness: 500, damping: 42, mass: 1 },
+  /** A stamp landing on paper: one firm settle, no wobble. */
+  settle: { type: "spring", stiffness: 360, damping: 30, mass: 0.9 },
+} as const;
+
+/**
+ * The house physics, so every surface responds the same way:
+ * hover = a small lift, press = a slight compression.
+ */
+export const lift = {
+  card: { y: -4 },
+  button: { y: -1 },
+  press: { scale: 0.98, y: -1 },
+  pressButton: { scale: 0.97, y: 0 },
 } as const;
 
 /** Spring options for `useSpring` followers (no `type` key). */
 export const follow = {
-  /** The cursor dot: almost on the pointer, never jittery. */
-  cursorDot: { stiffness: 1100, damping: 70, mass: 0.2 },
-  /** The cursor ring/label: a hair behind the dot. */
+  /** The cursor's ink point: a hair behind the pointer, never jittery. */
+  cursorDot: { stiffness: 700, damping: 52, mass: 0.25 },
+  /** The cursor ring/caption: a little further behind. */
   cursorRing: { stiffness: 420, damping: 38, mass: 0.5 },
+  /** The cursor's glow: glides a beat behind, like ink spreading. */
+  cursorAura: { stiffness: 170, damping: 24, mass: 0.7 },
+  /** The ambient room light that follows the pointer across the page: slow, heavy. */
+  ambient: { stiffness: 38, damping: 20, mass: 1.2 },
   /** Magnetic pull and its return. */
   magnetic: { stiffness: 260, damping: 20, mass: 0.5 },
   /** Pointer parallax on imagery and type. */

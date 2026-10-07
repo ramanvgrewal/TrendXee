@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { m } from "framer-motion";
 import { Parallax, PointerScope } from "@/motion/Parallax";
-import { spring } from "@/motion/tokens";
+import { lift, spring } from "@/motion/tokens";
 import type { Aesthetic } from "@/lib/mock-data";
 import { laneLabel } from "@/lib/format";
 import { Img } from "@/components/Img";
@@ -32,8 +32,8 @@ export function LaneCard({
   return (
     <m.div
       className={`group/lane relative ${className}`}
-      whileHover={{ y: -6 }}
-      whileTap={{ scale: 0.98, y: -2 }}
+      whileHover={lift.card}
+      whileTap={lift.press}
       tabIndex={-1}
       transition={spring.soft}
     >
@@ -45,7 +45,7 @@ export function LaneCard({
         data-cursor-label="Enter"
         className="block h-full rounded-[20px] outline-offset-4"
       >
-        <PointerScope className="relative h-full overflow-hidden rounded-[20px] bg-cream shadow-print transition-shadow duration-500 group-hover/lane:shadow-lift group-active/lane:shadow-press">
+        <PointerScope className="relative h-full overflow-hidden rounded-[20px] bg-cream shadow-print transition-shadow duration-[350ms] group-hover/lane:shadow-lift group-active/lane:shadow-press">
           {/* Photo */}
           <div className="absolute inset-0" style={{ viewTransitionName: `lane-${aesthetic.id}` }}>
             <Parallax depth={5} bleed className="absolute inset-0">

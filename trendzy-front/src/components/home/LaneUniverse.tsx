@@ -58,7 +58,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
               <span className="text-clay-ink">04</span> · The lanes
             </p>
             <RevealHeading
-              className="mt-3 font-display text-[clamp(2.6rem,4.8vw,4.5rem)] leading-[0.95] tracking-[-0.03em]"
+              className="mt-4 h-section"
               lines={[
                 "Eight lanes.",
                 <em key="w" className="italic text-clay">

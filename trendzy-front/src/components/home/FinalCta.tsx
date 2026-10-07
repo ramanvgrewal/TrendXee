@@ -32,7 +32,7 @@ export function FinalCta({ rotationMap }: { rotationMap: Record<string, Rotation
             text="Find the fit before everyone else does."
             dim={0.14}
             offset={["start 95%", "end 75%"]}
-            className="mt-6 max-w-4xl font-display text-[clamp(2.8rem,6vw,6.25rem)] leading-[0.95] tracking-[-0.035em]"
+            className="mt-5 max-w-4xl font-display text-[clamp(2.8rem,6vw,6.25rem)] leading-[0.95] tracking-[-0.035em]"
           />
 
           <div className="mt-14 flex flex-wrap gap-3 lg:gap-2.5">

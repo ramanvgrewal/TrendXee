@@ -16,7 +16,7 @@ export function ScrollReveal({
   children,
   index = 0,
   delay = 0,
-  y = 16,
+  y = 20,
   amount = 0.2,
   className = "",
   as = "div",
@@ -38,7 +38,7 @@ export function ScrollReveal({
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount, margin: "0px 0px -8% 0px" }}
-      transition={{ duration: duration.slow, ease: ease.drift, delay: delay + staggerDelay }}
+      transition={{ duration: duration.reveal, ease: ease.drift, delay: delay + staggerDelay }}
     >
       {children}
     </Tag>

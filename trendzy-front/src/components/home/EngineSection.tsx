@@ -33,14 +33,14 @@ export function EngineSection() {
   const line = useSpring(useTransform(scrollYProgress, [0, 1], [0, 1]), follow.scroll);
 
   return (
-    <section ref={ref} id="engine" className="section-pad mx-auto w-full max-w-[1440px] scroll-mt-20 px-5 sm:px-8">
+    <section ref={ref} id="engine" className="mx-auto w-full max-w-[1440px] scroll-mt-20 px-5 pb-[clamp(3rem,5vw,4.5rem)] pt-[clamp(5rem,9vw,8.5rem)] sm:px-8">
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="lg:col-span-6">
           <p className="eyebrow text-ink/70">
             <span className="text-clay-ink">06</span> · How the engine works
           </p>
           <RevealHeading
-            className="mt-4 font-display text-[clamp(2.4rem,4.6vw,4.25rem)] leading-[0.98] tracking-[-0.03em]"
+            className="mt-4 h-section"
             lines={[
               "Noise in,",
               <>
@@ -49,7 +49,7 @@ export function EngineSection() {
             ]}
           />
         </div>
-        <p className="self-end text-[16px] leading-relaxed text-ink/70 lg:col-span-4 lg:col-start-9">
+        <p className="lede self-end lg:col-span-4 lg:col-start-9">
           Every drop on the board went through the same four steps. Scores move as the chatter moves.
         </p>
       </div>

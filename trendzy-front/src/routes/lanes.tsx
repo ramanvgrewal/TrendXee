@@ -35,13 +35,13 @@ function LanesPage() {
       <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
         <div className="lg:col-span-8">
           <p className="enter-fade eyebrow text-ink/70">The collection</p>
-          <h1 className="mt-3 overflow-hidden pb-[0.1em] font-display text-[clamp(3.2rem,8vw,7.5rem)] leading-[0.9] tracking-[-0.04em]">
+          <h1 className="h-page mt-4 overflow-hidden pb-[0.1em]">
             <span className="enter-line block">
               Every <em className="italic text-clay">lane.</em>
             </span>
           </h1>
         </div>
-        <p className="enter-fade max-w-md text-[16px] leading-relaxed text-ink/70 lg:col-span-4" style={{ "--d": "200ms" } as React.CSSProperties}>
+        <p className="enter-fade lede max-w-md lg:col-span-4" style={{ "--d": "200ms" } as React.CSSProperties}>
           Eight worlds, each read from what people are posting right now. Open one to see its drops, why they're
           climbing, and the small brands making them first.
         </p>

@@ -38,7 +38,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
 
   return (
     <PointerScope mode="viewport" className="relative isolate overflow-hidden">
-      <section ref={ref} className="relative mx-auto grid min-h-[calc(100svh-4rem)] w-full max-w-[1440px] grid-cols-1 gap-12 px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-12 lg:gap-6 lg:pb-24 lg:pt-14">
+      <section ref={ref} className="relative mx-auto grid min-h-[calc(100svh-4rem)] w-full max-w-[1440px] grid-cols-1 gap-12 px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-12 lg:gap-6 lg:pb-20 lg:pt-20">
         {/* Copy */}
         <m.div
           className="relative z-10 flex flex-col justify-center lg:col-span-7 lg:pr-6"
@@ -50,7 +50,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
           </div>
 
           <Parallax depth={1.5} follow>
-            <h1 className="mt-6 font-display text-[clamp(3.4rem,9.2vw,9.25rem)] font-normal leading-[0.9] tracking-[-0.035em]">
+            <h1 className="mt-7 font-display text-[clamp(3.25rem,8.4vw,8.5rem)] font-normal leading-[0.9] tracking-[-0.035em]">
               <span className="-mb-[0.1em] block overflow-hidden pb-[0.1em]">
                 <span className="enter-line block" style={d(120)}>
                   Fits before
@@ -64,7 +64,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
             </h1>
           </Parallax>
 
-          <p className="enter-fade mt-8 max-w-[34rem] text-[17px] leading-relaxed text-ink/70 sm:text-lg" style={d(420)}>
+          <p className="enter-fade mt-8 max-w-[33rem] text-[16px] leading-[1.75] text-ink/70 sm:text-[17px]" style={d(420)}>
             TrendXee reads what people actually post, search and repost — then pins the
             small Indian brand making each fit first, with the mainstream lookalikes beside it.
           </p>
@@ -94,7 +94,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
 
         {/* Pinned prints */}
         <div className="relative lg:col-span-5">
-          <div className="relative mx-auto w-full max-w-[520px] lg:ml-auto lg:mr-0">
+          <div className="relative mx-auto w-full max-w-[480px] lg:ml-auto lg:mr-0">
             {/* Small print, top-left, behind */}
             {printA && (
               <m.div
@@ -126,7 +126,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
                           src={leadImage}
                           alt={lead ? `${lead.title} by ${lead.brand}` : "Today's lead drop"}
                           fetchPriority="high"
-                          className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
+                          className="media-zoom h-full w-full object-cover group-hover:scale-[1.03]"
                         />
                       </Parallax>
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-scrim/75 via-scrim/25 to-transparent" />

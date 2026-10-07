@@ -98,7 +98,7 @@ export function TrendDetail({
                   <m.div
                     layoutId={`trend-surface-${trend.id}`}
                     transition={spring.layout}
-                    className="absolute inset-0 bg-raised shadow-lift"
+                    className="fibre absolute inset-0 bg-raised shadow-lift"
                     style={{ borderRadius: 28 }}
                   />
                   <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] lg:flex-row">
@@ -187,7 +187,7 @@ function DetailBody({
             className="absolute bottom-5 left-5 z-10 lg:bottom-8 lg:left-8"
             initial={{ scale: 1.5, rotate: -18, opacity: 0 }}
             animate={{ scale: 1, rotate: -6, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 480, damping: 22, delay: 0.3 }}
+            transition={{ ...spring.settle, delay: 0.3 }}
           >
             <Stamp score={score} size="lg" pressable className="shadow-print" />
           </m.div>
@@ -322,7 +322,7 @@ function DetailBody({
                   >
                     <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-sand/40">
                       {product.imageUrl && (
-                        <img src={product.imageUrl} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <img src={product.imageUrl} alt="" loading="lazy" className="media-zoom h-full w-full object-cover group-hover:scale-[1.04]" />
                       )}
                     </div>
                     <div className="min-w-0 py-0.5">

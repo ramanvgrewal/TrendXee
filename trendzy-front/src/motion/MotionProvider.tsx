@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { LazyMotion, MotionConfig } from "framer-motion";
 import { PointerProvider } from "@/motion/pointer";
 import { Cursor } from "@/motion/Cursor";
+import { AmbientLight } from "@/motion/AmbientLight";
 
 const loadFeatures = () => import("@/motion/features").then((mod) => mod.default);
 
@@ -19,6 +20,7 @@ export function MotionProvider({ children }: { children: ReactNode }) {
     <LazyMotion features={loadFeatures} strict>
       <MotionConfig reducedMotion="user">
         <PointerProvider>
+          <AmbientLight />
           {children}
           <Cursor />
         </PointerProvider>

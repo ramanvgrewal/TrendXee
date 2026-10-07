@@ -110,7 +110,7 @@ function LaneHero({ aesthetic, index, image }: { aesthetic: Aesthetic; index: nu
   return (
     <section ref={ref} className="relative isolate overflow-hidden">
       <div className="mx-auto w-full max-w-[1440px] px-5 pt-4 sm:px-8">
-        <div className="relative h-[min(64svh,620px)] overflow-hidden rounded-[28px] bg-sand/40 shadow-lift lg:h-[min(62svh,580px)] lg:bg-cream lg:shadow-none lg:ring-1 lg:ring-border">
+        <div className="relative h-[min(64svh,620px)] overflow-hidden rounded-[28px] bg-sand/40 shadow-lift lg:h-[min(62svh,580px)] lg:fibre lg:bg-cream lg:shadow-none lg:ring-1 lg:ring-border">
           {/* Phones and tablets: full-bleed photo under a scrim */}
           <div className="absolute inset-0 lg:hidden" style={vt}>
             <m.div className="absolute inset-0" style={reduced ? undefined : { y, scale }}>
@@ -340,7 +340,7 @@ function LaneFeed({
         <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
           Rising in <em className="italic text-clay">{laneLabel(aesthetic.name)}</em>
         </h2>
-        <p className="text-[13px] font-semibold text-ink/70">
+        <p className="meta">
           {trends.length} {trends.length === 1 ? "drop" : "drops"} · highest score first
         </p>
       </div>

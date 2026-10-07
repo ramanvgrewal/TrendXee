@@ -29,14 +29,14 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
   const msLabel = sameBrand ? `On ${source}` : ms.brand;
 
   return (
-    <section ref={ref} className="tone-invert relative mx-3 overflow-hidden rounded-[28px] py-20 sm:mx-5 lg:mx-8 lg:py-32">
+    <section ref={ref} className="tone-invert relative mx-3 overflow-hidden rounded-[28px] py-20 shadow-[0_40px_80px_-48px_oklch(0.25_0.03_45/0.55)] sm:mx-5 lg:mx-8 lg:py-32">
       <div className="mx-auto grid w-full max-w-[1440px] items-center gap-14 px-5 sm:px-8 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-4">
           <p className="eyebrow text-ink/70">
             <span className="text-clay-ink">05</span> · Underdogs first
           </p>
           <RevealHeading
-            className="mt-4 font-display text-[clamp(2.4rem,4.6vw,4.25rem)] leading-[0.98] tracking-[-0.03em]"
+            className="mt-4 h-section"
             lines={[
               "Small labels",
               <>
@@ -44,7 +44,7 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
               </>,
             ]}
           />
-          <p className="mt-6 max-w-md text-[16px] leading-relaxed text-ink/70">
+          <p className="lede mt-6 max-w-md">
             The big names usually copy a fit after it takes off. Every drop on TrendXee leads with the
             indie brand behind it — then shows the mainstream lookalike, so the choice is yours.
           </p>
@@ -60,7 +60,7 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
                   className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-sand/50 shadow-lift"
                   style={reduced ? undefined : { clipPath: clip }}
                 >
-                  <img src={item.image} alt={item.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-[1.04]" />
+                  <img src={item.image} alt={item.title} loading="lazy" className="media-zoom h-full w-full object-cover group-hover:scale-[1.03]" />
                   <span className="absolute left-4 top-4 rounded-full bg-stamp-clay px-3 py-1 eyebrow text-[11px] text-paper">
                     <span className="max-sm:hidden">The </span>underdog
                   </span>
@@ -77,7 +77,7 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
             <Parallax depth={2}>
               <a href={ms.shopUrl} target="_blank" rel="noopener noreferrer" data-cursor="view" data-cursor-label="Compare" className="group block">
                 <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-sand/40 opacity-90 ring-1 ring-border transition-opacity duration-500 group-hover:opacity-100">
-                  <img src={ms.image} alt={ms.title} loading="lazy" className="h-full w-full object-cover grayscale-[35%] transition duration-700 group-hover:scale-[1.03] group-hover:grayscale-0" />
+                  <img src={ms.image} alt={ms.title} loading="lazy" className="media-zoom h-full w-full object-cover grayscale-[35%] group-hover:scale-[1.03] group-hover:grayscale-0" />
                   <span className="absolute left-4 top-4 rounded-full bg-paper/90 px-3 py-1 eyebrow text-[11px] text-ink/70">
                     <span className="max-sm:hidden">The lookalike · </span>
                     {source}
