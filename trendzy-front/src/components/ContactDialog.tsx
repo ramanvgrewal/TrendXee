@@ -40,7 +40,7 @@ export function ContactDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-3xl border border-0 bg-raised shadow-lift p-7 text-ink">
+      <DialogContent className="max-w-md rounded-[20px] border border-0 bg-raised shadow-lift p-7 text-ink">
         <DialogHeader className="space-y-2 text-left">
           <DialogTitle className="font-display text-3xl font-normal tracking-tight">
             Write to <em className="italic text-clay">us</em>

@@ -35,10 +35,10 @@ const SLOTS: Slot[] = [
   { left: "4%", top: "14%", width: "clamp(104px,12vw,190px)", drift: -260, depth: 3, mobile: true, mLeft: "6%", mTop: "10%" },
   { left: "13%", top: "54%", width: "clamp(90px,9vw,150px)", drift: -420, depth: 5, aspect: "1/1" },
   { left: "2%", top: "80%", width: "clamp(100px,10vw,160px)", drift: -340, depth: 2 },
-  { left: "77%", top: "8%", width: "clamp(100px,10vw,165px)", drift: -380, depth: 4 },
+  { left: "77%", top: "8%", width: "clamp(96px,10vw,165px)", drift: -380, depth: 4, mobile: true, mLeft: "66%", mTop: "13%" },
   { left: "76%", top: "58%", width: "clamp(112px,14vw,220px)", drift: -200, depth: 3, mobile: true, mLeft: "calc(50% - 56px)", mTop: "76%" }, // ← the underdog
   { left: "90%", top: "38%", width: "clamp(80px,8vw,130px)", drift: -480, depth: 6, aspect: "1/1" },
-  { left: "86%", top: "86%", width: "clamp(90px,9vw,140px)", drift: -300, depth: 2 },
+  { left: "86%", top: "86%", width: "clamp(84px,9vw,140px)", drift: -300, depth: 2, mobile: true, mLeft: "7%", mTop: "84%" },
 ];
 const CHOSEN = 4;
 
@@ -146,10 +146,12 @@ function FeedPrint({
 }) {
   const y = useTransform(progress, [0, 1], [120, 120 + slot.drift]);
   // Everyone arrives; at "filter" the crowd dims; the underdog stays and steps forward.
+  // Present from the moment the scene arrives (never an empty stage), dims at
+  // "filter", and clears at the very end as the scene hands over.
   const opacity = useTransform(
     progress,
-    chosen ? [0, 0.06, 0.92, 1] : [0, 0.06, 0.52, 0.62, 0.92, 1],
-    chosen ? [0, 1, 1, 0] : [0, 0.95, 0.95, 0.12, 0.12, 0],
+    chosen ? [0, 0.92, 1] : [0, 0.52, 0.62, 0.92, 1],
+    chosen ? [1, 1, 0] : [0.95, 0.95, 0.12, 0.12, 0],
   );
   const scale = useTransform(progress, chosen ? [0.62, 0.8] : [0, 1], chosen ? [1, 1.18] : [1, 1]);
   const ring = useTransform(progress, [0.66, 0.78], [0, 1]);
@@ -183,7 +185,7 @@ function FeedPrint({
             <>
               <m.span
                 aria-hidden
-                className="pointer-events-none absolute -inset-1.5 rounded-[14px] ring-2 ring-clay"
+                className="pointer-events-none absolute -inset-1.5 rounded-[16px] ring-2 ring-clay"
                 style={{ opacity: ring }}
               />
               <m.p

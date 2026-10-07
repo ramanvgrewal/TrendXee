@@ -28,13 +28,13 @@ export function LaneCard({
   eager?: boolean;
 }) {
   const src = image || aesthetic.heroImage;
-  const isSneaker = aesthetic.id === "sneakers";
 
   return (
     <m.div
       className={`group/lane relative ${className}`}
       whileHover={{ y: -6 }}
       whileTap={{ scale: 0.98, y: -2 }}
+      tabIndex={-1}
       transition={spring.soft}
     >
       <Link
@@ -43,27 +43,26 @@ export function LaneCard({
         viewTransition
         data-cursor="explore"
         data-cursor-label="Enter"
-        className="block h-full rounded-[26px] outline-offset-4"
+        className="block h-full rounded-[20px] outline-offset-4"
       >
-        <PointerScope className="relative h-full overflow-hidden rounded-[26px] bg-cream shadow-print transition-shadow duration-500 group-hover/lane:shadow-lift group-active/lane:shadow-press">
+        <PointerScope className="relative h-full overflow-hidden rounded-[20px] bg-cream shadow-print transition-shadow duration-500 group-hover/lane:shadow-lift group-active/lane:shadow-press">
           {/* Photo */}
           <div className="absolute inset-0" style={{ viewTransitionName: `lane-${aesthetic.id}` }}>
-            {isSneaker && (
-              <img src={src} alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full scale-125 object-cover opacity-70 blur-2xl" />
-            )}
             <Parallax depth={5} bleed className="absolute inset-0">
               <Img
                 src={src}
                 eager={eager}
                 fallbackLabel={laneLabel(aesthetic.name)}
-                className={`h-full w-full group-hover/lane:scale-[1.03] ${isSneaker ? "object-contain p-8" : "object-cover"}`}
+                className="h-full w-full object-cover group-hover/lane:scale-[1.03]"
               />
             </Parallax>
           </div>
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-scrim/85 via-scrim/15 to-scrim/30" />
+          {/* Shade only where type sits (bottom copy, top-left numeral) so the photo stays clean. */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-scrim/90 via-scrim/55 via-35% to-transparent to-65%" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_0%_0%,color-mix(in_oklab,var(--scrim)_50%,transparent),transparent)]" />
 
           {/* Index numeral */}
-          <span aria-hidden className="pointer-events-none absolute -left-1 -top-4 font-display text-[7.5rem] leading-none tracking-[-0.06em] text-on-scrim/25 transition-colors duration-500 group-hover/lane:text-on-scrim/40 sm:text-[9rem]">
+          <span aria-hidden className="pointer-events-none absolute -left-1 -top-4 font-display text-[7.5rem] leading-none tracking-[-0.06em] text-on-scrim/40 transition-colors duration-500 group-hover/lane:text-on-scrim/60 sm:text-[9rem]">
             {String(index + 1).padStart(2, "0")}
           </span>
 

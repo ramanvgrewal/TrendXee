@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { AnimatePresence, m, useDragControls, useReducedMotion, type DragControls, type PanInfo } from "framer-motion";
 import { toast } from "sonner";
@@ -47,6 +47,9 @@ export function TrendDetail({
 }) {
   const reduced = useReducedMotion();
   const dragControls = useDragControls();
+  // No Dialog.Trigger here (cards open the story through the URL), so keep
+  // track of the opener ourselves and hand focus back to it on close.
+  const openerRef = useRef<HTMLElement | null>(null);
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.y > 120 || info.velocity.y > 600) onClose();
@@ -66,7 +69,21 @@ export function TrendDetail({
                 transition={{ duration: 0.3 }}
               />
             </DialogPrimitive.Overlay>
-            <DialogPrimitive.Content forceMount asChild aria-describedby={undefined}>
+            <DialogPrimitive.Content
+              forceMount
+              asChild
+              aria-describedby={undefined}
+              onOpenAutoFocus={(e) => {
+                e.preventDefault();
+                openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+                document.querySelector<HTMLElement>("[data-story-close]")?.focus({ preventScroll: true });
+              }}
+              onCloseAutoFocus={(e) => {
+                e.preventDefault();
+                const opener = openerRef.current;
+                if (opener?.isConnected) opener.focus({ preventScroll: true });
+              }}
+            >
               <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center p-2 sm:items-center sm:p-6 lg:p-10">
                 <m.div
                   className="pointer-events-auto relative h-[calc(100svh-1.5rem)] w-full max-w-6xl sm:h-[min(88svh,860px)]"
@@ -149,7 +166,7 @@ function DetailBody({
         onPointerDown={(e) => dragControls.start(e)}
         aria-hidden
       >
-        <span className="h-1 w-10 rounded-full bg-on-scrim/80 shadow" />
+        <span className="h-1 w-10 rounded-full bg-on-scrim/90 shadow-[0_0_0_1px_color-mix(in_oklab,var(--scrim)_30%,transparent),0_1px_4px_color-mix(in_oklab,var(--scrim)_45%,transparent)]" />
       </div>
 
       {/* Media */}
@@ -197,6 +214,7 @@ function DetailBody({
           <div className="flex shrink-0 items-center gap-1">
           <ShareButton trend={trend} laneId={lane?.id} />
           <DialogPrimitive.Close
+            data-story-close
             className="grid size-10 shrink-0 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink"
             aria-label="Close story"
           >
@@ -220,11 +238,6 @@ function DetailBody({
 
           <m.div custom={0} variants={stagger} initial="hidden" animate="show" className="meta mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
             {score > 0 && <span>Trend score {score}</span>}
-            {trend.totalSignals > 0 && (
-              <span>
-                {trend.totalSignals} {trend.totalSignals === 1 ? "signal" : "signals"}
-              </span>
-            )}
             {trend.indiaRelevant && <span>Relevant in India</span>}
           </m.div>
 
@@ -260,7 +273,7 @@ function DetailBody({
 
           {/* The underdog */}
           {underdog?.shopUrl && (
-            <m.div custom={4} variants={stagger} initial="hidden" animate="show" className="mt-9 rounded-2xl bg-cream/70 p-5 ring-1 ring-clay/25">
+            <m.div custom={4} variants={stagger} initial="hidden" animate="show" className="mt-9 rounded-[20px] bg-cream/70 p-5 ring-1 ring-clay/25">
               <p className="eyebrow text-[11px] text-clay-ink">The underdog</p>
               <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
                 <div className="min-w-0">
@@ -387,7 +400,7 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
   };
 
   return (
-    <div className="mt-8 rounded-2xl border border-dashed border-destructive/30 p-4">
+    <div className="mt-8 rounded-[20px] border border-dashed border-destructive/30 p-4">
       <p className="eyebrow text-[11px] text-destructive">Admin</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" onClick={() => open("score")} className={ctaClass("outline", "sm")}>
@@ -402,7 +415,7 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
       </div>
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
-        <DialogContent className="max-w-sm rounded-3xl border-0 bg-raised shadow-lift p-7">
+        <DialogContent className="max-w-sm rounded-[20px] border-0 bg-raised shadow-lift p-7">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl font-normal">{editing === "score" ? "Trend score" : "Underdog price (₹)"}</DialogTitle>
           </DialogHeader>
@@ -422,7 +435,7 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
       </Dialog>
 
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent className="max-w-md rounded-3xl border-0 bg-raised shadow-lift p-7">
+        <AlertDialogContent className="max-w-md rounded-[20px] border-0 bg-raised shadow-lift p-7">
           <AlertDialogHeader className="text-left">
             <AlertDialogTitle className="font-display text-2xl font-normal">Delete this trend permanently?</AlertDialogTitle>
             <AlertDialogDescription>“{trend.name}” will be removed from the board for everyone. This can't be undone.</AlertDialogDescription>

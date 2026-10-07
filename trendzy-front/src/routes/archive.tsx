@@ -78,7 +78,8 @@ function ArchivePage() {
         ) : !isAuthenticated ? (
           <Notice
             title="Sign in to keep a board of your own."
-            body="Save any drop with the bookmark and it lands here — with the brand and links kept alongside it, even after it leaves the live feed."
+            body="Save drops from any lane and come back to them whenever you like."
+            steps
             action={
               <Cta magnetic>
                 <button type="button" onClick={() => setAuthOpen(true)} className={ctaClass("primary", "lg")}>
@@ -100,7 +101,8 @@ function ArchivePage() {
         ) : trends.length === 0 ? (
           <Notice
             title="Nothing pinned yet."
-            body="Tap the bookmark on any drop and it lands here. Start with a lane that's close to your wardrobe."
+            body="Start with a lane that's close to your wardrobe and save what catches your eye."
+            steps
             action={
               <Link to="/lanes" className={ctaClass("primary", "lg")}>
                 Browse the lanes <CtaArrow />
@@ -132,15 +134,44 @@ function ArchivePage() {
   );
 }
 
-function Notice({ title, body, action }: { title: string; body: string; action: React.ReactNode }) {
+const SAVING_STEPS = [
+  "Tap the bookmark on any drop.",
+  "It lands here with the brand and shop links.",
+  "It stays, even after it leaves the live feed.",
+];
+
+function Notice({
+  title,
+  body,
+  action,
+  steps = false,
+}: {
+  title: string;
+  body: string;
+  action: React.ReactNode;
+  /** Show how saving works beside the message. */
+  steps?: boolean;
+}) {
   return (
-    <div className="relative overflow-hidden rounded-[28px] bg-raised px-6 py-16 shadow-card sm:px-14 sm:py-20">
-      <span aria-hidden className="pointer-events-none absolute -right-6 -top-10 font-display text-[14rem] italic leading-none text-ink/[0.04]">
-        ✦
-      </span>
-      <h2 className="relative max-w-xl font-display text-[clamp(2rem,4vw,3.2rem)] leading-[1.05] tracking-tight">{title}</h2>
-      <p className="relative mt-4 max-w-lg text-[16px] leading-relaxed text-ink/70">{body}</p>
-      <div className="relative mt-8">{action}</div>
+    <div className="grid gap-12 rounded-[28px] bg-raised px-6 py-14 ring-1 ring-border sm:px-12 sm:py-16 lg:grid-cols-12 lg:px-16">
+      <div className={steps ? "lg:col-span-7" : "lg:col-span-9"}>
+        <h2 className="max-w-xl font-display text-[clamp(2rem,4vw,3.2rem)] leading-[1.05] tracking-tight">{title}</h2>
+        <p className="mt-4 max-w-lg text-[16px] leading-relaxed text-ink/70">{body}</p>
+        <div className="mt-8">{action}</div>
+      </div>
+      {steps && (
+        <div className="self-center lg:col-span-5">
+          <p className="hand text-xl text-clay-ink">how saving works</p>
+          <ol className="mt-3">
+            {SAVING_STEPS.map((step, i) => (
+              <li key={step} className="flex gap-5 border-t border-border py-4 last:pb-0">
+                <span className="font-display text-2xl italic leading-none text-clay">{i + 1}</span>
+                <p className="text-[15px] leading-relaxed text-ink/75">{step}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
     </div>
   );
 }
@@ -149,7 +180,7 @@ function ArchiveSkeleton() {
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Loading your archive">
       {Array.from({ length: 3 }, (_, i) => (
-        <div key={i} className="overflow-hidden rounded-[22px] bg-raised shadow-card">
+        <div key={i} className="overflow-hidden rounded-[20px] bg-raised shadow-card">
           <div className="skeleton aspect-[4/5]" />
           <div className="space-y-3 p-5">
             <div className="h-3 w-24 skeleton rounded-full" />

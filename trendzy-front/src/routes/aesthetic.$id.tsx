@@ -75,54 +75,80 @@ function LanePage() {
   );
 }
 
-/** The lane's cover. Its photo shares a view-transition name with the lane card it came from. */
+/**
+ * The lane's cover. Phones get the photo full-bleed (a portrait frame suits a
+ * portrait product shot); wide screens get a cream section opener with the
+ * photo as a pinned portrait print, so it is never blown up into a soft crop.
+ * The photo shares a view-transition name with the lane card it came from.
+ */
 function LaneHero({ aesthetic, index, image }: { aesthetic: Aesthetic; index: number; image: string }) {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const printY = useTransform(scrollYProgress, [0, 1], [0, 70]);
   const copyY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const vt = { viewTransitionName: `lane-${aesthetic.id}` } as React.CSSProperties;
+
+  const cover = (
+    // Switching lanes cross-dissolves the cover instead of hard-swapping it.
+    <AnimatePresence initial={false}>
+      <m.div
+        key={aesthetic.id}
+        className="absolute inset-0"
+        initial={{ opacity: 0, scale: 1.03 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.55, ease: ease.drift }}
+      >
+        <Img src={image} priority className="h-full w-full object-cover" />
+      </m.div>
+    </AnimatePresence>
+  );
 
   return (
     <section ref={ref} className="relative isolate overflow-hidden">
       <div className="mx-auto w-full max-w-[1440px] px-5 pt-4 sm:px-8">
-        <div className="relative h-[min(64svh,620px)] overflow-hidden rounded-[30px] bg-sand/40 shadow-lift">
-          <div className="absolute inset-0" style={{ viewTransitionName: `lane-${aesthetic.id}` }}>
-            {/* Switching lanes cross-dissolves the cover instead of hard-swapping it. */}
-            <AnimatePresence initial={false}>
-              <m.div
-                key={aesthetic.id}
-                className="absolute inset-0"
-                initial={{ opacity: 0, scale: 1.03 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.55, ease: ease.drift }}
-              >
-                <m.div className="h-full w-full" style={reduced ? undefined : { y, scale }}>
-                  <Img
-                    src={image}
-                    priority
-                    className={`h-full w-full ${aesthetic.id === "sneakers" ? "object-contain p-10" : "object-cover"}`}
-                  />
-                </m.div>
-              </m.div>
-            </AnimatePresence>
+        <div className="relative h-[min(64svh,620px)] overflow-hidden rounded-[28px] bg-sand/40 shadow-lift lg:h-[min(62svh,580px)] lg:bg-cream lg:shadow-none lg:ring-1 lg:ring-border">
+          {/* Phones and tablets: full-bleed photo under a scrim */}
+          <div className="absolute inset-0 lg:hidden" style={vt}>
+            <m.div className="absolute inset-0" style={reduced ? undefined : { y, scale }}>
+              {cover}
+            </m.div>
           </div>
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-scrim/90 via-scrim/30 to-scrim/20" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-scrim/90 via-scrim/30 to-scrim/20 lg:hidden" />
 
-          <span className="enter-fade pointer-events-none absolute -top-6 right-4 font-display text-[clamp(8rem,20vw,17rem)] leading-none tracking-[-0.06em] text-on-scrim/15 sm:right-10">
+          {/* Wide screens: the photo as a pinned portrait print */}
+          <m.div
+            className="absolute bottom-10 right-14 top-10 hidden aspect-[4/5] lg:block xl:right-20"
+            style={reduced ? undefined : { y: printY }}
+          >
+            <div className="h-full rotate-[1.5deg] rounded-[24px] bg-paper p-2 shadow-print ring-1 ring-border">
+              <div className="relative h-full overflow-hidden rounded-[18px] bg-sand/50" style={vt}>
+                {cover}
+              </div>
+            </div>
+          </m.div>
+
+          <span
+            aria-hidden
+            className="enter-fade pointer-events-none absolute -top-6 right-4 font-display text-[clamp(8rem,20vw,17rem)] leading-none tracking-[-0.06em] text-on-scrim/15 sm:right-10 lg:left-10 lg:right-auto lg:top-2 lg:text-[clamp(7rem,12vw,11rem)] lg:numeral-outline"
+          >
             {String(index + 1).padStart(2, "0")}
           </span>
 
-          <m.div className="absolute inset-x-0 bottom-0 p-6 text-on-scrim sm:p-10 lg:p-14" style={reduced ? undefined : { y: copyY }}>
+          <m.div
+            className="absolute inset-x-0 bottom-0 p-6 text-on-scrim sm:p-10 lg:right-[44%] lg:p-14 lg:text-ink"
+            style={reduced ? undefined : { y: copyY }}
+          >
             <Link
               to="/lanes"
-              className="hit enter-fade inline-flex items-center gap-2 eyebrow text-on-scrim/70 transition-colors hover:text-on-scrim"
+              className="hit enter-fade inline-flex items-center gap-2 eyebrow text-on-scrim/70 transition-colors hover:text-on-scrim lg:text-ink/70 lg:hover:text-clay"
             >
               <span aria-hidden>←</span> All lanes
             </Link>
-            <h1 className="mt-4 overflow-hidden pb-[0.12em] font-display text-[clamp(3.5rem,10vw,9rem)] leading-[0.88] tracking-[-0.04em]">
+            <h1 className="mt-4 overflow-hidden pb-[0.12em] font-display text-[clamp(3.5rem,10vw,9rem)] leading-[0.88] tracking-[-0.04em] lg:text-[clamp(4.5rem,8.4vw,8rem)]">
               <span className="enter-line block" style={{ "--d": "80ms" } as React.CSSProperties}>
                 <AnimatePresence mode="popLayout" initial={false}>
                   <m.span
@@ -138,12 +164,12 @@ function LaneHero({ aesthetic, index, image }: { aesthetic: Aesthetic; index: nu
                 </AnimatePresence>
               </span>
             </h1>
-            <p key={aesthetic.id} className="enter-fade mt-4 max-w-xl text-pretty text-[16px] leading-relaxed text-on-scrim/85 sm:text-lg" style={{ "--d": "220ms" } as React.CSSProperties}>
+            <p key={aesthetic.id} className="enter-fade mt-4 max-w-xl text-pretty text-[16px] leading-relaxed text-on-scrim/85 sm:text-lg lg:text-ink/75" style={{ "--d": "220ms" } as React.CSSProperties}>
               {aesthetic.description}
             </p>
             <ul key={`${aesthetic.id}-tags`} className="enter-fade mt-5 flex flex-wrap gap-2" style={{ "--d": "300ms" } as React.CSSProperties}>
               {aesthetic.vibeTags.map((t) => (
-                <li key={t} className="rounded-full border border-on-scrim/25 px-3 py-1 text-[12px] font-semibold text-on-scrim/80">
+                <li key={t} className="rounded-full border border-on-scrim/25 px-3 py-1 text-[12px] font-semibold text-on-scrim/80 lg:border-ink/20 lg:text-ink/70">
                   #{t}
                 </li>
               ))}
@@ -392,11 +418,11 @@ function LanePending() {
   return (
     <div className="pb-24" aria-busy="true" aria-label="Loading lane">
       <div className="mx-auto w-full max-w-[1440px] px-5 pt-4 sm:px-8">
-        <div className="h-[min(64svh,620px)] skeleton rounded-[30px]" />
+        <div className="h-[min(64svh,620px)] skeleton rounded-[28px]" />
       </div>
       <div className="mx-auto mt-24 grid w-full max-w-[1440px] gap-6 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="overflow-hidden rounded-[22px] bg-raised shadow-card">
+          <div key={i} className="overflow-hidden rounded-[20px] bg-raised shadow-card">
             <div className="skeleton aspect-[4/5]" />
             <div className="space-y-3 p-5">
               <div className="h-3 w-24 skeleton rounded-full" />

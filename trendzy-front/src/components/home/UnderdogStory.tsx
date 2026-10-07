@@ -24,9 +24,12 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
   const underdogPrice = formatPrice(item.price, item.currency);
   const mainstreamPrice = formatPrice(ms.price, ms.currency);
   const source = ms.source === "amazon" ? "Amazon" : "Flipkart";
+  // Marketplace listings sometimes echo the indie label's name; never credit the lookalike to the underdog.
+  const sameBrand = !ms.brand || ms.brand.trim().toLowerCase() === item.brand.trim().toLowerCase();
+  const msLabel = sameBrand ? `On ${source}` : ms.brand;
 
   return (
-    <section ref={ref} className="tone-invert relative mx-3 overflow-hidden rounded-[32px] py-20 sm:mx-5 sm:rounded-[40px] lg:mx-8 lg:py-32">
+    <section ref={ref} className="tone-invert relative mx-3 overflow-hidden rounded-[28px] py-20 sm:mx-5 lg:mx-8 lg:py-32">
       <div className="mx-auto grid w-full max-w-[1440px] items-center gap-14 px-5 sm:px-8 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-4">
           <p className="eyebrow text-ink/70">
@@ -54,7 +57,7 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
             <Parallax depth={4}>
               <a href={item.shopUrl} target="_blank" rel="noopener noreferrer" data-cursor="view" data-cursor-label="Shop" className="group block">
                 <m.div
-                  className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-sand/50 shadow-lift"
+                  className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-sand/50 shadow-lift"
                   style={reduced ? undefined : { clipPath: clip }}
                 >
                   <img src={item.image} alt={item.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-[1.04]" />
@@ -62,8 +65,8 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
                     <span className="max-sm:hidden">The </span>underdog
                   </span>
                 </m.div>
-                <figcaption className="mt-4 flex items-baseline justify-between gap-3">
-                  <span className="truncate font-display text-xl italic">{item.brand}</span>
+                <figcaption className="mt-4 flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+                  <span className="truncate font-display text-lg italic sm:text-xl">{item.brand}</span>
                   {underdogPrice && <span className="shrink-0 font-display text-lg tabular-nums">{underdogPrice}</span>}
                 </figcaption>
               </a>
@@ -73,15 +76,15 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
           <m.figure style={reduced ? undefined : { x: rightX }} className="relative mt-16 sm:mt-24">
             <Parallax depth={2}>
               <a href={ms.shopUrl} target="_blank" rel="noopener noreferrer" data-cursor="view" data-cursor-label="Compare" className="group block">
-                <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-sand/40 opacity-90 ring-1 ring-border transition-opacity duration-500 group-hover:opacity-100">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-sand/40 opacity-90 ring-1 ring-border transition-opacity duration-500 group-hover:opacity-100">
                   <img src={ms.image} alt={ms.title} loading="lazy" className="h-full w-full object-cover grayscale-[35%] transition duration-700 group-hover:scale-[1.03] group-hover:grayscale-0" />
                   <span className="absolute left-4 top-4 rounded-full bg-paper/90 px-3 py-1 eyebrow text-[11px] text-ink/70">
                     <span className="max-sm:hidden">The lookalike · </span>
                     {source}
                   </span>
                 </div>
-                <figcaption className="mt-4 flex items-baseline justify-between gap-3 text-ink/70">
-                  <span className="truncate text-sm font-semibold">{ms.brand || source}</span>
+                <figcaption className="mt-4 flex flex-col gap-0.5 text-ink/70 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+                  <span className="truncate text-sm font-semibold">{msLabel}</span>
                   {mainstreamPrice && <span className="shrink-0 text-sm tabular-nums">{mainstreamPrice}</span>}
                 </figcaption>
               </a>

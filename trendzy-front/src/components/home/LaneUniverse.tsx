@@ -51,14 +51,14 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
       className="relative scroll-mt-16"
       style={pinned ? ({ height: `calc(100svh + ${distance}px)` } as CSSProperties) : undefined}
     >
-      <div className={pinned ? "sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden" : "py-6"}>
-        <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-end justify-between gap-6 px-5 pt-20 sm:px-8 lg:pt-16">
+      <div className={pinned ? "sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden pt-16" : "py-6"}>
+        <div className={`mx-auto flex w-full max-w-[1440px] flex-wrap items-end justify-between gap-6 px-5 sm:px-8 ${pinned ? "" : "pt-20"}`}>
           <div>
             <p className="eyebrow text-ink/70">
               <span className="text-clay-ink">04</span> · The lanes
             </p>
             <RevealHeading
-              className="mt-3 font-display text-[clamp(2.6rem,5.5vw,5rem)] leading-[0.95] tracking-[-0.03em]"
+              className="mt-3 font-display text-[clamp(2.6rem,4.8vw,4.5rem)] leading-[0.95] tracking-[-0.03em]"
               lines={[
                 "Eight lanes.",
                 <em key="w" className="italic text-clay">
@@ -88,7 +88,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
 
         <m.div
           ref={trackRef}
-          className={`no-scrollbar mt-10 flex gap-5 px-5 sm:px-8 ${
+          className={`no-scrollbar mt-8 flex gap-5 px-5 sm:px-8 ${
             pinned ? "w-max gap-6" : "snap-x snap-mandatory scroll-px-5 overflow-x-auto pb-6 sm:scroll-px-8"
           }`}
           style={pinned ? { x } : undefined}
@@ -102,7 +102,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
                 index={i}
                 image={first?.image}
                 brand={first?.brand}
-                className="h-[min(68svh,560px)] w-[78vw] shrink-0 snap-start sm:w-[min(46vw,400px)] lg:h-[min(62svh,600px)] lg:w-[min(31vw,440px)]"
+                className="h-[min(68svh,560px)] w-[78vw] shrink-0 snap-start sm:w-[min(46vw,400px)] lg:h-[min(54svh,560px)] lg:w-[min(30vw,420px)]"
               />
             );
           })}

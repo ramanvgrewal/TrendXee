@@ -16,8 +16,8 @@ export function SiteFooter() {
 
   return (
     <footer className="relative border-t border-border bg-deep">
-      <div className="mx-auto grid w-full max-w-[1440px] gap-12 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:py-20">
-        <div className="lg:col-span-5">
+      <div className="mx-auto grid w-full max-w-[1440px] grid-cols-2 gap-x-6 gap-y-12 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:py-20">
+        <div className="col-span-2 lg:col-span-5">
           <Link to="/" className="inline-flex items-center gap-2.5">
             <img src="/logo.png" alt="" className="size-8 object-contain" />
             <span className="font-display text-2xl tracking-tight">
@@ -33,7 +33,7 @@ export function SiteFooter() {
           </p>
         </div>
 
-        <nav aria-label="Lanes" className="lg:col-span-3">
+        <nav aria-label="Lanes" className="col-span-2 lg:col-span-3">
           <p className="eyebrow text-ink/70">Lanes</p>
           <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5">
             {aesthetics.map((a) => (
@@ -96,7 +96,18 @@ export function SiteFooter() {
       <div className="border-t border-border">
         <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-5 py-6 text-[12px] text-ink/70 sm:px-8">
           <p>© 2026 TrendXee · trendxee.com</p>
-          <p className="hand text-[13px]">pinned by hand, read from real signals</p>
+          <button
+            type="button"
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+              })
+            }
+            className="hit ed-link-rest font-semibold text-ink/70 hover:text-clay"
+          >
+            Back to top ↑
+          </button>
         </div>
       </div>
 

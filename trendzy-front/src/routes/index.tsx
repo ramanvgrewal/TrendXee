@@ -45,6 +45,8 @@ function castTheBoard(rotationMap: Record<string, RotationItem[]>, dailyFive: Ro
   const rest = Object.values(rotationMap)
     .flat()
     .filter((i) => i.image && !used.has(i.id));
+  // Each lane's first product is its lane card's cover, so skip it here too.
+  for (const items of Object.values(rotationMap)) if (items[0]) used.add(items[0].id);
   // Interleave lanes so neighbouring prints are visually different.
   const byLane = Object.values(rotationMap).map((items) => items.filter((i) => i.image && !used.has(i.id)));
   const interleaved: RotationItem[] = [];
@@ -92,7 +94,7 @@ function Home() {
         <EngineSection />
       </div>
       <div data-chapter="07" data-chapter-title="Start" className="tone-cta">
-        <FinalCta />
+        <FinalCta rotationMap={rotationMap} />
       </div>
     </div>
   );

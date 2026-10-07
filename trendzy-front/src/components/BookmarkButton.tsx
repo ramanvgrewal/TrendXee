@@ -119,7 +119,7 @@ export function BookmarkButton({
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent className="max-w-md rounded-3xl border-0 bg-raised shadow-lift p-7" onClick={(e) => e.stopPropagation()}>
+        <AlertDialogContent className="max-w-md rounded-[20px] border-0 bg-raised shadow-lift p-7" onClick={(e) => e.stopPropagation()}>
           <AlertDialogHeader className="text-left">
             <AlertDialogTitle className="font-display text-2xl font-normal tracking-tight">Remove from your archive?</AlertDialogTitle>
             <AlertDialogDescription className="text-[15px] leading-relaxed text-ink/70">

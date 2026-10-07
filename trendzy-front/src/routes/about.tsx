@@ -73,7 +73,7 @@ function AboutPage() {
         ))}
       </div>
 
-      <section className="mt-28 grid gap-10 rounded-[30px] bg-cream/60 p-8 ring-1 ring-border sm:p-12 lg:grid-cols-12 lg:p-16">
+      <section className="mt-28 grid gap-10 rounded-[28px] bg-cream/60 p-8 ring-1 ring-border sm:p-12 lg:grid-cols-12 lg:p-16">
         <div className="lg:col-span-4">
           <p className="hand text-xl text-clay-ink">how to use it</p>
           <h2 className="mt-2 font-display text-4xl leading-tight tracking-tight">Four steps, no noise.</h2>

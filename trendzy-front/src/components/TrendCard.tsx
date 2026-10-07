@@ -55,6 +55,7 @@ export function TrendCard({
       className="group/card relative h-full"
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98, y: -1 }}
+      tabIndex={-1}
       transition={spring.soft}
       data-cursor="explore"
       data-cursor-label="Open"
@@ -64,10 +65,10 @@ export function TrendCard({
         layoutId={`trend-surface-${trend.id}`}
         transition={spring.layout}
         className="absolute inset-0 bg-raised shadow-card transition-shadow duration-500 group-hover/card:shadow-lift group-active/card:shadow-press"
-        style={{ borderRadius: 22 }}
+        style={{ borderRadius: 20 }}
       />
 
-      <PointerScope className="relative flex h-full flex-col overflow-hidden rounded-[22px]">
+      <PointerScope className="relative flex h-full flex-col overflow-hidden rounded-[20px]">
         {/* Photo */}
         <m.div
           layoutId={`trend-media-${trend.id}`}
@@ -85,14 +86,11 @@ export function TrendCard({
           </Parallax>
           {/* Only a light top veil, so the chips stay legible on bright photos. */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-scrim/30 to-transparent" />
-          <div className="absolute left-4 top-4 flex max-w-[72%] flex-wrap gap-1.5">
-            {trend.subcategory && (
-              <span className="truncate rounded-full bg-raised/90 px-2.5 py-1 text-[11px] font-semibold text-ink/80 backdrop-blur-sm">
-                {trend.subcategory}
-              </span>
-            )}
-            {off && <span className="rounded-full bg-stamp-clay px-2.5 py-1 text-[11px] font-bold text-paper">−{off}%</span>}
-          </div>
+          {off && (
+            <span className="absolute left-4 top-4 rounded-full bg-stamp-clay px-2.5 py-1 text-[11px] font-bold text-paper">
+              −{off}%
+            </span>
+          )}
         </m.div>
 
         {/* Copy */}
@@ -160,7 +158,7 @@ export function TrendCard({
           type="button"
           onClick={() => onOpen(trend)}
           aria-label={`Open the story: ${trend.name}`}
-          className="absolute inset-0 z-[5] rounded-[22px] focus-visible:outline-offset-[-4px]"
+          className="absolute inset-0 z-[5] rounded-[20px] focus-visible:outline-offset-[-4px]"
         />
 
         <div className="absolute right-3 top-3 z-20">

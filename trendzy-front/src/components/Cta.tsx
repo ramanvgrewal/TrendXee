@@ -25,6 +25,8 @@ export function Cta({
       className={`inline-flex ${className}`}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.97, y: 0 }}
+      // Motion makes tap targets focusable; the real link/button inside already is.
+      tabIndex={-1}
       transition={spring.tactile}
     >
       {children}

@@ -25,6 +25,8 @@ export function Stamp({ score, tone = "clay", size = "md", pressable = false, cl
       role="img"
       whileHover={pressable ? { rotate: -4, scale: 1.05 } : undefined}
       whileTap={pressable ? { scale: 0.9, rotate: -8 } : undefined}
+      // Decorative press only: keep it out of the tab order.
+      tabIndex={pressable ? -1 : undefined}
       transition={spring.tactile}
       className={`stamp grid shrink-0 place-items-center rounded-full font-display font-bold tabular-nums text-paper ${
         tone === "clay" ? "bg-stamp-clay" : "bg-stamp-olive"

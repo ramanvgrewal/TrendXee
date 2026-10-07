@@ -193,7 +193,7 @@ function LanesMenu({ active }: { active: boolean }) {
       <DropdownMenuContent
         align="start"
         sideOffset={10}
-        className="w-[30rem] rounded-2xl border-0 bg-raised p-3 shadow-lift data-[state=open]:duration-200"
+        className="w-[30rem] rounded-[20px] border-0 bg-raised p-3 shadow-lift data-[state=open]:duration-200"
       >
         <div className="grid grid-cols-2 gap-1">
           {aesthetics.map((a, i) => (
@@ -242,7 +242,7 @@ function ProfileMenu({ user, onContact, onLogout }: { user: CurrentUser; onConta
         <span className="max-w-[8rem] truncate">{first}</span>
         <ChevronDown className="size-3.5 text-ink/70 transition-transform duration-300 group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={10} className="w-64 rounded-2xl border-0 bg-raised p-2 shadow-lift data-[state=open]:duration-200">
+      <DropdownMenuContent align="end" sideOffset={10} className="w-64 rounded-[20px] border-0 bg-raised p-2 shadow-lift data-[state=open]:duration-200">
         <DropdownMenuLabel className="flex items-center gap-3 px-2 py-2 font-normal">
           <Avatar user={user} size="size-9" />
           <span className="min-w-0">
@@ -335,7 +335,7 @@ function MobileMenu({
 
           <m.div custom={i++} variants={item} initial="hidden" animate="show" className="mt-auto pt-10">
             {user ? (
-              <div className="rounded-2xl bg-cream/70 p-4 ring-1 ring-border">
+              <div className="rounded-[20px] bg-cream/70 p-4 ring-1 ring-border">
                 <div className="flex items-center gap-3">
                   <Avatar user={user} size="size-10" />
                   <div className="min-w-0">

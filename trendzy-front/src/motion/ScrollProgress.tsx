@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { m, useScroll, useSpring, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { m, useMotionValueEvent, useScroll, useSpring, useTransform } from "framer-motion";
 import { follow } from "@/motion/tokens";
 
 /**
@@ -9,28 +9,36 @@ import { follow } from "@/motion/tokens";
  * Desktop only; the label only updates when the chapter changes.
  */
 export function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
+  const { scrollY, scrollYProgress } = useScroll();
   const fill = useSpring(scrollYProgress, follow.scroll);
   const opacity = useTransform(scrollYProgress, [0, 0.02, 0.98, 1], [0, 1, 1, 0]);
   const [chapter, setChapter] = useState({ n: "01", title: "" });
+  const nodes = useRef<HTMLElement[]>([]);
+  const frame = useRef(0);
+
+  // The chapter is whichever section crosses the middle of the viewport.
+  // Checked at most once per frame, and state only changes on a new chapter.
+  const measure = () => {
+    frame.current = 0;
+    const mid = window.innerHeight / 2;
+    let current: HTMLElement | undefined;
+    for (const node of nodes.current) if (node.getBoundingClientRect().top <= mid) current = node;
+    const next = current ?? nodes.current[0];
+    if (!next) return;
+    setChapter((prev) =>
+      prev.n === next.dataset.chapter ? prev : { n: next.dataset.chapter ?? "", title: next.dataset.chapterTitle ?? "" },
+    );
+  };
 
   useEffect(() => {
-    const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
-    if (!nodes.length) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement;
-            setChapter({ n: el.dataset.chapter ?? "", title: el.dataset.chapterTitle ?? "" });
-          }
-        }
-      },
-      { rootMargin: "-50% 0px -50% 0px" },
-    );
-    nodes.forEach((n) => io.observe(n));
-    return () => io.disconnect();
+    nodes.current = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
+    measure();
+    return () => cancelAnimationFrame(frame.current);
   }, []);
+
+  useMotionValueEvent(scrollY, "change", () => {
+    if (!frame.current) frame.current = requestAnimationFrame(measure);
+  });
 
   return (
     <m.div

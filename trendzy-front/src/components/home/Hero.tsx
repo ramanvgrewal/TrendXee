@@ -120,7 +120,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
                   className="group block"
                 >
                   <div className="relative rounded-[28px] bg-cream p-2.5 shadow-lift ring-1 ring-border">
-                    <div className="enter-clip relative aspect-[4/5] overflow-hidden rounded-[22px] bg-sand/50">
+                    <div className="enter-clip relative aspect-[4/5] overflow-hidden rounded-[20px] bg-sand/50">
                       <Parallax depth={4} bleed className="absolute inset-0">
                         <img
                           src={leadImage}
@@ -129,7 +129,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
                           className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
                         />
                       </Parallax>
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-scrim/55 to-transparent" />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-scrim/75 via-scrim/25 to-transparent" />
                       {lead && (
                         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-on-scrim">
                           <div className="min-w-0">

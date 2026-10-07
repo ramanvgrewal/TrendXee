@@ -123,10 +123,12 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
         </p>
       </div>
 
-      <div className="mt-12 grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+      <div className="mt-12 grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
         {/* Visual */}
-        <PointerScope className="relative lg:col-span-7">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-cream shadow-lift sm:aspect-[5/4]">
+        <PointerScope className="relative lg:col-span-6 lg:flex lg:justify-center">
+          {/* Frame + stamp share one box so the stamp always sits on the photo's corner. */}
+          <div className="relative w-full lg:w-auto">
+          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[28px] bg-cream shadow-lift lg:h-[min(74svh,680px)] lg:w-auto">
             <AnimatePresence initial={false} custom={direction} mode="popLayout">
               <m.a
                 key={item.id + index}
@@ -200,10 +202,11 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
               </Parallax>
             </div>
           )}
+          </div>
         </PointerScope>
 
         {/* Story */}
-        <div className="relative lg:col-span-5">
+        <div className="relative lg:col-span-6 lg:max-w-xl">
           <AnimatePresence mode="wait" initial={false} custom={direction}>
             <m.div
               key={item.id + index}
