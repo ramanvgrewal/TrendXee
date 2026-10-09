@@ -9,42 +9,36 @@ import { follow } from "@/motion/tokens";
  * Desktop only; the label only updates when the chapter changes.
  */
 export function ScrollProgress() {
-  const { scrollY, scrollYProgress } = useScroll();
+  const { scrollYProgress } = useScroll();
   const fill = useSpring(scrollYProgress, follow.scroll);
   const opacity = useTransform(scrollYProgress, [0, 0.02, 0.98, 1], [0, 1, 1, 0]);
   const [chapter, setChapter] = useState({ n: "01", title: "" });
-  const nodes = useRef<HTMLElement[]>([]);
-  const frame = useRef(0);
-
-  // The chapter is whichever section crosses the middle of the viewport.
-  // Checked at most once per frame, and state only changes on a new chapter.
-  const measure = () => {
-    frame.current = 0;
-    const mid = window.innerHeight / 2;
-    let current: HTMLElement | undefined;
-    for (const node of nodes.current) if (node.getBoundingClientRect().top <= mid) current = node;
-    const next = current ?? nodes.current[0];
-    if (!next) return;
-    // The room light reads the chapter from <html> (CSS only, no re-render).
-    const root = document.documentElement;
-    if (root.dataset.chapter !== next.dataset.chapter) root.dataset.chapter = next.dataset.chapter ?? "";
-    setChapter((prev) =>
-      prev.n === next.dataset.chapter ? prev : { n: next.dataset.chapter ?? "", title: next.dataset.chapterTitle ?? "" },
-    );
-  };
 
   useEffect(() => {
-    nodes.current = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
-    measure();
-    return () => {
-      cancelAnimationFrame(frame.current);
-      delete document.documentElement.dataset.chapter;
-    };
-  }, []);
+    if (typeof window === "undefined" || window.innerWidth < 1280) return;
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
+    if (nodes.length === 0) return;
 
-  useMotionValueEvent(scrollY, "change", () => {
-    if (!frame.current) frame.current = requestAnimationFrame(measure);
-  });
+    const first = nodes[0];
+    setChapter({ n: first.dataset.chapter ?? "01", title: first.dataset.chapterTitle ?? "" });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            const n = el.dataset.chapter ?? "";
+            const title = el.dataset.chapterTitle ?? "";
+            setChapter((prev) => (prev.n === n ? prev : { n, title }));
+          }
+        }
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
+    );
+
+    nodes.forEach((n) => observer.observe(n));
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <m.div

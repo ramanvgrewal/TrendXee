@@ -37,12 +37,14 @@ export function TrendCard({
   archivedContext = false,
   onUnarchived,
   priority = false,
+  activeLayout = false,
 }: {
   trend: Trend;
   onOpen: (trend: Trend) => void;
   archivedContext?: boolean;
   onUnarchived?: () => void;
   priority?: boolean;
+  activeLayout?: boolean;
 }) {
   const underdog = trend.products?.underdog;
   const image = trendImage(trend);
@@ -63,7 +65,7 @@ export function TrendCard({
     >
       {/* The paper surface (morphs into the story's background). */}
       <m.div
-        layoutId={`trend-surface-${trend.id}`}
+        layoutId={activeLayout ? `trend-surface-${trend.id}` : undefined}
         transition={spring.layout}
         className="fibre absolute inset-0 bg-raised shadow-card transition-shadow duration-[350ms] group-hover/card:shadow-lift group-active/card:shadow-press"
         style={{ borderRadius: 20 }}
@@ -72,7 +74,7 @@ export function TrendCard({
       <PointerScope className="relative flex h-full flex-col overflow-hidden rounded-[20px]">
         {/* Photo */}
         <m.div
-          layoutId={`trend-media-${trend.id}`}
+          layoutId={activeLayout ? `trend-media-${trend.id}` : undefined}
           transition={spring.layout}
           className="relative aspect-[4/5] overflow-hidden bg-cream"
           style={{ borderRadius: 0 }}
@@ -124,7 +126,7 @@ export function TrendCard({
           </p>
 
           <m.h3
-            layoutId={`trend-title-${trend.id}`}
+            layoutId={activeLayout ? `trend-title-${trend.id}` : undefined}
             transition={spring.layout}
             className="mt-2 line-clamp-2 text-balance font-display text-[1.4rem] leading-[1.15] tracking-[-0.01em]"
           >

@@ -146,8 +146,8 @@
    * pattern), tiled and scrolling with the page like a real sheet. Brown on
    * the day board; a faint cream lamplight bloom on the night board.
    */
-  --fibre-light: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27640%27 height=%27640%27%3E%3Cfilter id=%27m%27 x=%270%27 y=%270%27 width=%27100%25%27 height=%27100%25%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.0045 0.0065%27 numOctaves=%273%27 seed=%2711%27 stitchTiles=%27stitch%27/%3E%3CfeColorMatrix values=%270 0 0 0 0.36 0 0 0 0 0.24 0 0 0 0 0.13 0 0 0 1.8 -0.7%27/%3E%3C/filter%3E%3Crect width=%27640%27 height=%27640%27 filter=%27url%28%23m%29%27 opacity=%270.065%27/%3E%3C/svg%3E");
-  --fibre-dark: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27640%27 height=%27640%27%3E%3Cfilter id=%27m%27 x=%270%27 y=%270%27 width=%27100%25%27 height=%27100%25%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.0045 0.0065%27 numOctaves=%273%27 seed=%2711%27 stitchTiles=%27stitch%27/%3E%3CfeColorMatrix values=%270 0 0 0 0.93 0 0 0 0 0.86 0 0 0 0 0.74 0 0 0 1.8 -0.7%27/%3E%3C/filter%3E%3Crect width=%27640%27 height=%27640%27 filter=%27url%28%23m%29%27 opacity=%270.03%27/%3E%3C/svg%3E");
+  --fibre-light: none;
+  --fibre-dark: none;
   --paper-fibre: var(--fibre-light);
   /* Edge falloff over the whole board, like light on a printed page. */
   --vignette: oklch(0.3 0.03 50 / 0.075);
@@ -290,17 +290,6 @@
   position: relative;
   isolation: isolate;
   box-shadow: 0 1px 2px color-mix(in oklab, var(--ink) 18%, transparent);
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    z-index: -1;
-    opacity: 0.35;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
-    mix-blend-mode: soft-light;
-  }
 }
 
 /* Hand-written aside */
@@ -340,21 +329,6 @@ html.has-custom-cursor :is(input, textarea, select, [contenteditable="true"]) {
 }
 
 /* ── Atmosphere ──────────────────────────────────────────────────────────── */
-
-/* Fine paper grain over the whole board. Static, so it costs nothing per frame. */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.1 0 0 0 0 0.05 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
-}
-
-.dark body::after {
-  opacity: 0.07;
-}
 
 /* Visible, on-brand keyboard focus everywhere. */
 :focus-visible {
@@ -546,40 +520,13 @@ body::before {
 
 /* ── Living light ────────────────────────────────────────────────────────────
  * The room light that follows the pointer (see motion/AmbientLight.tsx): warm
- * daylight on the day board, lamplight on the night board. Each homepage
- * chapter tints it slightly, and the colour eases between chapters.
+ * daylight on the day board, lamplight on the night board.
  */
-@property --ambient {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
-
 :root {
   --ambient: oklch(0.995 0.02 85 / 0.6);
 }
-:root[data-chapter="02"] {
-  --ambient: oklch(0.97 0.04 65 / 0.55);
-}
-:root[data-chapter="04"] {
-  --ambient: oklch(0.98 0.035 100 / 0.5);
-}
-:root[data-chapter="05"],
-:root[data-chapter="07"] {
-  --ambient: oklch(0.96 0.05 55 / 0.5);
-}
 .dark {
   --ambient: oklch(0.52 0.085 58 / 0.14);
-}
-.dark[data-chapter="02"] {
-  --ambient: oklch(0.5 0.1 45 / 0.16);
-}
-.dark[data-chapter="04"] {
-  --ambient: oklch(0.54 0.06 95 / 0.12);
-}
-.dark[data-chapter="05"],
-.dark[data-chapter="07"] {
-  --ambient: oklch(0.52 0.1 48 / 0.16);
 }
 
 .ambient-light {
@@ -589,7 +536,7 @@ body::before {
     color-mix(in oklab, var(--ambient) 45%, transparent) 42%,
     transparent 100%
   );
-  transition: --ambient 1.6s ease;
+  will-change: transform;
 }
 
 /* The cursor's glow: wet clay ink, softest at the edge. */

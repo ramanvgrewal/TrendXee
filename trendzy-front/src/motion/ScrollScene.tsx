@@ -1,6 +1,7 @@
 import { createContext, useContext, useRef, type CSSProperties, type ReactNode } from "react";
 import { useMotionValue, useReducedMotion, useScroll, useSpring, type MotionValue } from "framer-motion";
 import { follow } from "@/motion/tokens";
+import { useFinePointer } from "@/motion/hooks";
 
 /**
  * A pinned scene: the stage sticks to the viewport while the reader scrolls
@@ -45,11 +46,12 @@ export function ScrollScene({
 }) {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
+  const finePointer = useFinePointer();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const smoothed = useSpring(scrollYProgress, follow.scroll);
   const done = useMotionValue(1);
 
-  const progress = reduced ? done : smooth ? smoothed : scrollYProgress;
+  const progress = reduced ? done : smooth && finePointer ? smoothed : scrollYProgress;
   const content = typeof children === "function" ? children(progress) : children;
 
   if (reduced) {

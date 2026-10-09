@@ -17,7 +17,7 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
   const leftX = useTransform(scrollYProgress, [0, 1], ["-8%", "0%"]);
   const rightX = useTransform(scrollYProgress, [0, 1], ["10%", "0%"]);
-  const clip = useTransform(scrollYProgress, [0, 1], ["inset(14% 8% 14% 8% round 24px)", "inset(0% 0% 0% 0% round 24px)"]);
+  const cardScale = useTransform(scrollYProgress, [0, 1], [0.92, 1]);
 
   if (!item?.mainstream) return null;
   const ms = item.mainstream;
@@ -58,7 +58,7 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
               <a href={item.shopUrl} target="_blank" rel="noopener noreferrer" data-cursor="view" data-cursor-label="Shop" className="group block">
                 <m.div
                   className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-sand/50 shadow-lift"
-                  style={reduced ? undefined : { clipPath: clip }}
+                  style={reduced ? undefined : { scale: cardScale }}
                 >
                   <img src={item.image} alt={item.title} loading="lazy" className="media-zoom h-full w-full object-cover group-hover:scale-[1.03]" />
                   <span className="absolute left-4 top-4 rounded-full bg-stamp-clay px-3 py-1 eyebrow text-[11px] text-paper">

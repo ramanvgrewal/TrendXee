@@ -29,30 +29,39 @@ type Props = {
   offset?: [string, string];
 };
 
-export function ScrollTextReveal({
+export function ScrollTextReveal(props: Props) {
+  const reduced = useReducedMotion();
+  const Tag = props.as ?? "p";
+
+  if (reduced) {
+    return <Tag className={props.className}>{props.text}</Tag>;
+  }
+
+  if (props.progress) {
+    return <RevealBody {...props} source={props.progress} />;
+  }
+
+  return <SelfTrackedScrollTextReveal {...props} />;
+}
+
+function SelfTrackedScrollTextReveal(props: Props) {
+  const ref = useRef<HTMLElement>(null);
+  const offset = props.offset ?? ["start 85%", "end 45%"];
+  const { scrollYProgress } = useScroll({ target: ref, offset: offset as never });
+  return <RevealBody {...props} innerRef={ref} source={scrollYProgress} />;
+}
+
+function RevealBody({
   text,
   by = "word",
-  progress,
+  source,
   range = [0, 1],
   as: Tag = "p",
   className = "",
   dim = 0,
   softness = 1.5,
-  offset = ["start 85%", "end 45%"],
-}: Props) {
-  const ref = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: offset as never });
-  const source = progress ?? scrollYProgress;
-
-  if (reduced) {
-    return (
-      <Tag ref={ref} className={className}>
-        {text}
-      </Tag>
-    );
-  }
-
+  innerRef,
+}: Props & { source: MotionValue<number>; innerRef?: React.RefObject<HTMLElement | null> }) {
   const words = text.split(/(\s+)/).filter((w) => w.length > 0);
   const units = by === "word" ? words.filter((w) => !/^\s+$/.test(w)).length : text.replace(/\s+/g, "").length;
   const [start, end] = range;
@@ -61,7 +70,7 @@ export function ScrollTextReveal({
   let unitIndex = 0;
 
   return (
-    <Tag ref={ref} className={className}>
+    <Tag ref={innerRef} className={className}>
       <span className="sr-only">{text}</span>
       <span aria-hidden>
         {words.map((word, wi) => {
@@ -70,9 +79,15 @@ export function ScrollTextReveal({
           if (by === "word") {
             const i = unitIndex++;
             return (
-              <RevealUnit key={wi} progress={source} from={start + i * slot} to={Math.min(start + (i + 1 + softness) * slot, end)} dim={dim} lift>
+              <RevealUnitLift
+                key={wi}
+                progress={source}
+                from={start + i * slot}
+                to={Math.min(start + (i + 1 + softness) * slot, end)}
+                dim={dim}
+              >
                 {word}
-              </RevealUnit>
+              </RevealUnitLift>
             );
           }
 
@@ -82,9 +97,15 @@ export function ScrollTextReveal({
               {Array.from(word).map((char, ci) => {
                 const i = unitIndex++;
                 return (
-                  <RevealUnit key={ci} progress={source} from={start + i * slot} to={Math.min(start + (i + 1 + softness) * slot, end)} dim={dim}>
+                  <RevealUnitOpacity
+                    key={ci}
+                    progress={source}
+                    from={start + i * slot}
+                    to={Math.min(start + (i + 1 + softness) * slot, end)}
+                    dim={dim}
+                  >
                     {char}
-                  </RevealUnit>
+                  </RevealUnitOpacity>
                 );
               })}
             </span>
@@ -95,25 +116,44 @@ export function ScrollTextReveal({
   );
 }
 
-function RevealUnit({
+function RevealUnitOpacity({
   children,
   progress,
   from,
   to,
   dim,
-  lift = false,
 }: {
   children: string;
   progress: MotionValue<number>;
   from: number;
   to: number;
   dim: number;
-  lift?: boolean;
+}) {
+  const opacity = useTransform(progress, [from, to], [dim, 1], { clamp: true });
+  return (
+    <m.span className="inline-block" style={{ opacity }}>
+      {children}
+    </m.span>
+  );
+}
+
+function RevealUnitLift({
+  children,
+  progress,
+  from,
+  to,
+  dim,
+}: {
+  children: string;
+  progress: MotionValue<number>;
+  from: number;
+  to: number;
+  dim: number;
 }) {
   const opacity = useTransform(progress, [from, to], [dim, 1], { clamp: true });
   const y = useTransform(progress, [from, to], ["0.18em", "0em"], { clamp: true });
   return (
-    <m.span className="inline-block" style={lift ? { opacity, y } : { opacity }}>
+    <m.span className="inline-block" style={{ opacity, y }}>
       {children}
     </m.span>
   );

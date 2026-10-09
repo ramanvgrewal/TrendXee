@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { LayoutGroup } from "framer-motion";
 import { TrendCard } from "@/components/TrendCard";
 import { TrendDetail } from "@/components/TrendDetail";
@@ -28,6 +29,12 @@ export function TrendBoard({
   onUnarchived?: (id: string) => void;
   batchSize?: number;
 }) {
+  const [lastOpenId, setLastOpenId] = useState<string | null>(openId ?? null);
+  useEffect(() => {
+    if (openId) setLastOpenId(openId);
+  }, [openId]);
+
+  const activeLayoutId = openId ?? lastOpenId;
   const open = openId ? trends.find((t) => t.id === openId) ?? null : null;
 
   return (
@@ -37,10 +44,14 @@ export function TrendBoard({
           <ScrollReveal as="li" key={trend.id} index={i % batchSize} y={24}>
             <TrendCard
               trend={trend}
-              onOpen={(t) => onOpenChange(t.id)}
+              onOpen={(t) => {
+                setLastOpenId(t.id);
+                onOpenChange(t.id);
+              }}
               archivedContext={archivedContext}
               onUnarchived={() => onUnarchived?.(trend.id)}
               priority={i < 3}
+              activeLayout={activeLayoutId === trend.id}
             />
           </ScrollReveal>
         ))}
