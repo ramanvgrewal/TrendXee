@@ -28,28 +28,6 @@ export function PointerScope({
   mode?: "hover" | "viewport";
   as?: "div" | "section" | "article";
 }) {
-  const pointer = usePointer();
-  if (!pointer.enabled) {
-    return <Tag className={className}>{children}</Tag>;
-  }
-  return (
-    <ActivePointerScope className={className} mode={mode} as={Tag}>
-      {children}
-    </ActivePointerScope>
-  );
-}
-
-function ActivePointerScope({
-  children,
-  className = "",
-  mode = "hover",
-  as: Tag = "div",
-}: {
-  children: ReactNode;
-  className?: string;
-  mode?: "hover" | "viewport";
-  as?: "div" | "section" | "article";
-}) {
   const ref = useRef<HTMLElement>(null);
   const { rx, ry } = useRelativePointer(ref, { mode });
   return (
