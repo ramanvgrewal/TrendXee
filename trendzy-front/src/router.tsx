@@ -9,7 +9,14 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
+    // Start loading a route's data when a link is hovered or focused, so the
+    // page (and any transition into it) is ready by the time it's clicked.
+    defaultPreload: "intent",
+    defaultPreloadStaleTime: 30_000,
+    // Short cross-fade between routes via the View Transitions API, where
+    // supported (styles in styles.css). Unsupported browsers navigate normally.
+    defaultViewTransition: true,
+    // Routes opt into longer caching via their own `staleTime`.
     defaultStaleTime: 0,
   });
 

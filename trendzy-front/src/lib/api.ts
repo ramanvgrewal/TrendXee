@@ -108,11 +108,17 @@ function normalizeSignalProducts(raw: any): SignalProduct[] {
   return [raw as SignalProduct];
 }
 
-export async function getTrends(category: string, size = 100, subcategory?: string): Promise<Trend[]> {
+export async function getTrends(
+  category: string,
+  size = 100,
+  subcategory?: string,
+  page = 0,
+): Promise<Trend[]> {
   const queryObj: Record<string, string> = {
     category,
+    page: String(page),
     size: String(size),
-    _t: String(Date.now()), // Force bypass of any browser/CDN cache
+    _t: String(Date.now()), // Force bypass of any browser/CDN cache (app caching happens in the router)
   };
   
   if (subcategory) {
