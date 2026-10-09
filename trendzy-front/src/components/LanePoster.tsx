@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Photo } from "@/components/Photo";
 import type { Aesthetic } from "@/lib/mock-data";
+
+const ROTATE_EVERY_MS = 1600;
 
 export function LanePoster({
   aesthetic,
@@ -16,29 +17,44 @@ export function LanePoster({
   heroOverride?: string;
   className?: string;
 }) {
-
   const isSneaker = aesthetic.id === "sneakers" || aesthetic.name.toLowerCase().includes("sneaker");
-  
+
   const rotation = rotationImages;
   const [idx, setIdx] = useState(0);
+  // Rotation only runs while the poster is hovered or focused — no idle timers.
+  const [active, setActive] = useState(false);
+  // Extra images are only mounted (and downloaded) after the first interaction.
+  const [armed, setArmed] = useState(false);
 
   useEffect(() => {
-    if (rotation.length < 2) return;
-    const t = setInterval(() => setIdx((i) => (i + 1) % rotation.length), 2800 + index * 300);
+    if (!active || rotation.length < 2) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % rotation.length), ROTATE_EVERY_MS);
     return () => clearInterval(t);
-  }, [rotation.length, index]);
+  }, [active, rotation.length]);
+
+  const start = () => {
+    setArmed(true);
+    setActive(true);
+  };
+  const stop = () => setActive(false);
 
   const defaultHero = heroOverride || aesthetic.heroImage;
+  const slides = rotation.length > 0 ? (armed ? rotation : rotation.slice(0, 1)) : [];
 
   return (
     <Link
       to="/aesthetic/$id"
       params={{ id: aesthetic.id }}
+      data-cursor="explore"
+      onPointerEnter={(e) => e.pointerType === "mouse" && start()}
+      onPointerLeave={stop}
+      onFocus={start}
+      onBlur={stop}
       className={`group relative block h-[340px] shrink-0 snap-start overflow-hidden rounded-2xl bg-cream ring-1 ring-border transition-transform duration-300 hover:-translate-y-1 sm:h-[380px] ${className}`}
     >
       <div className="absolute inset-0 bg-paper">
-        {rotation.length > 0 ? (
-          rotation.map((r, i) => (
+        {slides.length > 0 ? (
+          slides.map((r, i) => (
             <div
               key={`${r.image}-${i}`}
               className={`absolute inset-0 size-full transition-opacity duration-700 ${
@@ -48,7 +64,9 @@ export function LanePoster({
               {isSneaker && (
                 <img
                   src={r.image}
+                  alt=""
                   aria-hidden="true"
+                  loading="lazy"
                   className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl"
                 />
               )}
@@ -67,7 +85,9 @@ export function LanePoster({
              {isSneaker && (
                 <img
                   src={defaultHero}
+                  alt=""
                   aria-hidden="true"
+                  loading="lazy"
                   className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl"
                 />
               )}

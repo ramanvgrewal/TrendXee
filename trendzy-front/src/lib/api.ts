@@ -75,6 +75,9 @@ export function normalizeTrend(raw: any): Trend {
     aestheticId: category,
     subcategory: subcategory,
     trendScore: Number(raw?.trendScore ?? 0),
+    brandInstagramHandle: raw?.brandInstagramHandle,
+    trendScoreUpdatedAt: raw?.trendScoreUpdatedAt,
+    brandHypeSignals: raw?.brandHypeSignals,
     vibeTags: Array.isArray(raw?.vibeTags) ? raw.vibeTags : [],
     aiSummary: raw?.aiSummary ?? "",
     whyTrending: Array.isArray(raw?.whyTrending) ? raw.whyTrending : [],
@@ -91,6 +94,10 @@ export function normalizeTrend(raw: any): Trend {
     estimatedPrice: Number(raw?.estimatedPrice ?? 0),
     lastUpdatedAt: raw?.lastUpdatedAt ?? "",
     active: raw?.active ?? true,
+    underdogRating: raw?.underdogRating,
+    ratingSignals: raw?.ratingSignals,
+    userRatingAverage: raw?.userRatingAverage,
+    userRatingCount: raw?.userRatingCount,
   };
 }
 
@@ -108,11 +115,17 @@ function normalizeSignalProducts(raw: any): SignalProduct[] {
   return [raw as SignalProduct];
 }
 
-export async function getTrends(category: string, size = 100, subcategory?: string): Promise<Trend[]> {
+export async function getTrends(
+  category: string,
+  size = 100,
+  subcategory?: string,
+  page = 0,
+): Promise<Trend[]> {
   const queryObj: Record<string, string> = {
     category,
+    page: String(page),
     size: String(size),
-    _t: String(Date.now()), // Force bypass of any browser/CDN cache
+    _t: String(Date.now()), // Force bypass of any browser/CDN cache (app caching happens in the router)
   };
   
   if (subcategory) {
@@ -130,3 +143,36 @@ export async function getTrends(category: string, size = 100, subcategory?: stri
 
   return normalizeTrendList(await response.json());
 }
+
+export async function rateTrendProduct(trendId: string, rating: number) {
+  const response = await apiFetch(`/api/products/${trendId}/rate`, {
+    method: "POST",
+    body: JSON.stringify({ rating })
+  });
+  if (!response.ok) throw new Error("Failed to submit rating");
+  return normalizeTrend(await response.json());
+}
+
+export interface BrandReview {
+  id?: string;
+  brandName: string;
+  userId?: string;
+  comment: string;
+  createdAt?: string;
+}
+
+export async function getBrandComments(brandName: string): Promise<BrandReview[]> {
+  const response = await apiFetch(`/api/brands/${encodeURIComponent(brandName)}/comments`);
+  if (!response.ok) throw new Error("Failed to fetch brand comments");
+  return response.json();
+}
+
+export async function addBrandComment(brandName: string, comment: string): Promise<BrandReview> {
+  const response = await apiFetch(`/api/brands/${encodeURIComponent(brandName)}/comments`, {
+    method: "POST",
+    body: JSON.stringify({ comment })
+  });
+  if (!response.ok) throw new Error("Failed to submit comment");
+  return response.json();
+}
+

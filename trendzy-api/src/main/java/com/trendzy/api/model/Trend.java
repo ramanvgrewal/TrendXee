@@ -27,6 +27,10 @@ public class Trend {
     private String subcategory;
 
     private double trendScore;
+    private String brandInstagramHandle;
+    private Long trendScoreUpdatedAt;
+    private BrandHypeSignals brandHypeSignals;
+
 
     private String tier;
     private List<String> vibeTags;
@@ -57,7 +61,23 @@ public class Trend {
     @Builder.Default
     private boolean active = true;
 
+    private Double underdogRating;
+    private java.util.Map<String, Object> ratingSignals;
+    @Builder.Default
+    private Double userRatingAverage = 0.0;
+    @Builder.Default
+    private Integer userRatingCount = 0;
+
     // Bucket for supporting signal products
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BrandHypeSignals {
+        private Integer followers;
+        private Double engagementRate;
+        private Double postsPerWeek;
+    }
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -87,3 +107,5 @@ public class Trend {
         private Boolean codAvailable;
     }
 }
+
+

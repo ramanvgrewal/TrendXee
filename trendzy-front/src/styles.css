@@ -65,21 +65,33 @@
   --color-olive: var(--olive);
   --color-paper: var(--paper);
   --color-cream: var(--cream);
+  --color-scrim: var(--scrim);
+  --color-on-scrim: var(--on-scrim);
+  /* Surfaces: page (paper) < raised (cards, menus, dialogs); deep = recessed sections. */
+  --color-raised: var(--raised);
+  --color-deep: var(--deep);
+  --color-clay-soft: var(--clay-soft);
+  /* Text-safe clay for small labels (≥4.5:1 on paper); stamps get a deeper ink. */
+  --color-clay-ink: var(--clay-ink);
+  --color-stamp-clay: var(--stamp-clay);
+  --color-stamp-olive: var(--stamp-olive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  /* Layered, warm shadows — never one heavy blur. */
+  --shadow-card: 0 0 0 1px hsl(var(--shadow-color) / 0.06), 0 1px 2px hsl(var(--shadow-color) / 0.06),
+    0 10px 24px -14px hsl(var(--shadow-color) / 0.22), inset 0 1px 0 var(--highlight);
+  --shadow-print: 0 0 0 1px hsl(var(--shadow-color) / 0.05), 0 1px 2px hsl(var(--shadow-color) / 0.08),
+    0 6px 12px -4px hsl(var(--shadow-color) / 0.12), 0 22px 40px -18px hsl(var(--shadow-color) / 0.3),
+    inset 0 1px 0 var(--highlight);
+  --shadow-lift: 0 0 0 1px hsl(var(--shadow-color) / 0.05), 0 2px 4px hsl(var(--shadow-color) / 0.07),
+    0 14px 28px -10px hsl(var(--shadow-color) / 0.2), 0 40px 70px -28px hsl(var(--shadow-color) / 0.36),
+    inset 0 1px 0 var(--highlight);
+  --shadow-press: 0 0 0 1px hsl(var(--shadow-color) / 0.07), 0 1px 2px hsl(var(--shadow-color) / 0.1),
+    inset 0 1px 0 var(--highlight);
 
   --ease-drift: cubic-bezier(0.32, 0.72, 0, 1);
-  --animate-settle: settle 0.9s var(--ease-drift) both;
   --animate-rise: rise 0.7s var(--ease-drift) both;
-}
-
-@keyframes settle {
-  from {
-    opacity: 0;
-    transform: translateY(16px) rotate(0deg);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) rotate(var(--tilt, 0deg));
-  }
 }
 
 @keyframes rise {
@@ -105,9 +117,9 @@
 
   --background: var(--paper);
   --foreground: var(--ink);
-  --card: var(--paper);
+  --card: var(--raised);
   --card-foreground: var(--ink);
-  --popover: var(--paper);
+  --popover: var(--raised);
   --popover-foreground: var(--ink);
   --primary: var(--ink);
   --primary-foreground: var(--sand);
@@ -122,6 +134,33 @@
   --border: oklch(0.256 0.026 47 / 0.12);
   --input: oklch(0.256 0.026 47 / 0.18);
   --ring: var(--clay);
+
+  /* Image overlays stay dark in both themes so photo captions keep contrast. */
+  --scrim: oklch(0.2 0.02 47);
+  --on-scrim: oklch(0.95 0.02 85);
+  --shadow-color: 28deg 35% 22%;
+  --highlight: oklch(1 0 0 / 0.5);
+
+  /*
+   * Paper material: a large, slow mottle (tonal variation, no visible
+   * pattern), tiled and scrolling with the page like a real sheet. Brown on
+   * the day board; a faint cream lamplight bloom on the night board.
+   */
+  --fibre-light: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27640%27 height=%27640%27%3E%3Cfilter id=%27m%27 x=%270%27 y=%270%27 width=%27100%25%27 height=%27100%25%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.0045 0.0065%27 numOctaves=%273%27 seed=%2711%27 stitchTiles=%27stitch%27/%3E%3CfeColorMatrix values=%270 0 0 0 0.36 0 0 0 0 0.24 0 0 0 0 0.13 0 0 0 1.8 -0.7%27/%3E%3C/filter%3E%3Crect width=%27640%27 height=%27640%27 filter=%27url%28%23m%29%27 opacity=%270.065%27/%3E%3C/svg%3E");
+  --fibre-dark: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27640%27 height=%27640%27%3E%3Cfilter id=%27m%27 x=%270%27 y=%270%27 width=%27100%25%27 height=%27100%25%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.0045 0.0065%27 numOctaves=%273%27 seed=%2711%27 stitchTiles=%27stitch%27/%3E%3CfeColorMatrix values=%270 0 0 0 0.93 0 0 0 0 0.86 0 0 0 0 0.74 0 0 0 1.8 -0.7%27/%3E%3C/filter%3E%3Crect width=%27640%27 height=%27640%27 filter=%27url%28%23m%29%27 opacity=%270.03%27/%3E%3C/svg%3E");
+  --paper-fibre: var(--fibre-light);
+  /* Edge falloff over the whole board, like light on a printed page. */
+  --vignette: oklch(0.3 0.03 50 / 0.075);
+
+  /* Day board: warm paper; raised = cards/menus; deep = recessed editorial bands. */
+  --raised: oklch(0.966 0.014 84);
+  --deep: oklch(0.905 0.03 80);
+  --clay-soft: oklch(0.88 0.05 55);
+  --clay-ink: oklch(0.5 0.115 45);
+  --stamp-clay: oklch(0.51 0.125 44);
+  --stamp-olive: oklch(0.47 0.055 116);
+  --success: oklch(0.52 0.08 140);
+  --warning: oklch(0.66 0.12 75);
 
   --chart-1: var(--sand);
   --chart-2: var(--clay);
@@ -155,7 +194,20 @@
   --cream: oklch(0.252 0.022 50);
 
   --muted-foreground: oklch(0.928 0.022 85 / 0.62);
-  --border: oklch(0.928 0.022 85 / 0.14);
+  --shadow-color: 25deg 40% 2%;
+  --highlight: oklch(0.95 0.03 80 / 0.05);
+  --paper-fibre: var(--fibre-dark);
+  --vignette: oklch(0.11 0.012 45 / 0.42);
+  /* Night board: lamplit espresso. Raised surfaces get lighter, not just darker shadows. */
+  --raised: oklch(0.232 0.021 50);
+  --deep: oklch(0.163 0.016 45);
+  --clay-soft: oklch(0.32 0.05 47);
+  --clay-ink: oklch(0.74 0.11 50);
+  --stamp-clay: oklch(0.7 0.115 47);
+  --stamp-olive: oklch(0.66 0.055 116);
+  --success: oklch(0.7 0.09 140);
+  --warning: oklch(0.78 0.11 75);
+  --border: oklch(0.928 0.022 85 / 0.12);
   --input: oklch(0.928 0.022 85 / 0.22);
   --destructive: oklch(0.62 0.17 27);
   --destructive-foreground: var(--paper);
@@ -179,9 +231,15 @@
 
   body {
     background-color: var(--color-background);
+    background-image: var(--paper-fibre);
     color: var(--color-foreground);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+    /* Only real weights: never a faux-bold Lora or Nunito. */
+    font-synthesis-weight: none;
   }
 
   h1,
@@ -190,6 +248,11 @@
   h4 {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   ::selection {
@@ -244,4 +307,549 @@
 @utility hand {
   font-family: var(--font-display);
   font-style: italic;
+}
+
+/*
+ * Custom cursor (see src/motion/Cursor.tsx). The class is only added on
+ * fine-pointer devices with motion allowed; text fields keep the native caret.
+ */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
+}
+
+html.has-custom-cursor :is(input, textarea, select, [contenteditable="true"]) {
+  cursor: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Loading spinners still need to spin to communicate "working". */
+  .animate-spin {
+    animation-duration: 1s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* ── Atmosphere ──────────────────────────────────────────────────────────── */
+
+/* Fine paper grain over the whole board. Static, so it costs nothing per frame. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.1 0 0 0 0 0.05 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+.dark body::after {
+  opacity: 0.07;
+}
+
+/* Visible, on-brand keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--clay);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ── Hero entrance ───────────────────────────────────────────────────────────
+ * Pure CSS so it plays from the server-rendered HTML, before any JavaScript.
+ * Nothing waits on hydration and nothing stays hidden if scripts are slow.
+ */
+@keyframes tx-line-up {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes tx-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tx-clip-up {
+  from {
+    clip-path: inset(18% 0 0 0 round 24px);
+    transform: scale(1.06);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 24px);
+    transform: scale(1);
+  }
+}
+
+@keyframes tx-print-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@utility enter-line {
+  animation: tx-line-up 0.75s var(--ease-drift) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@utility enter-fade {
+  animation: tx-fade-up 0.6s var(--ease-drift) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@utility enter-clip {
+  animation: tx-clip-up 0.9s var(--ease-drift) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@utility enter-print {
+  animation: tx-print-in 0.7s var(--ease-drift) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* A slow hairline that invites scrolling. */
+@keyframes tx-scroll-cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  45% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  55% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+@utility scroll-cue {
+  animation: tx-scroll-cue 2.4s var(--ease-drift) infinite;
+}
+
+/* Hairline rule used between editorial sections. */
+@utility rule {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border) 12%, var(--border) 88%, transparent);
+}
+
+/* Large outlined numerals for lane indexes. */
+@utility numeral-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--ink) 45%, transparent);
+}
+
+/* Hide scrollbars on horizontal rails while keeping them scrollable. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Route transitions (View Transitions API, where supported) ─────────── */
+/* Pages hand over softly: the old one fades, the new one settles up 8px.
+   The header has its own name, so it holds still while the page changes. */
+@keyframes tx-page-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes tx-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+::view-transition-old(root) {
+  animation: tx-page-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: tx-page-in 420ms cubic-bezier(0.32, 0.72, 0, 1) 60ms both;
+}
+
+::view-transition-group(*) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* ── Page lighting ───────────────────────────────────────────────────────────
+ * A very soft overhead light on the paper, fixed behind everything, so the
+ * board never reads as a flat fill. Grain (body::after) sits on top.
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% -20%, color-mix(in oklab, var(--raised) 85%, transparent), transparent 60%),
+    radial-gradient(70% 55% at -10% 60%, color-mix(in oklab, var(--clay) 6%, transparent), transparent 70%),
+    radial-gradient(80% 60% at 100% 100%, color-mix(in oklab, var(--deep) 45%, transparent), transparent 70%);
+}
+
+/* The board's edge falloff. Fixed and static: composited once, never repainted. */
+@utility page-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 89;
+  pointer-events: none;
+  background: radial-gradient(135% 105% at 50% 42%, transparent 58%, var(--vignette) 100%);
+}
+
+/* Every photo answers hover the same way: a slow, small push-in. */
+@utility media-zoom {
+  transition:
+    scale 1.1s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1),
+    filter 0.7s ease,
+    opacity 0.5s ease;
+}
+
+/* ── Living light ────────────────────────────────────────────────────────────
+ * The room light that follows the pointer (see motion/AmbientLight.tsx): warm
+ * daylight on the day board, lamplight on the night board. Each homepage
+ * chapter tints it slightly, and the colour eases between chapters.
+ */
+@property --ambient {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+:root {
+  --ambient: oklch(0.995 0.02 85 / 0.6);
+}
+:root[data-chapter="02"] {
+  --ambient: oklch(0.97 0.04 65 / 0.55);
+}
+:root[data-chapter="04"] {
+  --ambient: oklch(0.98 0.035 100 / 0.5);
+}
+:root[data-chapter="05"],
+:root[data-chapter="07"] {
+  --ambient: oklch(0.96 0.05 55 / 0.5);
+}
+.dark {
+  --ambient: oklch(0.52 0.085 58 / 0.14);
+}
+.dark[data-chapter="02"] {
+  --ambient: oklch(0.5 0.1 45 / 0.16);
+}
+.dark[data-chapter="04"] {
+  --ambient: oklch(0.54 0.06 95 / 0.12);
+}
+.dark[data-chapter="05"],
+.dark[data-chapter="07"] {
+  --ambient: oklch(0.52 0.1 48 / 0.16);
+}
+
+.ambient-light {
+  background: radial-gradient(
+    closest-side,
+    var(--ambient),
+    color-mix(in oklab, var(--ambient) 45%, transparent) 42%,
+    transparent 100%
+  );
+  transition: --ambient 1.6s ease;
+}
+
+/* The cursor's glow: wet clay ink, softest at the edge. */
+@utility cursor-aura {
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--clay) 32%, transparent),
+    color-mix(in oklab, var(--clay) 12%, transparent) 55%,
+    transparent
+  );
+}
+
+/* The paper material on a surface of its own (cards, panels, the footer). */
+@utility fibre {
+  background-image: var(--paper-fibre);
+}
+
+/* ── Section tones ───────────────────────────────────────────────────────────
+ * Each band fades in and out of the paper at its edges, so the homepage reads
+ * as one continuous object with tonal rhythm, not stacked websites. Bands stay
+ * slightly translucent so the sheet's own material and room light carry
+ * through them (no second texture layer, so there is never a seam).
+ */
+/* The entrance: a lamp over the headline and clay light behind the print. The
+   story band below dims in on its own, so the edge here stays seamless. */
+@utility tone-hero {
+  background:
+    radial-gradient(42% 48% at 30% 46%, color-mix(in oklab, var(--raised) 55%, transparent), transparent 72%),
+    radial-gradient(55% 65% at 80% 38%, color-mix(in oklab, var(--clay) 11%, transparent), transparent 70%),
+    radial-gradient(50% 55% at 6% 8%, color-mix(in oklab, var(--sand) 38%, transparent), transparent 72%);
+}
+
+@utility tone-deep {
+  background:
+    linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in oklab, var(--deep) 88%, transparent) 14%,
+      color-mix(in oklab, var(--deep) 88%, transparent) 86%,
+      transparent
+    );
+}
+
+@utility tone-raised {
+  background:
+    radial-gradient(60% 50% at 30% 55%, color-mix(in oklab, var(--clay) 5%, transparent), transparent 70%),
+    linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in oklab, var(--raised) 86%, transparent) 16%,
+      color-mix(in oklab, var(--raised) 86%, transparent) 84%,
+      transparent
+    );
+}
+
+@utility tone-lanes {
+  background:
+    radial-gradient(45% 55% at 12% 62%, color-mix(in oklab, var(--olive) 10%, transparent), transparent 72%),
+    radial-gradient(45% 55% at 88% 36%, color-mix(in oklab, var(--clay) 10%, transparent), transparent 72%),
+    linear-gradient(to bottom, transparent, color-mix(in oklab, var(--deep) 55%, transparent) 20%, color-mix(in oklab, var(--deep) 55%, transparent) 80%, transparent);
+}
+
+@utility tone-cta {
+  background:
+    radial-gradient(60% 75% at 50% 112%, color-mix(in oklab, var(--clay) 18%, transparent), transparent 70%),
+    linear-gradient(to bottom, transparent, var(--deep) 30%);
+}
+
+/*
+ * An inverted editorial insert (the underdog story): the section re-declares
+ * the palette, so every utility inside it (text-ink, bg-paper, borders…)
+ * flips together. Day board → an espresso insert; night board → dark clay.
+ */
+@utility tone-invert {
+  --ink: oklch(0.935 0.02 85);
+  --paper: oklch(0.215 0.02 47);
+  --cream: oklch(0.262 0.022 50);
+  --sand: oklch(0.3 0.026 50);
+  --raised: oklch(0.25 0.022 49);
+  --deep: oklch(0.18 0.018 46);
+  --clay: oklch(0.72 0.115 47);
+  --clay-ink: oklch(0.76 0.11 50);
+  --olive: oklch(0.66 0.055 116);
+  --border: oklch(0.935 0.02 85 / 0.13);
+  --shadow-color: 25deg 40% 2%;
+  --highlight: oklch(0.95 0.03 80 / 0.05);
+  --paper-fibre: var(--fibre-dark);
+  background-color: var(--paper);
+  background-image:
+    var(--paper-fibre),
+    radial-gradient(70% 60% at 85% 20%, color-mix(in oklab, var(--clay) 9%, transparent), transparent 70%);
+  color: var(--ink);
+}
+
+/* On the night board the insert becomes dark clay rather than a bright slab:
+   one step warmer and lighter than the espresso page, still unmistakably an insert. */
+.dark .tone-invert {
+  --ink: oklch(0.94 0.02 85);
+  --paper: oklch(0.275 0.034 44);
+  --cream: oklch(0.315 0.036 45);
+  --sand: oklch(0.345 0.036 46);
+  --raised: oklch(0.3 0.035 45);
+  --deep: oklch(0.235 0.03 44);
+  --clay: oklch(0.76 0.11 50);
+  --clay-ink: oklch(0.79 0.1 52);
+  --stamp-clay: oklch(0.7 0.115 47);
+  --olive: oklch(0.7 0.055 116);
+  --border: oklch(0.94 0.02 85 / 0.14);
+  --shadow-color: 25deg 40% 2%;
+  --highlight: oklch(0.95 0.03 80 / 0.06);
+  --paper-fibre: var(--fibre-dark);
+}
+
+/* ── Type helpers ───────────────────────────────────────────────────────── */
+
+/* Small uppercase label above headings. Readable size and contrast. */
+@utility eyebrow {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Display scale. Three steps only, so headings contrast instead of competing:
+   the page title, the section heading, and the statement lines (set inline). */
+@utility h-page {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 7.2vw, 6.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.038em;
+}
+
+@utility h-section {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 4.4vw, 4.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.028em;
+}
+
+/* Supporting copy beside a heading: quieter and smaller than the heading's
+   world — one size, one measure, one tone. */
+@utility lede {
+  font-size: 15.5px;
+  line-height: 1.75;
+  letter-spacing: 0.003em;
+  text-wrap: pretty;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+}
+
+/* Secondary metadata in sentence case. */
+@utility meta {
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+}
+
+/* Editorial link: the underline draws itself left → right on hover/focus. */
+@utility ed-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  padding-bottom: 2px;
+  transition:
+    background-size 0.35s var(--ease-drift),
+    color 0.2s ease;
+  &:hover,
+  &:focus-visible {
+    background-size: 100% 1px;
+  }
+}
+
+/* Same, but with a faint resting underline that strengthens on hover. */
+@utility ed-link-rest {
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(color-mix(in oklab, currentColor 28%, transparent), color-mix(in oklab, currentColor 28%, transparent));
+  background-repeat: no-repeat;
+  background-position:
+    0 100%,
+    0 100%;
+  background-size:
+    0% 1px,
+    100% 1px;
+  padding-bottom: 2px;
+  transition:
+    background-size 0.35s var(--ease-drift),
+    color 0.2s ease;
+  &:hover,
+  &:focus-visible {
+    background-size:
+      100% 1px,
+      100% 1px;
+  }
+}
+
+/* Generous, consistent vertical rhythm for page sections. */
+@utility section-pad {
+  padding-block: clamp(5rem, 9vw, 8.5rem);
+}
+
+/* Restrained loading surface: a slow, low-contrast sheen. */
+@keyframes tx-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@utility skeleton {
+  background-color: var(--cream);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in oklab, var(--raised) 70%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: tx-shimmer 1.8s ease-in-out infinite;
+}
+
+/* ── Theme switch ──────────────────────────────────────────────────────────
+ * The new theme is revealed as a soft circle opening from the toggle, so it
+ * feels like the material itself changing. Named view-transition elements
+ * are folded into the root snapshot during the switch so nothing pops.
+ */
+@keyframes tx-theme-reveal {
+  from {
+    clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 0%));
+  }
+  to {
+    clip-path: circle(var(--vt-r, 150vmax) at var(--vt-x, 50%) var(--vt-y, 0%));
+  }
+}
+
+html.theme-vt * {
+  view-transition-name: none !important;
+}
+
+html.theme-vt::view-transition-old(root) {
+  animation: none;
+}
+
+html.theme-vt::view-transition-new(root) {
+  animation: tx-theme-reveal 0.62s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Invisible, larger tap target for small inline links (≥44px tall), no layout change. */
+@utility hit {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -12px -8px;
+  }
 }

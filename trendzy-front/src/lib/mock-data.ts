@@ -4,6 +4,13 @@ export interface Aesthetic {
   description: string;
   signalCount: number;
   trendScore: number;
+  brandInstagramHandle?: string;
+  trendScoreUpdatedAt?: number;
+  brandHypeSignals?: {
+    followers?: number;
+    engagementRate?: number;
+    postsPerWeek?: number;
+  };
   colorPalette: string[];
   heroImage: string;
   vibeTags: string[];
@@ -38,6 +45,13 @@ export interface Trend {
   name: string;
   aestheticId: string;
   trendScore: number;
+  brandInstagramHandle?: string;
+  trendScoreUpdatedAt?: number;
+  brandHypeSignals?: {
+    followers?: number;
+    engagementRate?: number;
+    postsPerWeek?: number;
+  };
   vibeTags: string[];
   aiSummary: string;
   whyTrending: string[];
@@ -50,6 +64,10 @@ export interface Trend {
   estimatedPrice: number;
   lastUpdatedAt: string;
   active: boolean;
+  underdogRating?: number;
+  ratingSignals?: Record<string, any>;
+  userRatingAverage?: number;
+  userRatingCount?: number;
   subcategory?: string;
 }
 export const aesthetics: Aesthetic[] = [
@@ -252,4 +270,5 @@ export function paletteVars(palette: string[]): React.CSSProperties {
     ["--aesthetic-4" as string]: d,
   };
 }
+
 

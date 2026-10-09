@@ -14,6 +14,9 @@ import java.util.List;
 @Repository
 public interface TrendRepository extends ReactiveMongoRepository<Trend, String> {
 
+    @Query("{ 'signalProducts.underdog.brandName': ?0 }")
+    Flux<Trend> findByBrandName(String brandName);
+
     // Infinite scroll using Flux
         @Query(value = "{ 'category': { '$in': ?0 }, 'enrichmentStatus': 'COMPLETED' }",
             sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1 }")

@@ -23,3 +23,7 @@ trendzy-front/.vinxi/
 # ── OS junk ──
 .DS_Store
 Thumbs.db
+# Ignore temp patches and design zips
+trendzy-front/trendxee-frontend.patch
+lovable-frontend-design-code*
+loadtest/

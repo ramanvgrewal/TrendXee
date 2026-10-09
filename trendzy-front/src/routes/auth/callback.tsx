@@ -15,10 +15,10 @@ function AuthCallbackComponent() {
   }, [navigate])
 
   return (
-    <div className="flex h-screen w-full items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-        <p className="text-lg font-medium">Authenticating...</p>
+    <div className="flex min-h-[70svh] w-full items-center justify-center px-5">
+      <div className="flex flex-col items-center gap-5 text-center" role="status">
+        <div className="size-9 animate-spin rounded-full border-2 border-clay border-t-transparent" />
+        <p className="font-display text-2xl italic">Signing you in…</p>
       </div>
     </div>
   )
