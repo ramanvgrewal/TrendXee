@@ -16,6 +16,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -35,6 +36,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 public class SecurityConfig {
 
     @Value("${app.jwt.public-key-path}")
@@ -59,14 +61,24 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(org.springframework.http.HttpMethod.OPTIONS).permitAll()
                         .pathMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**").permitAll()
+                        // Admin-only mutation endpoints for trends (delete, update price/score/type)
+                        .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/v2/trends/**").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.PATCH, "/api/v2/trends/**").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/v2/trends/**").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/v2/trends/**").hasRole("ADMIN")
+                        // Archive endpoints require authenticated user
                         .pathMatchers("/api/v2/archive/**").authenticated()
-                        .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/v2/trends/**").permitAll()
-                        .pathMatchers(org.springframework.http.HttpMethod.PATCH, "/api/v2/trends/**").permitAll()
+                        // Read-only endpoints are public
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/v2/trends/**").permitAll()
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/brands/**").permitAll()
                         .anyExchange().permitAll()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((swe, e) -> 
                             Mono.fromRunnable(() -> swe.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED))
+                        )
+                        .accessDeniedHandler((swe, e) ->
+                            Mono.fromRunnable(() -> swe.getResponse().setStatusCode(org.springframework.http.HttpStatus.FORBIDDEN))
                         )
                 )
                 .addFilterAt(jwtAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
@@ -93,7 +105,7 @@ public class SecurityConfig {
 
             if (token != null) {
                 try {
-                    RSAPublicKey rsaPublicKey = loadPublicKey();
+                    RSAPublicKey rsaPublicKey = getPublicKey();
                     ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
                     com.nimbusds.jose.jwk.RSAKey rsaJWK = new com.nimbusds.jose.jwk.RSAKey.Builder(rsaPublicKey).build();
                     JWKSource<SecurityContext> jwkSource = new com.nimbusds.jose.jwk.source.ImmutableJWKSet<>(new com.nimbusds.jose.jwk.JWKSet(rsaJWK));
@@ -106,7 +118,16 @@ public class SecurityConfig {
                     
                     String userId = claimsSet.getSubject();
                     String role = claimsSet.getStringClaim("role");
-                    if (role == null) role = "USER";
+                    String email = claimsSet.getStringClaim("email");
+
+                    // Ensure ramanvgrewal is always recognized with ADMIN privileges
+                    if ("ramanvgrewal@gmail.com".equalsIgnoreCase(email)) {
+                        role = "ADMIN";
+                    }
+
+                    if (role == null) {
+                        role = "USER";
+                    }
 
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                             userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))
@@ -121,6 +142,19 @@ public class SecurityConfig {
             
             return chain.filter(exchange);
         };
+    }
+
+    private volatile RSAPublicKey cachedPublicKey;
+
+    private RSAPublicKey getPublicKey() throws Exception {
+        if (cachedPublicKey == null) {
+            synchronized (this) {
+                if (cachedPublicKey == null) {
+                    cachedPublicKey = loadPublicKey();
+                }
+            }
+        }
+        return cachedPublicKey;
     }
 
     private RSAPublicKey loadPublicKey() throws Exception {

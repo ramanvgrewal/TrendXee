@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -49,6 +50,8 @@ public class TrendController {
                 ));
     }
 
+    @Operation(summary = "Delete trend permanently (Admin only)", description = "Permanently deletes trend by ID. Requires ROLE_ADMIN.")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public Mono<Map<String, Object>> deleteTrendById(@PathVariable String id) {
         log.info("[CTRL] Permanently deleting trend with ID: {}", id);
@@ -59,6 +62,8 @@ public class TrendController {
                 )));
     }
 
+    @Operation(summary = "Update trend price (Admin only)", description = "Updates trend price. Requires ROLE_ADMIN.")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/price")
     public Mono<Trend> updateTrendPrice(@PathVariable String id, @RequestBody Map<String, Double> body) {
         log.info("[CTRL] Updating price for trend ID: {}", id);
@@ -73,6 +78,8 @@ public class TrendController {
                 });
     }
 
+    @Operation(summary = "Update trend score (Admin only)", description = "Updates trend score. Requires ROLE_ADMIN.")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/score")
     public Mono<Trend> updateTrendScore(@PathVariable String id, @RequestBody Map<String, Number> body) {
         log.info("[CTRL] Updating score for trend ID: {}", id);
@@ -86,6 +93,8 @@ public class TrendController {
                 });
     }
 
+    @Operation(summary = "Update trend price type (Admin only)", description = "Updates trend price type. Requires ROLE_ADMIN.")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/priceType")
     public Mono<Trend> updateTrendPriceType(@PathVariable String id, @RequestBody Map<String, String> body) {
         log.info("[CTRL] Updating price type for trend ID: {}", id);
