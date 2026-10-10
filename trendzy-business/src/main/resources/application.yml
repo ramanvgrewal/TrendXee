@@ -49,3 +49,11 @@ app:
     name: ${COOKIE_NAME:trendxee_token}
     domain: ${COOKIE_DOMAIN:localhost}
     secure: ${COOKIE_SECURE:false}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha

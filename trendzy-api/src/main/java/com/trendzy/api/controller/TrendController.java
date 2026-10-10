@@ -2,6 +2,8 @@ package com.trendzy.api.controller;
 
 import com.trendzy.api.model.Trend;
 import com.trendzy.api.repository.TrendRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +14,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Trends", description = "Trending clothing & styles catalog")
 @RestController
 @RequestMapping("/api/v2/trends")
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class TrendController {
 
     private final TrendRepository trendRepository;
 
+    @Operation(summary = "Get trends by category", description = "Paginated list of trend items filtered by category")
     @GetMapping
     public Mono<Map<String, Object>> getTrends(
             @RequestParam(defaultValue = "streetwear") String category,

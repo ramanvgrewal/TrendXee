@@ -35,7 +35,10 @@ public class SecurityConfig {
             .formLogin(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/error", "/api/auth/**", "/api/analytics/**", "/oauth2/**", "/login/**").permitAll()
+                .requestMatchers(
+                    "/", "/error", "/api/auth/**", "/api/analytics/**", "/oauth2/**", "/login/**",
+                    "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**"
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2

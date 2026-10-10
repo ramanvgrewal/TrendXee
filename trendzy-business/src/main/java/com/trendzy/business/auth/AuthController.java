@@ -4,6 +4,8 @@ import com.trendzy.business.auth.dto.AuthResponse;
 import com.trendzy.business.auth.dto.LoginRequest;
 import com.trendzy.business.auth.dto.SignupRequest;
 import com.trendzy.business.user.User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Authentication", description = "Endpoints for user login, signup, and logout")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @Operation(summary = "User login", description = "Authenticates user credentials and issues JWT auth cookie")
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         User user = authService.login(request);
@@ -30,6 +34,7 @@ public class AuthController {
                 .body(new AuthResponse(user));
     }
 
+    @Operation(summary = "User registration", description = "Creates a new user account and returns JWT auth cookie")
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest request) {
         User user = authService.signup(request);
@@ -40,6 +45,7 @@ public class AuthController {
                 .body(new AuthResponse(user));
     }
     
+    @Operation(summary = "User logout", description = "Clears authentication cookies and invalidates session")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(jakarta.servlet.http.HttpServletRequest request) {
         ResponseCookie cookie = authService.generateLogoutCookie();

@@ -58,6 +58,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(org.springframework.http.HttpMethod.OPTIONS).permitAll()
+                        .pathMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**").permitAll()
                         .pathMatchers("/api/v2/archive/**").authenticated()
                         .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/v2/trends/**").permitAll()
                         .pathMatchers(org.springframework.http.HttpMethod.PATCH, "/api/v2/trends/**").permitAll()
