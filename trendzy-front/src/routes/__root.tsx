@@ -83,13 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "A hand-pinned board of aesthetic lanes, scored by the signals gathering behind each fit.",
+          "A proving ground for India's indie fashion brands — audited for trust, scored for real Instagram hype, and backed before they go viral.",
       },
       { property: "og:title", content: "TrendXee — fits before they go viral" },
       {
         property: "og:description",
         content:
-          "A hand-pinned board of aesthetic lanes, scored by the signals gathering behind each fit.",
+          "A proving ground for India's indie fashion brands — audited for trust, scored for real Instagram hype, and backed before they go viral.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

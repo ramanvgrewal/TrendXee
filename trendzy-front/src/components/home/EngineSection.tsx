@@ -5,20 +5,20 @@ import { follow } from "@/motion/tokens";
 
 const STEPS = [
   {
-    title: "Listen",
-    body: "We watch what people actually post, search and repost across social feeds, marketplaces and indie brand stores.",
+    title: "Discover",
+    body: "We track rising fashion drops across indie storefronts and creators, cutting through marketplace clutter to find who made each fit first.",
   },
   {
-    title: "Cluster",
-    body: "Related chatter is grouped into one drop — a single fit idea with the reasons it is climbing right now.",
+    title: "Audit",
+    body: "Every underdog brand is vetted for genuine trust signals — verifying Cash on Delivery readiness, verified reviews, and fulfillment reliability.",
   },
   {
-    title: "Score",
-    body: "Each drop gets a trend score from signal volume, velocity and how shoppable it currently is.",
+    title: "Hype Score",
+    body: "We measure true momentum (0–100) from the label's Instagram footprint — analyzing authentic follower growth, real engagement, and posting cadence.",
   },
   {
-    title: "Source",
-    body: "We pin the underdog brand making it first, then the mainstream lookalikes, so you can choose either.",
+    title: "Back",
+    body: "The community rates and reviews the brand, helping shoppers back authentic underdogs while comparing them with mainstream lookalikes.",
   },
 ];
 
@@ -42,15 +42,15 @@ export function EngineSection() {
           <RevealHeading
             className="mt-4 h-section"
             lines={[
-              "Noise in,",
+              "Audited for trust,",
               <>
-                <em className="italic text-clay">one honest drop</em> out.
+                <em className="italic text-clay">backed by real hype</em>.
               </>,
             ]}
           />
         </div>
         <p className="lede self-end lg:col-span-4 lg:col-start-9">
-          Every drop on the board went through the same four steps. Scores move as the chatter moves.
+          Every label on the board goes through the same proving ground — audited for trust, scored for hype, and backed by the community.
         </p>
       </div>
 

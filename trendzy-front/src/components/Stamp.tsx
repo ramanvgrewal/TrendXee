@@ -17,11 +17,11 @@ const sizes = {
   lg: "size-14 text-[22px]",
 };
 
-/** The inked trend score, printed like a rubber stamp on the board. */
+/** The inked Brand Hype score, printed like a rubber stamp on the board. */
 export function Stamp({ score, tone = "clay", size = "md", pressable = false, className = "" }: StampProps) {
   return (
     <m.span
-      aria-label={`Trend score ${score}`}
+      aria-label={`Brand hype score ${score}`}
       role="img"
       whileHover={pressable ? { rotate: -4, scale: 1.05 } : undefined}
       whileTap={pressable ? { scale: 0.9, rotate: -8 } : undefined}

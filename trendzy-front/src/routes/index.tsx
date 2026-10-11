@@ -27,7 +27,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Eight lanes of rising fits, read from real signals, with the indie brand behind each trend and where to buy it.",
+          "Eight lanes of rising fits audited for trust and Instagram hype, with the indie brand behind each trend and where to buy it.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

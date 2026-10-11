@@ -14,7 +14,7 @@ export const Route = createFileRoute("/about")({
       { property: "og:title", content: "About TrendXee" },
       {
         property: "og:description",
-        content: "Trends read from real signals, underdog brands credited first, and links straight to the official store.",
+        content: "Indie fashion labels audited for trust, scored for real Instagram hype, and backed before they go viral.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/about")({
 const notes = [
   {
     title: "No gatekeeping",
-    body: "When something is rising, we say what it is, why it is climbing and where to get it. No vague mood boards, no paywall on the answer.",
+    body: "When an indie label drops heat, we show who made it first, how their trust metrics stack up, and where to buy. No vague mood boards, no paywalls.",
   },
   {
     title: "Underdogs first",
@@ -34,19 +34,19 @@ const notes = [
   },
   {
     title: "Straight to the store",
-    body: "Every product here links to the brand's own store or the marketplace listing. Nothing is resold through us and no step is added in between.",
+    body: "Every product here links to the brand's own official store or verified marketplace listing. Nothing is marked up or resold through us.",
   },
   {
-    title: "Signals, not guesses",
-    body: "We read what people post and search to pin the drops currently on the board across all lanes. Scores move as the chatter moves.",
+    title: "Audited, not guessed",
+    body: "We audit each indie label's trust signals (COD, verified buyer reviews) and track their Instagram momentum to calculate real Brand Hype. No sponsored fluff.",
   },
 ];
 
 const howTo = [
   "Pick the lane closest to your wardrobe — bottoms, tees, outerwear, sneakers, sportswear, anime, polos, or caps.",
-  "Read the drops from the top; the trend score tells you how hot each one is right now.",
-  "Open a drop and check why it's climbing before you buy, so you know whether it has legs.",
-  "Save the ones you like to your archive, then buy from the underdog or the mainstream pick.",
+  "Check the Brand Hype and 5-Star Trust badges to verify Instagram momentum and verified legitimacy before you buy.",
+  "Open a drop to review community feedback, check Instagram metrics, and compare the indie original against the mainstream lookalike.",
+  "Save the ones you like to your archive, leave your own brand review, or buy directly from the underdog.",
 ];
 
 /** About is a reading page: calm type, almost no motion. */

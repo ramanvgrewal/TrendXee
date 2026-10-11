@@ -131,8 +131,8 @@ function Stage({ progress, products }: { progress: MotionValue<number>; products
 
       {/* Chapter rail */}
       <div className="pointer-events-none absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-4 eyebrow text-[11px] text-ink/70">
-        <span className="max-sm:hidden">How TrendXee reads the feed</span>
-        <span className="relative block h-px w-24 overflow-hidden bg-ink/15">
+        <span className="max-sm:hidden">The underdog proving ground</span>
+        <span className="relative block h-px w-24 overflow-hidden bg-ink/12">
           <m.span className="absolute inset-0 origin-left bg-clay" style={{ scaleX: rail }} />
         </span>
         <m.span className="w-5 font-display text-sm normal-case italic tracking-normal text-clay">{chapter}</m.span>

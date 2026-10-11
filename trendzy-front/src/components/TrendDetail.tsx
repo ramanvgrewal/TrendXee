@@ -242,7 +242,7 @@ function DetailBody({
           </DialogPrimitive.Title>
 
           <m.div custom={0} variants={stagger} initial="hidden" animate="show" className="meta mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
-            {score > 0 && <span>Trend score {score}</span>}
+            {score > 0 && <span>Brand hype {score}</span>}
             {trend.indiaRelevant && <span>Relevant in India</span>}
           </m.div>
 
@@ -443,7 +443,7 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent className="max-w-sm rounded-[20px] border-0 bg-raised shadow-lift p-7">
           <DialogHeader>
-            <DialogTitle className="font-display text-2xl font-normal">{editing === "score" ? "Trend score" : "Underdog price (₹)"}</DialogTitle>
+            <DialogTitle className="font-display text-2xl font-normal">{editing === "score" ? "Brand hype score" : "Underdog price (₹)"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={save} className="mt-2 flex flex-col gap-4">
             <input
