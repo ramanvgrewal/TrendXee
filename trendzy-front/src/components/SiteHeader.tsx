@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, m, useMotionValueEvent, useScroll } from "framer-motion";
-import { ChevronDown, LogOut, Mail, Bookmark, Search } from "lucide-react";
+import { ChevronDown, LogOut, Mail, Bookmark } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,6 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { ThemeIcon, ThemeToggle, useTheme } from "@/components/ThemeToggle";
 import { AuthModal } from "@/components/AuthModal";
 import { ContactDialog } from "@/components/ContactDialog";
-import { SearchDialog } from "@/components/SearchDialog";
 import { Cta, ctaClass } from "@/components/Cta";
 import { Magnetic } from "@/motion/Magnetic";
 import { ease, spring } from "@/motion/tokens";
@@ -43,7 +42,6 @@ export function SiteHeader() {
   const { pathname } = useLocation();
   const [authOpen, setAuthOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { data: user } = useQuery(currentUserQuery);
@@ -87,16 +85,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <button
-            type="button"
-            onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-2 rounded-full border border-border/80 bg-paper/60 px-3 py-1.5 text-xs text-ink/60 transition-colors hover:border-ink/30 hover:text-ink hover:bg-paper"
-            title="Search drops and aesthetics (Cmd+K)"
-          >
-            <Search className="size-3.5 text-ink/50" />
-            <span>Search drops...</span>
-            <kbd className="rounded bg-ink/5 px-1.5 py-0.5 text-[10px] font-mono text-ink/40">⌘K</kbd>
-          </button>
           <ThemeToggle />
           {user ? (
             <ProfileMenu user={user} onContact={() => setContactOpen(true)} onLogout={handleLogout} />
@@ -111,14 +99,6 @@ export function SiteHeader() {
 
         {/* Mobile */}
         <div className="flex items-center gap-1 md:hidden">
-          <button
-            type="button"
-            onClick={() => setSearchOpen(true)}
-            aria-label="Search"
-            className="grid size-10 place-items-center rounded-full text-ink hover:bg-ink/[0.06]"
-          >
-            <Search className="size-4" />
-          </button>
           <ThemeToggle />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
@@ -160,7 +140,6 @@ export function SiteHeader() {
 
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
       <ContactDialog open={contactOpen} onOpenChange={setContactOpen} user={user} />
-      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 }
