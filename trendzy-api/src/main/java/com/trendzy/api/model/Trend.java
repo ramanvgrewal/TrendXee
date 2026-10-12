@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -16,6 +18,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "trends")
+@CompoundIndexes({
+    @CompoundIndex(name = "category_enrichment_score_idx", def = "{ 'category': 1, 'enrichmentStatus': 1, 'trendScore': -1, 'lastUpdatedAt': -1 }"),
+    @CompoundIndex(name = "category_subcat_score_idx", def = "{ 'category': 1, 'subcategory': 1, 'enrichmentStatus': 1, 'trendScore': -1, 'lastUpdatedAt': -1 }")
+})
 public class Trend {
     @Id
     private String id;

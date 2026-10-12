@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TrendBoard } from "@/components/TrendBoard";
 import { AuthModal } from "@/components/AuthModal";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
@@ -28,30 +28,25 @@ export const Route = createFileRoute("/archive")({
 type Archived = { id: string; trendSnapshot: Trend };
 
 function ArchivePage() {
+  const queryClient = useQueryClient();
   const { data: user, isLoading: isUserLoading } = useQuery(currentUserQuery);
   const isAuthenticated = !!user;
-  const [items, setItems] = useState<Archived[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const fetchArchive = async () => {
-    try {
-      setLoading(true);
-      setError(false);
-      setItems(await getArchivedTrends());
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: items = [],
+    isLoading: isArchiveLoading,
+    isError: error,
+    refetch: fetchArchive,
+  } = useQuery<Archived[]>({
+    queryKey: ["archivedTrends"],
+    queryFn: getArchivedTrends,
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
 
-  useEffect(() => {
-    if (isAuthenticated) fetchArchive();
-  }, [isAuthenticated]);
-
+  const loading = isUserLoading || (isAuthenticated && isArchiveLoading);
   const trends = items.map((i) => i.trendSnapshot);
 
   return (
@@ -93,7 +88,7 @@ function ArchivePage() {
             title="Your archive didn't load."
             body="We couldn't reach your saved drops just now. They're safe — try again in a moment."
             action={
-              <button type="button" onClick={fetchArchive} className={ctaClass("primary")}>
+              <button type="button" onClick={() => fetchArchive()} className={ctaClass("primary")}>
                 Try again
               </button>
             }
@@ -120,9 +115,9 @@ function ArchivePage() {
               openId={openId}
               onOpenChange={setOpenId}
               archivedContext
-              onUnarchived={(id) => {
+              onUnarchived={(_id) => {
                 setOpenId(null);
-                setItems((prev) => prev.filter((i) => i.trendSnapshot.id !== id));
+                queryClient.invalidateQueries({ queryKey: ["archivedTrends"] });
               }}
             />
           </>

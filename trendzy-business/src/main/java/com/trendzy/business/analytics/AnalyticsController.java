@@ -17,7 +17,7 @@ public class AnalyticsController {
     private final ProductClickRepository productClickRepository;
 
     @PostMapping("/click")
-    public ResponseEntity<Void> trackClick(@RequestBody ClickRequest request) {
+    public ResponseEntity<Void> trackClick(@jakarta.validation.Valid @RequestBody ClickRequest request) {
         String userId = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         

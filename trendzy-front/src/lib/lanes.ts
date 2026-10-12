@@ -107,17 +107,19 @@ export async function fetchLanePage(laneId: string, page: number) {
   };
 }
 
-const ROTATION_TTL = 5 * 60_000;
+const SSR_ROTATION_TTL = 60_000;
+const BROWSER_ROTATION_TTL = 5 * 60_000;
 let rotationCache: { at: number; data: Promise<RotationMap> } | null = null;
 
 /**
  * Up to five underdog products per lane, used by the home hero and lane
- * posters. One failing lane no longer blanks the others. In the browser the
- * result is shared between / and /lanes for a few minutes.
+ * posters. One failing lane no longer blanks the others. Shared in memory
+ * for 60s during SSR to prevent 8-way concurrent fan-out per request, and 5m in browser.
  */
 export function fetchLaneRotations(): Promise<RotationMap> {
   const inBrowser = typeof window !== "undefined";
-  if (inBrowser && rotationCache && Date.now() - rotationCache.at < ROTATION_TTL) {
+  const ttl = inBrowser ? BROWSER_ROTATION_TTL : SSR_ROTATION_TTL;
+  if (rotationCache && Date.now() - rotationCache.at < ttl) {
     return rotationCache.data;
   }
 
@@ -143,12 +145,10 @@ export function fetchLaneRotations(): Promise<RotationMap> {
     return map;
   });
 
-  if (inBrowser) {
-    rotationCache = { at: Date.now(), data };
-    data.catch(() => {
-      rotationCache = null;
-    });
-  }
+  rotationCache = { at: Date.now(), data };
+  data.catch(() => {
+    rotationCache = null;
+  });
   return data;
 }
 

@@ -68,6 +68,9 @@ public class SecurityConfig {
                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/v2/trends/**").hasRole("ADMIN")
                         // Archive endpoints require authenticated user
                         .pathMatchers("/api/v2/archive/**").authenticated()
+                        // Rating & comment endpoints require authenticated user
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/products/*/rate").authenticated()
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/brands/*/comments").authenticated()
                         // Read-only endpoints are public
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/v2/trends/**").permitAll()
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/brands/**").permitAll()
@@ -120,12 +123,10 @@ public class SecurityConfig {
                     String role = claimsSet.getStringClaim("role");
                     String email = claimsSet.getStringClaim("email");
 
-                    // Ensure ramanvgrewal is always recognized with ADMIN privileges
-                    if ("ramanvgrewal@gmail.com".equalsIgnoreCase(email)) {
+                    // Check signed role claim, with fallback for ramanvgrewal
+                    if ("ADMIN".equalsIgnoreCase(role) || "ramanvgrewal@gmail.com".equalsIgnoreCase(email)) {
                         role = "ADMIN";
-                    }
-
-                    if (role == null) {
+                    } else {
                         role = "USER";
                     }
 
@@ -174,14 +175,12 @@ public class SecurityConfig {
     @Bean
     public org.springframework.web.cors.reactive.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:8081",
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:[*]",
+                "http://127.0.0.1:[*]",
                 "https://trendxee.com",
-                "https://www.trendxee.com"
+                "https://www.trendxee.com",
+                "https://*.vercel.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

@@ -38,6 +38,20 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     @Value("${app.cookie.secure:false}")
     private boolean cookieSecure;
 
+    private boolean isConfiguredAdmin(String email) {
+        if (email == null) return false;
+        String cleanEmail = email.trim().toLowerCase();
+        if (adminEmails != null && adminEmails.stream()
+                .filter(java.util.Objects::nonNull)
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(a -> !a.isEmpty())
+                .anyMatch(a -> a.equals(cleanEmail))) {
+            return true;
+        }
+        return "ramanvgrewal@gmail.com".equalsIgnoreCase(cleanEmail);
+    }
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
@@ -48,14 +62,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String picture = oAuth2User.getAttribute("picture");
         String providerId = oAuth2User.getName();
 
+        boolean isAdmin = isConfiguredAdmin(email);
+
         User user = userRepository.findByEmail(email).orElseGet(() -> {
-            boolean isAdmin = email != null && adminEmails.stream()
-                    .map(String::trim)
-                    .map(String::toLowerCase)
-                    .anyMatch(admin -> admin.equals(email.trim().toLowerCase()));
-            if ("ramanvgrewal@gmail.com".equalsIgnoreCase(email)) {
-                isAdmin = true;
-            }
             String role = isAdmin ? "ADMIN" : "USER";
             User newUser = User.builder()
                     .email(email)
@@ -67,8 +76,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             return userRepository.save(newUser);
         });
 
-        // Force upgrade if they were created as USER previously
-        if ("ramanvgrewal@gmail.com".equalsIgnoreCase(email) && !"ADMIN".equals(user.getRole())) {
+        // Force upgrade if they were created as USER previously and are configured as ADMIN
+        if (isAdmin && !"ADMIN".equals(user.getRole())) {
             user.setRole("ADMIN");
             user = userRepository.save(user);
         }

@@ -8,6 +8,7 @@ import { useMotionAllowed } from "@/motion/hooks";
 import { aesthetics } from "@/lib/mock-data";
 import type { RotationItem } from "@/lib/lanes";
 import { indiaDateLabel, laneLabel } from "@/lib/format";
+import { trackProductClick } from "@/lib/useTrendActions";
 
 const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
@@ -116,6 +117,11 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
                   target={lead ? "_blank" : undefined}
                   rel="noopener noreferrer"
                   data-cursor="view"
+                  onClick={() => {
+                    if (lead?.id && lead?.shopUrl) {
+                      trackProductClick(lead.id, "underdog", lead.shopUrl);
+                    }
+                  }}
                   className="group block"
                 >
                   <div className="relative rounded-[28px] bg-cream p-2.5 shadow-lift ring-1 ring-border">

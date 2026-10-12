@@ -18,9 +18,13 @@ public interface TrendRepository extends ReactiveMongoRepository<Trend, String> 
     Flux<Trend> findByBrandName(String brandName);
 
     // Infinite scroll using Flux
-        @Query(value = "{ 'category': { '$in': ?0 }, 'enrichmentStatus': 'COMPLETED' }",
-            sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1 }")
-        Flux<Trend> findByCategory(List<String> categories, Pageable pageable);
+    @Query(value = "{ 'category': { '$in': ?0 }, 'enrichmentStatus': 'COMPLETED' }",
+        sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1 }")
+    Flux<Trend> findByCategory(List<String> categories, Pageable pageable);
+
+    @Query(value = "{ 'category': { '$in': ?0 }, 'subcategory': { '$regex': ?1, '$options': 'i' }, 'enrichmentStatus': 'COMPLETED' }",
+        sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1 }")
+    Flux<Trend> findByCategoryAndSubcategory(List<String> categories, String subcategory, Pageable pageable);
 
     // Delete trends by category with score less than a threshold
     Mono<Long> deleteByCategoryAndTrendScoreLessThan(String category, double maxScore);

@@ -2,9 +2,11 @@ import { queryOptions } from "@tanstack/react-query";
 import { businessApiFetch } from "@/lib/api";
 
 export type CurrentUser = {
+  id?: string;
   email?: string;
   name?: string;
   picture?: string;
+  role?: string;
   [key: string]: unknown;
 };
 

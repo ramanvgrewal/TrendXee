@@ -7,12 +7,61 @@ import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { RevealHeading } from "@/motion/RevealHeading";
 import { ease, spring } from "@/motion/tokens";
-import { aesthetics } from "@/lib/mock-data";
+import { aesthetics, type Trend } from "@/lib/mock-data";
+import { TrendDetail } from "@/components/TrendDetail";
 import type { RotationItem } from "@/lib/lanes";
 import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
 import { businessApiFetch } from "@/lib/api";
 
 const STORY_MS = 7000;
+
+function rotationItemToTrend(item: RotationItem): Trend {
+  return {
+    id: item.id,
+    name: item.trendName,
+    aestheticId: item.category || "streetwear",
+    trendScore: item.score,
+    vibeTags: item.subcategory ? [item.subcategory] : [],
+    aiSummary: item.summary,
+    whyTrending: [],
+    indiaRelevant: true,
+    totalSignals: 1,
+    supportingSignals: [],
+    enrichmentStatus: "COMPLETED",
+    signalProducts: [],
+    estimatedPrice: item.price || 0,
+    lastUpdatedAt: new Date().toISOString(),
+    active: true,
+    products: {
+      underdog: {
+        brandName: item.brand,
+        title: item.title,
+        price: item.price || 0,
+        originalPrice: item.originalPrice,
+        currency: item.currency || "INR",
+        imageUrl: item.image,
+        shopUrl: item.shopUrl,
+      },
+      amazon: item.mainstream?.source === "amazon" ? {
+        brandName: item.mainstream.brand,
+        title: item.mainstream.title,
+        price: item.mainstream.price || 0,
+        currency: item.mainstream.currency || "INR",
+        imageUrl: item.mainstream.image,
+        shopUrl: item.mainstream.shopUrl,
+      } : undefined,
+      flipkart: item.mainstream?.source === "flipkart" ? {
+        brandName: item.mainstream.brand,
+        title: item.mainstream.title,
+        price: item.mainstream.price || 0,
+        currency: item.mainstream.currency || "INR",
+        imageUrl: item.mainstream.image,
+        shopUrl: item.mainstream.shopUrl,
+      } : undefined,
+    },
+    subcategory: item.subcategory,
+  };
+}
 
 /**
  * 03 — The Daily Five: five underdog drops, one per page, like flipping a
@@ -23,6 +72,7 @@ const STORY_MS = 7000;
 export function DailyFive({ items }: { items: RotationItem[] }) {
   const reduced = useReducedMotion();
   const [[index, direction], setPage] = useState<[number, number]>([0, 0]);
+  const [openTrend, setOpenTrend] = useState<Trend | null>(null);
   const [paused, setPaused] = useState(false);
   const elapsed = useMotionValue(0);
   const regionRef = useRef<HTMLElement>(null);
@@ -234,7 +284,11 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                   </>
                 )}
               </p>
-              <h3 className="mt-4 font-display text-[clamp(2rem,3.4vw,3.25rem)] leading-[1.02] tracking-[-0.02em]">
+              <h3
+                onClick={() => setOpenTrend(rotationItemToTrend(item))}
+                className="mt-4 font-display text-[clamp(2rem,3.4vw,3.25rem)] leading-[1.02] tracking-[-0.02em] cursor-pointer hover:text-clay transition-colors"
+                title="View full trend details & proof"
+              >
                 {item.trendName}
               </h3>
               {item.summary && <p className="mt-5 text-[16px] leading-relaxed text-ink/70">{item.summary}</p>}
@@ -259,6 +313,13 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                     Shop the underdog <CtaArrow className="-rotate-45 group-hover/cta:translate-x-0.5" />
                   </a>
                 </Cta>
+                <button
+                  type="button"
+                  onClick={() => setOpenTrend(rotationItemToTrend(item))}
+                  className={ctaClass("outline")}
+                >
+                  Inspect drop proof
+                </button>
                 {lane && (
                   <Link
                     to="/aesthetic/$id"
@@ -299,6 +360,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
           </div>
         </div>
       </div>
+      <TrendDetail trend={openTrend} onClose={() => setOpenTrend(null)} />
     </section>
   );
 }

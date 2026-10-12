@@ -219,6 +219,7 @@ function DetailBody({
             )}
           </p>
           <div className="flex shrink-0 items-center gap-1">
+          <WhatsAppShareButton trend={trend} laneId={lane?.id} />
           <ShareButton trend={trend} laneId={lane?.id} />
           <DialogPrimitive.Close
             data-story-close
@@ -508,6 +509,32 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+/** 1-click WhatsApp share: pre-fills drop title, brand handle, and direct TrendXee link. */
+function WhatsAppShareButton({ trend, laneId }: { trend: Trend; laneId?: string }) {
+  const shareOnWhatsApp = () => {
+    const url = laneId
+      ? `${window.location.origin}/aesthetic/${laneId}?trend=${encodeURIComponent(trend.id)}`
+      : window.location.href;
+    const brand = trend.products?.underdog?.brandName ? ` by ${trend.products.underdog.brandName}` : "";
+    const text = encodeURIComponent(`Check out "${trend.name}"${brand} on TrendXee:\n${url}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={shareOnWhatsApp}
+      aria-label="Share on WhatsApp"
+      className="grid size-10 place-items-center rounded-full text-ink/70 transition-colors hover:bg-emerald-500/10 hover:text-emerald-600"
+      title="Share on WhatsApp"
+    >
+      <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.301-.15-1.78-.879-2.056-.979-.276-.101-.477-.15-.678.15-.2.301-.778.979-.953 1.18-.176.2-.351.226-.653.075-.301-.151-1.272-.469-2.424-1.496-.895-.798-1.5-1.784-1.675-2.085-.176-.301-.019-.464.132-.614.136-.135.301-.351.452-.527.151-.176.2-.301.301-.502.101-.201.05-.377-.025-.527-.075-.151-.678-1.632-.929-2.235-.245-.588-.493-.508-.678-.518-.176-.008-.376-.01-.577-.01-.201 0-.527.075-.803.376s-1.054 1.03-1.054 2.511 1.079 2.912 1.23 3.113c.15.201 2.124 3.243 5.145 4.549.719.311 1.28.497 1.718.636.723.23 1.381.197 1.901.12.579-.087 1.78-.728 2.031-1.431.251-.703.251-1.305.176-1.431-.075-.126-.276-.201-.577-.351zM12.04 2C6.51 2 2.02 6.49 2.02 12.02c0 1.99.585 3.84 1.597 5.397L2 22l4.757-1.564A9.972 9.972 0 0012.04 22c5.53 0 10.02-4.49 10.02-10.02C22.06 6.49 17.57 2 12.04 2z" />
+      </svg>
+    </button>
   );
 }
 

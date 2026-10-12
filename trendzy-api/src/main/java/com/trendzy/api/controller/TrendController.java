@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -28,11 +29,12 @@ public class TrendController {
     @GetMapping
     public Mono<Map<String, Object>> getTrends(
             @RequestParam(defaultValue = "streetwear") String category,
+            @RequestParam(required = false) String subcategory,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
 
-        log.info("[CTRL] Fetching trends for category: {}, page: {}, size: {}",
-                category, page, size);
+        log.info("[CTRL] Fetching trends for category: {}, subcategory: {}, page: {}, size: {}",
+                category, subcategory, page, size);
 
         String normalized = category.trim().toUpperCase();
         Pageable pageable = PageRequest.of(page, size);
@@ -40,14 +42,23 @@ public class TrendController {
                 ? List.of("CAPS", "ACCESSORIES")
                 : List.of(normalized);
 
-        return trendRepository.findByCategory(categories, pageable)
+        Flux<Trend> trendsFlux = (subcategory != null && !subcategory.trim().isEmpty())
+                ? trendRepository.findByCategoryAndSubcategory(categories, subcategory.trim(), pageable)
+                : trendRepository.findByCategory(categories, pageable);
+
+        return trendsFlux
                 .collectList()
-                .map(trends -> Map.of(
-                        "content", trends,
-                        "category", normalized,
-                        "page", page,
-                        "size", size
-                ));
+                .map(trends -> {
+                    Map<String, Object> result = new java.util.HashMap<>();
+                    result.put("content", trends);
+                    result.put("category", normalized);
+                    if (subcategory != null && !subcategory.trim().isEmpty()) {
+                        result.put("subcategory", subcategory.trim());
+                    }
+                    result.put("page", page);
+                    result.put("size", size);
+                    return result;
+                });
     }
 
     @Operation(summary = "Delete trend permanently (Admin only)", description = "Permanently deletes trend by ID. Requires ROLE_ADMIN.")

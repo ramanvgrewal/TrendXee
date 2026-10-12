@@ -12,11 +12,13 @@ import { businessApiFetch } from "@/lib/api";
 import { currentUserQuery } from "@/lib/user";
 import type { Trend } from "@/lib/mock-data";
 
-const ADMIN_EMAIL = "ramanvgrewal@gmail.com";
-
 export function useSession() {
   const { data: user } = useQuery(currentUserQuery);
-  return { user, isSignedIn: !!user, isAdmin: user?.email === ADMIN_EMAIL };
+  return {
+    user,
+    isSignedIn: !!user,
+    isAdmin: user?.role === "ADMIN" || user?.email === "ramanvgrewal@gmail.com",
+  };
 }
 
 /**

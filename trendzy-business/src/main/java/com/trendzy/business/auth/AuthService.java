@@ -28,6 +28,23 @@ public class AuthService {
     @Value("${app.cookie.secure:false}")
     private boolean cookieSecure;
 
+    @Value("#{'${app.admin-emails:}'.split(',')}")
+    private java.util.List<String> adminEmails;
+
+    private boolean isConfiguredAdmin(String email) {
+        if (email == null) return false;
+        String cleanEmail = email.trim().toLowerCase();
+        if (adminEmails != null && adminEmails.stream()
+                .filter(java.util.Objects::nonNull)
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(a -> !a.isEmpty())
+                .anyMatch(a -> a.equals(cleanEmail))) {
+            return true;
+        }
+        return "ramanvgrewal@gmail.com".equalsIgnoreCase(cleanEmail);
+    }
+
     public User login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
@@ -36,7 +53,7 @@ public class AuthService {
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        if ("ramanvgrewal@gmail.com".equalsIgnoreCase(user.getEmail()) && !"ADMIN".equals(user.getRole())) {
+        if (isConfiguredAdmin(user.getEmail()) && !"ADMIN".equals(user.getRole())) {
             user.setRole("ADMIN");
             user = userRepository.save(user);
         }
@@ -46,14 +63,16 @@ public class AuthService {
 
     public User signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already in use");
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT, "Email is already registered");
         }
 
+        String role = isConfiguredAdmin(request.getEmail()) ? "ADMIN" : "USER";
         User user = User.builder()
                 .email(request.getEmail())
                 .name(request.getName())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role("USER")
+                .role(role)
                 .build();
 
         return userRepository.save(user);

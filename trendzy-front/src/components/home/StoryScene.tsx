@@ -49,7 +49,7 @@ export function StoryScene({ items }: { items: RotationItem[] }) {
   if (reduced) return <StaticStory chosen={products[CHOSEN]} />;
 
   return (
-    <ScrollScene length={4.2} mobileLength={3.2} id="story">
+    <ScrollScene length={4.2} mobileLength={1.2} id="story">
       {(progress) => <Stage progress={progress} products={products} />}
     </ScrollScene>
   );
