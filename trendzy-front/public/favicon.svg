@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>TrendXee</title><rect width="64" height="64" rx="14" fill="#F1EBDE"/>
+  <defs>
+    <mask id="weave" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+      <rect width="64" height="64" fill="white"/>
+      <path d="M42 8H55C49 26 32 48 22 56H9C25 41 37 21 42 8Z" fill="black" stroke="black" stroke-width="6"/>
+    </mask>
+  </defs>
+  <g fill="#2B211B">
+    <path d="M9 8H22C28 24 39 41 55 56H41C25 42 15 24 9 8Z" mask="url(#weave)"/>
+    <path d="M42 8H55C49 26 32 48 22 56H9C25 41 37 21 42 8Z"/>
+  </g>
+</svg>

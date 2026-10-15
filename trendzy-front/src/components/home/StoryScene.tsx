@@ -1,4 +1,5 @@
-import { m, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
+import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
+import { m, useTransform, type MotionValue } from "framer-motion";
 import { ScrollScene } from "@/motion/ScrollScene";
 import { ScrollTextReveal } from "@/motion/ScrollTextReveal";
 import { Parallax, PointerScope } from "@/motion/Parallax";

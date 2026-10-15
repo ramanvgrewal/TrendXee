@@ -19,7 +19,7 @@ export function SiteFooter() {
       <div className="mx-auto grid w-full max-w-[1440px] grid-cols-2 gap-x-6 gap-y-12 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:py-20">
         <div className="col-span-2 lg:col-span-5">
           <Link to="/" className="inline-flex items-center gap-2.5">
-            <img src="/logo.png" alt="" className="size-8 object-contain" />
+            <img src="/brand/trendxee-mark.svg" alt="" width={32} height={32} className="size-8 shrink-0" />
             <span className="font-display text-2xl tracking-tight">
               Trend<em className="italic text-clay">Xee</em>
             </span>

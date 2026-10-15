@@ -31,7 +31,7 @@ export function LaneCard({
 
   return (
     <m.div
-      className={`group/lane relative ${className}`}
+      className={`group/lane relative min-h-[26rem] ${className}`}
       whileHover={lift.card}
       whileTap={lift.press}
       tabIndex={-1}
@@ -69,7 +69,7 @@ export function LaneCard({
           {/* Copy */}
           <div className="absolute inset-x-0 bottom-0 p-6 text-on-scrim sm:p-7">
             <Parallax depth={1.5} follow>
-              <h3 className="font-display text-[2.4rem] leading-none tracking-[-0.02em] sm:text-5xl">{laneLabel(aesthetic.name)}</h3>
+              <h3 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere]">{laneLabel(aesthetic.name)}</h3>
               <p className="mt-3 line-clamp-2 max-w-[22rem] text-[14px] leading-relaxed text-on-scrim/75">{aesthetic.description}</p>
               <div className="mt-5 flex items-center justify-between gap-4 border-t border-on-scrim/20 pt-4 eyebrow">
                 <span className="truncate text-on-scrim/75">

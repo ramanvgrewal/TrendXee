@@ -1,5 +1,6 @@
+import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useRef } from "react";
-import { m, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
+import { m, useScroll, useSpring, useTransform } from "framer-motion";
 import { RevealHeading } from "@/motion/RevealHeading";
 import { follow } from "@/motion/tokens";
 

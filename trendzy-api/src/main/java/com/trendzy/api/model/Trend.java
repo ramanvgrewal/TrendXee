@@ -34,7 +34,8 @@ public class Trend {
 
     private double trendScore;
     private String brandInstagramHandle;
-    private Long trendScoreUpdatedAt;
+    // Legacy records use epoch milliseconds; current scraper writes BSON dates.
+    private Object trendScoreUpdatedAt;
     private BrandHypeSignals brandHypeSignals;
 
 
@@ -110,6 +111,7 @@ public class Trend {
         private String priceType;
         private String shopUrl;
         private String imageUrl;
+        private List<String> imageUrls;
         private Boolean codAvailable;
     }
 }

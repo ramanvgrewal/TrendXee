@@ -1,5 +1,6 @@
+import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useRef } from "react";
-import { m, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { m, useScroll, useTransform } from "framer-motion";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { RevealHeading } from "@/motion/RevealHeading";
 import type { RotationItem } from "@/lib/lanes";

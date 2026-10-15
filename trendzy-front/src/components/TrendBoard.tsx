@@ -39,9 +39,9 @@ export function TrendBoard({
 
   return (
     <LayoutGroup>
-      <ul className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         {trends.map((trend, i) => (
-          <ScrollReveal as="li" key={trend.id} index={i % batchSize} y={24}>
+          <ScrollReveal as="li" key={trend.id} index={i % batchSize} y={24} className="min-w-0">
             <TrendCard
               trend={trend}
               onOpen={(t) => {

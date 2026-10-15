@@ -1,5 +1,6 @@
+import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useRef, type ElementType } from "react";
-import { m, useReducedMotion, useScroll, useTransform, type MotionValue } from "framer-motion";
+import { m, useScroll, useTransform, type MotionValue } from "framer-motion";
 
 /**
  * Editorial "typed by scrolling" text. Each word (or character) appears as

@@ -70,7 +70,7 @@ export function SiteHeader() {
     >
       <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between gap-6 px-5 sm:px-8">
         <Link to="/" className="group flex items-center gap-2.5" aria-label="TrendXee home">
-          <img src="/logo.png" alt="" className="size-8 object-contain transition-transform duration-500 group-hover:-rotate-6" />
+          <img src="/brand/trendxee-mark.svg" alt="" width={32} height={32} className="size-8 shrink-0" />
           <span className="font-display text-xl tracking-tight">
             Trend<em className="italic text-clay">Xee</em>
           </span>
@@ -297,7 +297,7 @@ function MobileMenu({
   };
   let i = 0;
   return (
-    <SheetContent side="right" className="fibre flex w-full flex-col overflow-y-auto border-l border-border bg-raised p-0 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:duration-200 data-[state=open]:duration-300 sm:max-w-md">
+    <SheetContent side="right" aria-describedby={undefined} className="fibre flex w-full flex-col overflow-y-auto border-l border-border bg-raised p-0 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:duration-200 data-[state=open]:duration-300 sm:max-w-md">
       <SheetTitle className="sr-only">Menu</SheetTitle>
       <div className="flex h-16 items-center px-6 eyebrow text-ink/70">Menu</div>
       <AnimatePresence>
@@ -310,10 +310,10 @@ function MobileMenu({
                   to="/aesthetic/$id"
                   params={{ id: a.id }}
                   onClick={onNavigate}
-                  className="flex items-baseline gap-2 border-b border-border py-3 font-display text-2xl active:text-clay"
+                  className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-2 border-b border-border py-3 font-display text-xl active:text-clay sm:text-2xl"
                 >
                   <span className="font-mono text-[10px] font-bold text-clay-ink">{String(idx + 1).padStart(2, "0")}</span>
-                  {laneLabel(a.name)}
+                  <span className="min-w-0 [overflow-wrap:anywhere]">{laneLabel(a.name)}</span>
                 </Link>
               </m.li>
             ))}

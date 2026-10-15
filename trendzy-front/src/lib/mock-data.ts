@@ -5,7 +5,7 @@ export interface Aesthetic {
   signalCount: number;
   trendScore: number;
   brandInstagramHandle?: string;
-  trendScoreUpdatedAt?: number;
+  trendScoreUpdatedAt?: string | number;
   brandHypeSignals?: {
     followers?: number;
     engagementRate?: number;
@@ -25,6 +25,7 @@ export interface ProductMatch {
   priceType?: string;
   currency: string;
   imageUrl: string;
+  imageUrls?: string[];
   shopUrl: string;
 }
 
@@ -46,7 +47,7 @@ export interface Trend {
   aestheticId: string;
   trendScore: number;
   brandInstagramHandle?: string;
-  trendScoreUpdatedAt?: number;
+  trendScoreUpdatedAt?: string | number;
   brandHypeSignals?: {
     followers?: number;
     engagementRate?: number;
@@ -94,9 +95,20 @@ export const aesthetics: Aesthetic[] = [
     underdogRotation: []
   },
     {
+    id: "jeans",
+    name: "JEANS",
+    description: "Baggy, straight, slim, relaxed, wide-leg, bootcut and flared denim fits.",
+    signalCount: 0,
+    trendScore: 0,
+    colorPalette: ["#1e3a5f", "#64748b"],
+    heroImage: "https://images.unsplash.com/photo-1584865288642-42078afe6942?w=900&q=80",
+    vibeTags: ["denim", "baggy", "straight", "wide-leg"],
+    underdogRotation: []
+  },
+  {
     id: "bottoms",
     name: "BOTTOMS",
-    description: "Baggy jeans, parachute pants, cargo and joggers stacking over sneakers.",
+    description: "Cargo, trackpants and sweatpants for everyday fits.",
     signalCount: 3980,
     trendScore: 88,
     colorPalette: ["#a3a3a3", "#525252", "#f5f5f4", "#0f172a"],
@@ -117,8 +129,8 @@ export const aesthetics: Aesthetic[] = [
   },
     {
     id: "sneakers",
-    name: "SNEAKERS",
-    description: "Chunky kicks, retro runners, and the grails taking over your feed.",
+    name: "SHOES",
+    description: "Sneakers and sports shoes only: everyday kicks, running and training shoes.",
     signalCount: 5120,
     trendScore: 96,
     colorPalette: ["#7f1d1d", "#dc2626", "#fca5a5", "#fef2f2"],
@@ -129,7 +141,7 @@ export const aesthetics: Aesthetic[] = [
     {
     id: "sportswear",
     name: "SPORTSWEAR",
-    description: "Compression layers, stringers and the fit-gear dominating gym-tok.",
+    description: "Football, basketball and cricket jerseys, plus gym and compression T-shirts.",
     signalCount: 1890,
     trendScore: 78,
     colorPalette: ["#facc15", "#78716c", "#1c1917", "#e7e5e4"],
@@ -150,8 +162,8 @@ export const aesthetics: Aesthetic[] = [
   },
     {
     id: "caps",
-    name: "CAPS",
-    description: "Trucker caps, snapbacks and statement headwear that finish the fit and turn a look into a signature.",
+    name: "CAPS & ACCESSORIES",
+    description: "Caps, bags, wallets, belts, jewelry and sunglasses that finish the fit.",
     signalCount: 2610,
     trendScore: 82,
     colorPalette: ["#e5e7eb", "#9ca3af", "#f59e0b", "#111827"],

@@ -51,10 +51,10 @@ export const lift = {
 export const follow = {
   /** The cursor's ink point: a hair behind the pointer, never jittery. */
   cursorDot: { stiffness: 700, damping: 52, mass: 0.25 },
-  /** The cursor ring/caption: a little further behind. */
-  cursorRing: { stiffness: 420, damping: 38, mass: 0.5 },
-  /** The cursor's glow: glides a beat behind, like ink spreading. */
-  cursorAura: { stiffness: 170, damping: 24, mass: 0.7 },
+  /** The cursor ring/caption: a short, responsive follow. */
+  cursorRing: { stiffness: 900, damping: 32, mass: 0.2 },
+  /** The cursor's glow: soft follow with minimal trailing distance. */
+  cursorAura: { stiffness: 450, damping: 28, mass: 0.35 },
   /** The ambient room light that follows the pointer across the page: slow, heavy. */
   ambient: { stiffness: 38, damping: 20, mass: 1.2 },
   /** Magnetic pull and its return. */

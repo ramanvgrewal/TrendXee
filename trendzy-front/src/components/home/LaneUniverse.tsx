@@ -1,5 +1,6 @@
+import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { m, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
+import { m, useScroll, useSpring, useTransform } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { LaneCard } from "@/components/LaneCard";
 import { RevealHeading } from "@/motion/RevealHeading";
@@ -10,7 +11,7 @@ import type { RotationMap } from "@/lib/lanes";
 
 /**
  * 04 — The lane universe. On desktop this is the site's one horizontal
- * moment: the section pins and vertical scrolling slides the eight lanes
+ * moment: the section pins and vertical scrolling slides the lanes
  * across the stage, then normal scrolling resumes. On phones (and with
  * reduced motion) it is a native swipeable rail — nothing hijacked.
  */
@@ -18,7 +19,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  const desktop = useMediaQuery("(min-width: 1024px)");
+  const desktop = useMediaQuery("(min-width: 1024px) and (min-height: 800px)");
   const pinned = desktop && !reduced;
   const [distance, setDistance] = useState(0);
 
@@ -41,7 +42,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
   const smooth = useSpring(scrollYProgress, follow.scroll);
   const x = useTransform(smooth, [0.04, 0.96], [0, -distance]);
-  const counter = useTransform(smooth, (v) => String(Math.min(8, Math.max(1, Math.round(v * 7) + 1))).padStart(2, "0"));
+  const counter = useTransform(smooth, (v) => String(Math.min(aesthetics.length, Math.max(1, Math.round(v * (aesthetics.length - 1)) + 1))).padStart(2, "0"));
   const bar = useTransform(smooth, [0.04, 0.96], [0, 1]);
 
   return (
@@ -60,7 +61,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
             <RevealHeading
               className="mt-4 h-section"
               lines={[
-                "Eight lanes.",
+                "Nine lanes.",
                 <em key="w" className="italic text-clay">
                   Pick a world.
                 </em>,
@@ -74,7 +75,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
                 <span className="relative block h-px w-28 overflow-hidden bg-ink/15">
                   <m.span className="absolute inset-0 origin-left bg-clay" style={{ scaleX: bar }} />
                 </span>
-                08
+                {String(aesthetics.length).padStart(2, "0")}
               </div>
             )}
             <Link

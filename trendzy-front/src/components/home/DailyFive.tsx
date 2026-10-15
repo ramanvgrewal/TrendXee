@@ -1,6 +1,7 @@
+import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { AnimatePresence, m, useAnimationFrame, useInView, useMotionValue, useReducedMotion, type MotionValue, type PanInfo } from "framer-motion";
+import { AnimatePresence, m, useAnimationFrame, useInView, useMotionValue, type MotionValue, type PanInfo } from "framer-motion";
 import { Stamp } from "@/components/Stamp";
 import { Img } from "@/components/Img";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";

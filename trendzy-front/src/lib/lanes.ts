@@ -114,7 +114,7 @@ let rotationCache: { at: number; data: Promise<RotationMap> } | null = null;
 /**
  * Up to five underdog products per lane, used by the home hero and lane
  * posters. One failing lane no longer blanks the others. Shared in memory
- * for 60s during SSR to prevent 8-way concurrent fan-out per request, and 5m in browser.
+ * for 60s during SSR to prevent per-lane concurrent fan-out per request, and 5m in browser.
  */
 export function fetchLaneRotations(): Promise<RotationMap> {
   const inBrowser = typeof window !== "undefined";

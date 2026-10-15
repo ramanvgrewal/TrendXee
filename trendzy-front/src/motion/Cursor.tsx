@@ -99,8 +99,9 @@ export function Cursor() {
   const tx = useTransform(lean("x"));
   const ty = useTransform(lean("y"));
 
-  const coreX = useSpring(tx, follow.cursorDot);
-  const coreY = useSpring(ty, follow.cursorDot);
+  // Keep the aiming point immediate; only decorative layers trail the pointer.
+  const coreX = tx;
+  const coreY = ty;
   const ringX = useSpring(tx, follow.cursorRing);
   const ringY = useSpring(ty, follow.cursorRing);
   const auraX = useSpring(tx, follow.cursorAura);

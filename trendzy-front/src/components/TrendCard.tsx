@@ -55,7 +55,7 @@ export function TrendCard({
 
   return (
     <m.article
-      className="group/card relative h-full"
+      className="group/card relative h-full min-w-0"
       whileHover={lift.card}
       whileTap={lift.press}
       tabIndex={-1}
@@ -115,8 +115,8 @@ export function TrendCard({
             {underdog?.brandName ? (
               <>
                 <span className="eyebrow shrink-0 text-[11px] text-clay-ink">Underdog</span>
-                <span className="truncate font-display text-[15px] italic text-ink/80 flex items-center gap-2">
-                  {underdog.brandName}
+                <span className="min-w-0 font-display text-[15px] italic text-ink/80 flex items-center gap-2">
+                  <span className="truncate">{underdog.brandName}</span>
                   <TrustBadge rating={trend.underdogRating} signals={trend.ratingSignals} />
                 </span>
               </>
@@ -137,8 +137,8 @@ export function TrendCard({
             <p className="mt-2.5 line-clamp-2 text-pretty text-[14.5px] leading-relaxed text-ink/70">{firstSentence(trend.aiSummary)}</p>
           )}
 
-          <div className="mt-auto flex items-end justify-between gap-3 pt-5">
-            <div className="flex items-baseline gap-2">
+          <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-5">
+            <div className="flex flex-wrap items-baseline gap-2">
               {price ? (
                 <>
                   <span className="font-display text-xl tabular-nums">{price}</span>

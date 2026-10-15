@@ -9,7 +9,11 @@ import { useEffect, useRef, useState } from "react";
  * - Brand stores sometimes drop images without warning; a failed image
  *   becomes a quiet paper swatch with an optional label, never a broken icon.
  */
-export function Img({
+export function Img(props: React.ComponentProps<typeof ProductImage>) {
+  return <ProductImage key={props.src} {...props} />;
+}
+
+function ProductImage({
   src,
   alt = "",
   className = "",

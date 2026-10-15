@@ -18,12 +18,12 @@ public interface TrendRepository extends ReactiveMongoRepository<Trend, String> 
     Flux<Trend> findByBrandName(String brandName);
 
     // Infinite scroll using Flux
-    @Query(value = "{ 'category': { '$in': ?0 }, 'enrichmentStatus': 'COMPLETED' }",
-        sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1 }")
+    @Query(value = "{ 'category': { '$in': ?0 }, 'active': { '$ne': false }, '$or': [ { 'enrichmentStatus': 'COMPLETED' }, { 'enrichmentStatus': { '$in': ['PARTIAL', 'AWAITING_UNDERDOG', 'PENDING', 'IN_PROGRESS', 'PROCESSING', 'FAILED'] }, 'signalProducts.underdog.shopUrl': { '$type': 'string', '$ne': '' }, 'signalProducts.underdog.imageUrl': { '$type': 'string', '$ne': '' } } ] }",
+        sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1, '_id': 1 }")
     Flux<Trend> findByCategory(List<String> categories, Pageable pageable);
 
-    @Query(value = "{ 'category': { '$in': ?0 }, 'subcategory': { '$regex': ?1, '$options': 'i' }, 'enrichmentStatus': 'COMPLETED' }",
-        sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1 }")
+    @Query(value = "{ 'category': { '$in': ?0 }, 'subcategory': { '$regex': ?1, '$options': 'i' }, 'active': { '$ne': false }, '$or': [ { 'enrichmentStatus': 'COMPLETED' }, { 'enrichmentStatus': { '$in': ['PARTIAL', 'AWAITING_UNDERDOG', 'PENDING', 'IN_PROGRESS', 'PROCESSING', 'FAILED'] }, 'signalProducts.underdog.shopUrl': { '$type': 'string', '$ne': '' }, 'signalProducts.underdog.imageUrl': { '$type': 'string', '$ne': '' } } ] }",
+        sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1, '_id': 1 }")
     Flux<Trend> findByCategoryAndSubcategory(List<String> categories, String subcategory, Pageable pageable);
 
     // Delete trends by category with score less than a threshold

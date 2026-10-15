@@ -3,6 +3,7 @@ import { LazyMotion, MotionConfig } from "framer-motion";
 import { PointerProvider } from "@/motion/pointer";
 import { Cursor } from "@/motion/Cursor";
 import { AmbientLight } from "@/motion/AmbientLight";
+import { usePrefersReducedMotion } from "@/motion/hooks";
 
 const loadFeatures = () => import("@/motion/features").then((mod) => mod.default);
 
@@ -12,13 +13,14 @@ const loadFeatures = () => import("@/motion/features").then((mod) => mod.default
  *
  * - LazyMotion + `m` components keep the animation runtime out of the first
  *   bundle; `strict` stops anyone importing the heavy `motion.*` components.
- * - reducedMotion="user": with the OS setting on, transform and layout
- *   animations are dropped and only opacity changes remain.
+ * - The OS setting is applied after hydration so the initial styles match
+ *   server HTML. Reduced motion then drops transform and layout animations.
  */
 export function MotionProvider({ children }: { children: ReactNode }) {
+  const reduced = usePrefersReducedMotion();
   return (
     <LazyMotion features={loadFeatures} strict>
-      <MotionConfig reducedMotion="user">
+      <MotionConfig reducedMotion={reduced ? "always" : "never"}>
         <PointerProvider>
           <AmbientLight />
           {children}

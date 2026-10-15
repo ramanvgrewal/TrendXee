@@ -1,5 +1,6 @@
+import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { createContext, useContext, useRef, type CSSProperties, type ReactNode } from "react";
-import { useMotionValue, useReducedMotion, useScroll, useSpring, type MotionValue } from "framer-motion";
+import { useMotionValue, useScroll, useSpring, type MotionValue } from "framer-motion";
 import { follow } from "@/motion/tokens";
 
 /**

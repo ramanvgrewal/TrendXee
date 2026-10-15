@@ -1,6 +1,7 @@
+import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, notFound, useNavigate, useRouter } from "@tanstack/react-router";
-import { AnimatePresence, m, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, m, useScroll, useTransform } from "framer-motion";
 import { TrendBoard } from "@/components/TrendBoard";
 import { trendImage } from "@/components/TrendCard";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
@@ -56,18 +57,19 @@ export const Route = createFileRoute("/aesthetic/$id")({
     />
   ),
   notFoundComponent: () => (
-    <StateShell eyebrow="No such lane" title="That lane isn't pinned to the board." body="Pick one of the eight below." />
+    <StateShell eyebrow="No such lane" title="That lane isn't pinned to the board." body="Pick one of the lanes below." />
   ),
 });
 
 function LanePage() {
   const { aesthetic, trends, hasMore, failed } = Route.useLoaderData();
   const index = aesthetics.findIndex((a) => a.id === aesthetic.id);
-  const heroImage = trends.map(trendImage).find(Boolean) || aesthetic.heroImage;
+  const firstDrop = trends.find((trend) => trend.products?.underdog && trendImage(trend));
+  const heroImage = (firstDrop && trendImage(firstDrop)) || aesthetic.heroImage;
 
   return (
     <div className="pb-24">
-      <LaneHero aesthetic={aesthetic} index={index} image={heroImage} />
+      <LaneHero aesthetic={aesthetic} index={index} image={heroImage} firstDrop={firstDrop} />
       <LaneSwitcher activeId={aesthetic.id} />
       {/* Keyed by lane so switching lanes resets the loaded pages. */}
       <LaneFeed key={aesthetic.id} aesthetic={aesthetic} initialTrends={trends} initialHasMore={hasMore} failed={failed} />
@@ -81,14 +83,12 @@ function LanePage() {
  * photo as a pinned portrait print, so it is never blown up into a soft crop.
  * The photo shares a view-transition name with the lane card it came from.
  */
-function LaneHero({ aesthetic, index, image }: { aesthetic: Aesthetic; index: number; image: string }) {
+function LaneHero({ aesthetic, index, image, firstDrop }: { aesthetic: Aesthetic; index: number; image: string; firstDrop?: Trend }) {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
-  const printY = useTransform(scrollYProgress, [0, 1], [0, 70]);
-  const copyY = useTransform(scrollYProgress, [0, 1], [0, -40]);
   const vt = { viewTransitionName: `lane-${aesthetic.id}` } as React.CSSProperties;
 
   const cover = (
@@ -110,58 +110,31 @@ function LaneHero({ aesthetic, index, image }: { aesthetic: Aesthetic; index: nu
   return (
     <section ref={ref} className="relative isolate overflow-hidden">
       <div className="mx-auto w-full max-w-[1440px] px-5 pt-4 sm:px-8">
-        <div className="relative h-[min(64svh,620px)] overflow-hidden rounded-[28px] bg-sand/40 shadow-lift lg:h-[min(62svh,580px)] lg:fibre lg:bg-cream lg:shadow-none lg:ring-1 lg:ring-border">
+        <div className="relative grid min-h-[min(64svh,620px)] overflow-hidden rounded-[28px] bg-sand/40 shadow-lift lg:min-h-[clamp(460px,62svh,580px)] lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:items-center lg:fibre lg:bg-cream lg:shadow-none lg:ring-1 lg:ring-border">
           {/* Phones and tablets: full-bleed photo under a scrim */}
           <div className="absolute inset-0 lg:hidden" style={vt}>
             <m.div className="absolute inset-0" style={reduced ? undefined : { y, scale }}>
               {cover}
             </m.div>
           </div>
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-scrim/90 via-scrim/30 to-scrim/20 lg:hidden" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-scrim/95 via-scrim/60 to-scrim/45 lg:hidden" />
 
           {/* Wide screens: the photo as a pinned portrait print */}
-          <m.div
-            className="absolute bottom-10 right-14 top-10 hidden aspect-[4/5] lg:block xl:right-20"
-            style={reduced ? undefined : { y: printY }}
-          >
-            <div className="h-full rotate-[1.5deg] rounded-[24px] bg-paper p-2 shadow-print ring-1 ring-border">
-              <div className="relative h-full overflow-hidden rounded-[18px] bg-sand/50" style={vt}>
-                {cover}
-              </div>
-            </div>
-          </m.div>
-
-          <span
-            aria-hidden
-            className="enter-fade pointer-events-none absolute -top-6 right-4 font-display text-[clamp(8rem,20vw,17rem)] leading-none tracking-[-0.06em] text-on-scrim/15 sm:right-10 lg:left-10 lg:right-auto lg:top-2 lg:text-[clamp(7rem,12vw,11rem)] lg:numeral-outline"
-          >
-            {String(index + 1).padStart(2, "0")}
-          </span>
-
-          <m.div
-            className="absolute inset-x-0 bottom-0 p-6 text-on-scrim sm:p-10 lg:right-[44%] lg:p-14 lg:text-ink"
-            style={reduced ? undefined : { y: copyY }}
-          >
+          <div className="relative flex min-w-0 flex-col justify-end p-6 text-on-scrim sm:p-10 lg:justify-center lg:p-12 lg:text-ink xl:p-14">
+            <div className="flex items-center justify-between gap-4 lg:flex-col lg:items-start lg:gap-3">
             <Link
               to="/lanes"
               className="hit enter-fade inline-flex items-center gap-2 eyebrow text-on-scrim/70 transition-colors hover:text-on-scrim lg:text-ink/70 lg:hover:text-clay"
             >
               <span aria-hidden>←</span> All lanes
             </Link>
-            <h1 className="mt-4 overflow-hidden pb-[0.12em] font-display text-[clamp(3.5rem,10vw,9rem)] leading-[0.88] tracking-[-0.04em] lg:text-[clamp(4.5rem,8.4vw,8rem)]">
-              <span className="enter-line block" style={{ "--d": "80ms" } as React.CSSProperties}>
-                <AnimatePresence mode="popLayout" initial={false}>
-                  <m.span
-                    key={aesthetic.id}
-                    className="block"
-                    initial={{ y: "100%" }}
-                    animate={{ y: "0%" }}
-                    exit={{ y: "-100%", opacity: 0 }}
-                    transition={{ duration: 0.5, ease: ease.drift }}
-                  >
-                    {laneLabel(aesthetic.name)}
-                  </m.span>
-                </AnimatePresence>
+              <span aria-hidden className="pointer-events-none shrink-0 font-display text-5xl leading-none tracking-[-0.06em] text-on-scrim/40 lg:order-first lg:numeral-outline lg:text-[6rem] lg:leading-[0.85]">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+            </div>
+            <h1 className="mt-6 text-balance pb-[0.12em] font-display text-[clamp(2.5rem,8.5vw,6rem)] leading-[0.98] tracking-[-0.04em] [overflow-wrap:anywhere] lg:mt-5 lg:text-[clamp(3.5rem,7.6vw,7.5rem)]">
+              <span key={aesthetic.id} className="enter-fade block">
+                {laneLabel(aesthetic.name)}
               </span>
             </h1>
             <p key={aesthetic.id} className="enter-fade mt-4 max-w-xl text-pretty text-[16px] leading-relaxed text-on-scrim/85 sm:text-lg lg:text-ink/75" style={{ "--d": "220ms" } as React.CSSProperties}>
@@ -174,10 +147,54 @@ function LaneHero({ aesthetic, index, image }: { aesthetic: Aesthetic; index: nu
                 </li>
               ))}
             </ul>
-          </m.div>
+          </div>
+          {firstDrop ? (
+            <HeroDrop key={`${aesthetic.id}-${firstDrop.id}-${image}`} trend={firstDrop} laneId={aesthetic.id} />
+          ) : (
+          <div className="relative mx-auto my-10 hidden aspect-[4/5] w-[78%] max-w-[360px] lg:block">
+            <div className="h-full rotate-[1.5deg] rounded-[24px] bg-paper p-2 shadow-print ring-1 ring-border">
+              <div className="relative h-full overflow-hidden rounded-[18px] bg-sand/50" style={vt}>
+                {cover}
+              </div>
+            </div>
+          </div>
+          )}
         </div>
       </div>
     </section>
+  );
+}
+
+/** A simple portrait print of the first drop, matching the lane cover design. */
+function HeroDrop({ trend, laneId }: { trend: Trend; laneId: string }) {
+  const product = trend.products.underdog!;
+  const photos = [...new Set([product.imageUrl, ...(product.imageUrls ?? [])].filter(Boolean))];
+  const [photoIndex, setPhotoIndex] = useState(0);
+  return (
+    <Link
+      to="/aesthetic/$id"
+      params={{ id: laneId }}
+      search={{ trend: trend.id }}
+      resetScroll={false}
+      viewTransition={false}
+      aria-label={`Open first drop: ${product.title || trend.name}`}
+      className="group/drop relative mx-auto my-10 hidden aspect-[4/5] w-[80%] max-w-[360px] rotate-[1.5deg] rounded-[24px] bg-paper p-2 shadow-print ring-1 ring-border outline-offset-4 transition-shadow hover:shadow-lift lg:block"
+    >
+      <div className="relative h-full w-full overflow-hidden rounded-[18px] bg-cream">
+        {photoIndex < photos.length ? (
+          <img
+            src={photos[photoIndex]}
+            alt={product.title || trend.name}
+            loading="eager"
+            decoding="async"
+            onError={() => setPhotoIndex((index) => index + 1)}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover/drop:scale-[1.03]"
+          />
+        ) : (
+          <div className="grid h-full place-items-center p-3 font-display text-xl italic text-ink/50">{product.brandName || "Indie label"}</div>
+        )}
+      </div>
+    </Link>
   );
 }
 
@@ -259,6 +276,17 @@ function LaneFeed({
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const requestRef = useRef(0);
+  const loadingRef = useRef(false);
+  useEffect(() => {
+    requestRef.current += 1;
+    loadingRef.current = false;
+    setTrends(initialTrends);
+    setHasMore(initialHasMore);
+    setPage(0);
+    setLoading(false);
+    setError(false);
+  }, [initialTrends, initialHasMore]);
 
   // Opening a story pushes ?trend=… so Back closes it. Closing it ourselves
   // steps back through that entry instead of stacking another one.
@@ -283,10 +311,14 @@ function LaneFeed({
   };
 
   const loadMore = async () => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+    const request = ++requestRef.current;
     setLoading(true);
     setError(false);
     try {
       const next = await fetchLanePage(aesthetic.id, page + 1);
+      if (request !== requestRef.current) return;
       setTrends((prev) => {
         const seen = new Set(prev.map((t) => t.id));
         return [...prev, ...next.trends.filter((t) => !seen.has(t.id))];
@@ -295,9 +327,12 @@ function LaneFeed({
       setPage((p) => p + 1);
     } catch (e) {
       console.error(e);
-      setError(true);
+      if (request === requestRef.current) setError(true);
     } finally {
-      setLoading(false);
+      if (request === requestRef.current) {
+        loadingRef.current = false;
+        setLoading(false);
+      }
     }
   };
 

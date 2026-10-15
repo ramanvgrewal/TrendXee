@@ -24,6 +24,14 @@ import java.util.Map;
 public class TrendController {
 
     private final TrendRepository trendRepository;
+    private final org.springframework.data.mongodb.core.ReactiveMongoTemplate mongoTemplate;
+
+    private Mono<Trend> patch(String id, org.springframework.data.mongodb.core.query.Update update) {
+        return mongoTemplate.findAndModify(
+                org.springframework.data.mongodb.core.query.Query.query(org.springframework.data.mongodb.core.query.Criteria.where("id").is(id)),
+                update, org.springframework.data.mongodb.core.FindAndModifyOptions.options().returnNew(true), Trend.class)
+                .switchIfEmpty(Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND)));
+    }
 
     @Operation(summary = "Get trends by category", description = "Paginated list of trend items filtered by category")
     @GetMapping
@@ -36,14 +44,19 @@ public class TrendController {
         log.info("[CTRL] Fetching trends for category: {}, subcategory: {}, page: {}, size: {}",
                 category, subcategory, page, size);
 
-        String normalized = category.trim().toUpperCase();
+        String requested = category.trim().toUpperCase(java.util.Locale.ROOT);
+        String normalized = List.of("SHOES", "SNEAKER & SPORTS", "SNEAKERS & SPORTS", "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS").contains(requested) ? "SNEAKERS" : requested;
+        if (page < 0 || size < 1 || size > 100) {
+            return Mono.error(new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "page must be non-negative and size must be 1..100"));
+        }
         Pageable pageable = PageRequest.of(page, size);
-        List<String> categories = normalized.equals("CAPS")
+        List<String> categories = List.of("CAPS", "ACCESSORIES", "CAPS_ACCESSORIES", "CAPS & ACCESSORIES", "CAPS_AND_ACCESSORIES").contains(normalized)
                 ? List.of("CAPS", "ACCESSORIES")
                 : List.of(normalized);
 
         Flux<Trend> trendsFlux = (subcategory != null && !subcategory.trim().isEmpty())
-                ? trendRepository.findByCategoryAndSubcategory(categories, subcategory.trim(), pageable)
+                ? trendRepository.findByCategoryAndSubcategory(categories, "^" + java.util.regex.Pattern.quote(subcategory.trim()) + "$", pageable)
                 : trendRepository.findByCategory(categories, pageable);
 
         return trendsFlux
@@ -78,14 +91,18 @@ public class TrendController {
     @PatchMapping("/{id}/price")
     public Mono<Trend> updateTrendPrice(@PathVariable String id, @RequestBody Map<String, Double> body) {
         log.info("[CTRL] Updating price for trend ID: {}", id);
+        Double price = body.get("price");
+        if (price == null || !Double.isFinite(price) || price <= 0) {
+            return Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "A positive finite price is required"));
+        }
         return trendRepository.findById(id)
+                .switchIfEmpty(Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND)))
                 .flatMap(trend -> {
-                    Double newPrice = body.get("price");
-                    if (newPrice != null && trend.getSignalProducts() != null && trend.getSignalProducts().getUnderdog() != null) {
-                        trend.getSignalProducts().getUnderdog().setPrice(newPrice);
-                        trend.setEstimatedPrice(newPrice);
+                    if (trend.getSignalProducts() == null || trend.getSignalProducts().getUnderdog() == null) {
+                        return Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "Trend has no underdog product"));
                     }
-                    return trendRepository.save(trend);
+                    return patch(id, new org.springframework.data.mongodb.core.query.Update()
+                            .set("signalProducts.underdog.price", price).set("estimatedPrice", price));
                 });
     }
 
@@ -94,14 +111,11 @@ public class TrendController {
     @PatchMapping("/{id}/score")
     public Mono<Trend> updateTrendScore(@PathVariable String id, @RequestBody Map<String, Number> body) {
         log.info("[CTRL] Updating score for trend ID: {}", id);
-        return trendRepository.findById(id)
-                .flatMap(trend -> {
-                    Number newScore = body.get("score");
-                    if (newScore != null) {
-                        trend.setTrendScore(newScore.doubleValue());
-                    }
-                    return trendRepository.save(trend);
-                });
+        Number score = body.get("score");
+        if (score == null || !Double.isFinite(score.doubleValue()) || score.doubleValue() < 0 || score.doubleValue() > 100) {
+            return Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "score must be 0..100"));
+        }
+        return patch(id, new org.springframework.data.mongodb.core.query.Update().set("trendScore", score.doubleValue()));
     }
 
     @Operation(summary = "Update trend price type (Admin only)", description = "Updates trend price type. Requires ROLE_ADMIN.")
@@ -109,13 +123,18 @@ public class TrendController {
     @PatchMapping("/{id}/priceType")
     public Mono<Trend> updateTrendPriceType(@PathVariable String id, @RequestBody Map<String, String> body) {
         log.info("[CTRL] Updating price type for trend ID: {}", id);
+        String priceType = body.get("priceType");
+        if (priceType == null || priceType.isBlank()) {
+            return Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "priceType is required"));
+        }
         return trendRepository.findById(id)
+                .switchIfEmpty(Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND)))
                 .flatMap(trend -> {
-                    String newPriceType = body.get("priceType");
-                    if (newPriceType != null && trend.getSignalProducts() != null && trend.getSignalProducts().getUnderdog() != null) {
-                        trend.getSignalProducts().getUnderdog().setPriceType(newPriceType);
+                    if (trend.getSignalProducts() == null || trend.getSignalProducts().getUnderdog() == null) {
+                        return Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "Trend has no underdog product"));
                     }
-                    return trendRepository.save(trend);
+                    return patch(id, new org.springframework.data.mongodb.core.query.Update()
+                            .set("signalProducts.underdog.priceType", priceType.trim()));
                 });
     }
 }

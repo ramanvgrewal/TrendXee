@@ -13,12 +13,12 @@ export const Route = createFileRoute("/lanes")({
       {
         name: "description",
         content:
-          "Every TrendXee lane in one place: bottoms, tees, outerwear, sneakers, sportswear, anime, polos, and caps, each read from live signals.",
+          "Every TrendXee lane in one place: jeans, bottoms, tees, outerwear, shoes, sportswear, anime, polos, and caps & accessories, each read from live signals.",
       },
       { property: "og:title", content: "All lanes — TrendXee" },
       {
         property: "og:description",
-        content: "Eight lanes of rising Indian fashion drops, with the underdog brand behind each.",
+        content: "Nine lanes of rising Indian fashion drops, with the underdog brand behind each.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -42,7 +42,7 @@ function LanesPage() {
           </h1>
         </div>
         <p className="enter-fade lede max-w-md lg:col-span-4" style={{ "--d": "200ms" } as React.CSSProperties}>
-          Eight worlds, each read from what people are posting right now. Open one to see its drops, why they're
+          Nine worlds, each read from what people are posting right now. Open one to see its drops, why they're
           climbing, and the small brands making them first.
         </p>
       </div>

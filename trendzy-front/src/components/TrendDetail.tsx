@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
+import { useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { AnimatePresence, m, useDragControls, useReducedMotion, type DragControls, type PanInfo } from "framer-motion";
+import { AnimatePresence, m, useDragControls, type DragControls, type PanInfo } from "framer-motion";
 import { toast } from "sonner";
 import { Stamp } from "@/components/Stamp";
 import { BookmarkButton } from "@/components/BookmarkButton";
@@ -146,9 +147,12 @@ function DetailBody({
   dragControls: DragControls;
 }) {
   const { isAdmin } = useSession();
-  const [showSummary, setShowSummary] = useState(false);
   const underdog = trend.products?.underdog;
-  const image = trendImage(trend);
+  const images = [...new Set([trendImage(trend), ...(underdog?.imageUrls ?? [])].filter(Boolean))];
+  const [imageIndex, setImageIndex] = useState(0);
+  useEffect(() => setImageIndex(0), [trend.id, underdog?.shopUrl]);
+  const activeImageIndex = Math.min(imageIndex, Math.max(0, images.length - 1));
+  const image = images[activeImageIndex];
   const lane = trendLane(trend);
   const price = formatPrice(underdog?.price, underdog?.currency);
   const off = discountPercent(underdog?.price, underdog?.originalPrice);
@@ -189,9 +193,30 @@ function DetailBody({
           </Parallax>
         </m.div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-scrim/50 to-transparent lg:hidden" />
+        {images.length > 1 && (
+          <div className="absolute inset-x-3 bottom-3 z-20 flex items-center gap-2 rounded-2xl bg-paper/95 p-2 shadow-card" role="group" aria-label="Product photos"
+            onKeyDown={(event) => {
+              if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+                event.preventDefault();
+                setImageIndex((activeImageIndex + (event.key === "ArrowRight" ? 1 : -1) + images.length) % images.length);
+              }
+            }}>
+            <button type="button" aria-label="Previous product photo" className="size-10 shrink-0" onClick={() => setImageIndex((activeImageIndex - 1 + images.length) % images.length)}>←</button>
+            <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto">
+              {images.map((src, index) => (
+                <button type="button" key={src} aria-label={`Show product photo ${index + 1}`} aria-pressed={index === activeImageIndex}
+                  onClick={() => setImageIndex(index)} className={`size-12 shrink-0 overflow-hidden rounded-lg border-2 ${index === activeImageIndex ? "border-clay" : "border-transparent"}`}>
+                  <Img src={src} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+            <span className="text-xs tabular-nums" aria-live="polite">{activeImageIndex + 1}/{images.length}</span>
+            <button type="button" aria-label="Next product photo" className="size-10 shrink-0" onClick={() => setImageIndex((activeImageIndex + 1) % images.length)}>→</button>
+          </div>
+        )}
         {score > 0 && (
           <m.div
-            className="absolute bottom-5 left-5 z-10 lg:bottom-8 lg:left-8"
+            className={`absolute left-5 z-10 lg:left-8 ${images.length > 1 ? "bottom-24" : "bottom-5 lg:bottom-8"}`}
             initial={{ scale: 1.5, rotate: -18, opacity: 0 }}
             animate={{ scale: 1, rotate: -6, opacity: 1 }}
             transition={{ ...spring.settle, delay: 0.3 }}
@@ -208,13 +233,13 @@ function DetailBody({
         animate={{ opacity: 1, transition: { duration: 0.3, delay: 0.12 } }}
         exit={{ opacity: 0, transition: { duration: 0.12 } }}
       >
-        <div className="flex items-center justify-between gap-4 border-b border-border px-6 py-4 lg:px-10">
-          <p className="flex min-w-0 items-center gap-2 eyebrow text-ink/70">
-            {lane && <span className="text-clay-ink">{laneLabel(lane.name)}</span>}
+        <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-6 sm:py-4 lg:px-10">
+          <p className="flex min-w-0 flex-1 flex-col gap-1 eyebrow text-ink/70 sm:flex-row sm:items-center sm:gap-2">
+            {lane && <span className="max-w-full truncate text-clay-ink">{laneLabel(lane.name)}</span>}
             {trend.subcategory && (
               <>
-                <span className="text-ink/25">/</span>
-                <span className="truncate">{trend.subcategory}</span>
+                <span className="hidden text-ink/25 sm:inline">/</span>
+                <span className="max-w-full truncate">{trend.subcategory}</span>
               </>
             )}
           </p>
@@ -238,7 +263,7 @@ function DetailBody({
             <m.h2
               layoutId={`trend-title-${trend.id}`}
               transition={spring.layout}
-              className="font-display text-[clamp(2rem,3.4vw,3.1rem)] leading-[1.02] tracking-[-0.02em]"
+              className="font-display text-[clamp(2rem,3.4vw,3.1rem)] leading-[1.02] tracking-[-0.02em] [overflow-wrap:anywhere]"
             >
               {trend.name}
             </m.h2>
@@ -265,12 +290,13 @@ function DetailBody({
                         Algorithmically audited from the indie brand's real Instagram footprint:
                       </p>
                       <div className="space-y-1 border-t border-border/60 pt-1.5 text-[11px] font-mono">
-                        <div className="flex justify-between text-ink/80"><span>• Reach (Followers)</span> <strong className="text-ink">40%</strong></div>
-                        <div className="flex justify-between text-ink/80"><span>• Engagement Rate</span> <strong className="text-ink">30%</strong></div>
-                        <div className="flex justify-between text-ink/80"><span>• Posting Cadence</span> <strong className="text-ink">30%</strong></div>
+                        <div className="flex justify-between text-ink/80"><span>Audited baseline</span> <strong className="text-ink">60 pts</strong></div>
+                        <div className="flex justify-between text-ink/80"><span>Reach (Followers)</span> <strong className="text-ink">up to 25</strong></div>
+                        <div className="flex justify-between text-ink/80"><span>Engagement Rate</span> <strong className="text-ink">up to 8</strong></div>
+                        <div className="flex justify-between text-ink/80"><span>Posting Cadence</span> <strong className="text-ink">up to 7</strong></div>
                       </div>
                       <p className="text-[10px] text-ink/55 italic border-t border-border/40 pt-1">
-                        Recency decay scales down scores if the account has been inactive.
+                        Inactivity subtracts up to 20 points. Brands without usable Instagram analytics receive 0.
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -289,34 +315,6 @@ function DetailBody({
               ))}
             </m.ul>
           )}
-          {trend.aiSummary && (
-            <m.div custom={2} variants={stagger} initial="hidden" animate="show" className="mt-7 max-w-[60ch]">
-              <button
-                type="button"
-                onClick={() => setShowSummary(!showSummary)}
-                className="flex items-center gap-2 text-[14px] font-semibold text-ink/70 hover:text-ink transition-colors focus-visible:outline-none"
-              >
-                <span>AI Summary</span>
-                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`size-4 transition-transform duration-200 ${showSummary ? "rotate-180" : ""}`} aria-hidden>
-                  <path d="M5 7.5L10 12.5L15 7.5" />
-                </svg>
-              </button>
-              <AnimatePresence>
-                {showSummary && (
-                  <m.p
-                    initial={{ height: 0, opacity: 0, marginTop: 0 }}
-                    animate={{ height: "auto", opacity: 1, marginTop: "1rem" }}
-                    exit={{ height: 0, opacity: 0, marginTop: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden text-pretty font-display text-[1.22rem] leading-[1.65] text-ink/85"
-                  >
-                    {trend.aiSummary}
-                  </m.p>
-                )}
-              </AnimatePresence>
-            </m.div>
-          )}
-
           {trend.whyTrending.length > 0 && (
             <m.div custom={3} variants={stagger} initial="hidden" animate="show" className="mt-8">
               <p className="eyebrow text-ink/70">Why it's climbing</p>
@@ -368,7 +366,7 @@ function DetailBody({
           {mainstream.length > 0 && (
             <m.div custom={5} variants={stagger} initial="hidden" animate="show" className="mt-8">
               <p className="eyebrow text-ink/70">Mainstream lookalikes</p>
-              <div className="mt-3 grid grid-cols-2 gap-3">
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {mainstream.map(({ source, label, product }) => (
                   <a
                     key={source}
@@ -398,7 +396,7 @@ function DetailBody({
             </m.div>
           )}
 
-<ProductRating trend={trend} onChanged={onChanged} /><BrandHypeSection trend={trend} /><BrandReviewsSection brandName={trend.products?.underdog?.brandName || "Indie label"} />{isAdmin && <AdminTools trend={trend} onChanged={onChanged} onDeleted={(id) => (onDeleted?.(id), onClose())} />}
+<ProductRating trend={trend} onChanged={onChanged} /><BrandHypeSection trend={trend} /><BrandReviewsSection brandName={trend.products?.underdog?.brandName || "Indie label"} aiSummary={trend.aiSummary} />{isAdmin && <AdminTools trend={trend} onChanged={onChanged} onDeleted={(id) => (onDeleted?.(id), onClose())} />}
 
           <p className="mt-10 border-t border-border pt-5 text-[12px] leading-relaxed text-ink/70">
             TrendXee is a discovery platform. Product links open the brand's or marketplace's own store; TrendXee doesn't
@@ -594,9 +592,9 @@ function ProductRating({ trend, onChanged }: { trend: Trend; onChanged?: (t: Tre
     }
     if (submitting) return;
     setSubmitting(true);
-    setRating(val);
     try {
       const updated = await rateTrendProduct(trend.id, val);
+      setRating(val);
       toast.success("Thanks for rating!");
       onChanged?.(updated);
     } catch {
@@ -609,16 +607,17 @@ function ProductRating({ trend, onChanged }: { trend: Trend; onChanged?: (t: Tre
   return (
     <div className="mt-6 border-t border-border pt-4">
       <p className="text-[13px] font-semibold text-ink/80 mb-2">Rate this brand:</p>
-      <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
             type="button"
+            aria-label={`Rate this brand ${star} out of 5`}
             onClick={() => submitRating(star)}
             onMouseEnter={() => setHoverRating(star)}
             onMouseLeave={() => setHoverRating(0)}
             disabled={submitting || rating > 0}
-            className={`text-2xl transition-colors ${
+            className={`grid size-11 shrink-0 place-items-center text-2xl transition-colors ${
               (hoverRating || rating) >= star ? "text-amber-500" : "text-ink/20 hover:text-amber-300"
             }`}
           >
@@ -640,16 +639,16 @@ function BrandHypeSection({ trend }: { trend: Trend }) {
   
   return (
     <div className="mt-8 bg-cream/50 rounded-2xl p-5 border border-border">
-      <h4 className="font-display text-xl mb-4 text-ink flex items-center gap-2">
+      <h4 className="font-display text-xl mb-4 text-ink flex flex-wrap items-center gap-2">
         Instagram Hype 
-        <span className="text-[13px] font-sans text-ink/50 bg-ink/5 px-2 py-0.5 rounded-full">@{trend.brandInstagramHandle}</span>
+        <span className="max-w-full break-all text-[13px] font-sans text-ink/50 bg-ink/5 px-2 py-0.5 rounded-full">@{trend.brandInstagramHandle}</span>
       </h4>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
         <div className="flex flex-col">
           <span className="text-[11px] font-bold text-ink/60 uppercase tracking-wider mb-1">Followers</span>
           <span className="text-xl font-display text-ink">{followers ? followers.toLocaleString() : 'N/A'}</span>
         </div>
-        <div className="flex flex-col border-l border-border pl-4">
+        <div className="flex flex-col border-t border-border pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
           <div className="flex items-center gap-1 mb-1">
             <span className="text-[11px] font-bold text-ink/60 uppercase tracking-wider">Engagement</span>
             <TooltipProvider>
@@ -675,11 +674,11 @@ function BrandHypeSection({ trend }: { trend: Trend }) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <span className="text-xl font-display text-ink">{engagementRate ? (engagementRate * 100).toFixed(1) + '%' : 'N/A'}</span>
+          <span className="text-xl font-display text-ink">{engagementRate != null ? engagementRate.toFixed(1) + '%' : 'N/A'}</span>
         </div>
-        <div className="flex flex-col border-l border-border pl-4">
+        <div className="flex flex-col border-t border-border pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
           <span className="text-[11px] font-bold text-ink/60 uppercase tracking-wider mb-1">Posts/Wk</span>
-          <span className="text-xl font-display text-ink">{postsPerWeek ? postsPerWeek.toFixed(1) : 'N/A'}</span>
+          <span className="text-xl font-display text-ink">{postsPerWeek != null ? postsPerWeek.toFixed(1) : 'N/A'}</span>
         </div>
       </div>
       {trend.trendScoreUpdatedAt && (
@@ -689,12 +688,13 @@ function BrandHypeSection({ trend }: { trend: Trend }) {
   );
 }
 
-function BrandReviewsSection({ brandName }: { brandName: string }) {
+function BrandReviewsSection({ brandName, aiSummary }: { brandName: string; aiSummary?: string }) {
+  const aiReview = aiSummary?.trim();
   const { isSignedIn } = useSession();
   const queryClient = useQueryClient();
   const [comment, setComment] = useState("");
   
-  const { data: comments = [], isLoading } = useQuery({
+  const { data: comments = [], isLoading, isError } = useQuery({
     queryKey: ["brandComments", brandName],
     queryFn: () => getBrandComments(brandName),
     enabled: !!brandName,
@@ -713,9 +713,19 @@ function BrandReviewsSection({ brandName }: { brandName: string }) {
   return (
     <div className="mt-8 bg-cream/50 rounded-2xl p-5 border border-border">
       <h4 className="font-display text-xl mb-4 text-ink">Brand Reviews</h4>
+      {aiReview && (
+        <article aria-label="AI Review" className="mb-6 bg-raised p-4 rounded-xl border border-border">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <h5 className="text-[13px] font-semibold text-ink">AI Review</h5>
+            <span className="rounded-full bg-clay/10 px-2 py-0.5 text-[10px] font-semibold text-clay-ink">AI-generated</span>
+          </div>
+          <p className="whitespace-pre-line text-pretty text-[14px] leading-relaxed text-ink/80">{aiReview}</p>
+        </article>
+      )}
       
       <form onSubmit={(e) => { e.preventDefault(); if (!isSignedIn) { toast.info("Please sign in to post a review."); return; } if (comment.trim()) mutation.mutate(comment); }} className="mb-6">
         <textarea
+          aria-label="Your brand review"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder={isSignedIn ? "Leave a review about shipping, fabric, service..." : "Sign in to leave a review..."}
@@ -731,7 +741,8 @@ function BrandReviewsSection({ brandName }: { brandName: string }) {
 
       <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto no-scrollbar pr-2">
         {isLoading && <p className="text-[13px] text-ink/60">Loading reviews...</p>}
-        {!isLoading && comments.length === 0 && (
+        {isError && <p role="status" className="text-[13px] text-ink/60">Reviews couldn't load. Please try again in a moment.</p>}
+        {!isLoading && !isError && comments.length === 0 && !aiReview && (
           <p className="text-[13px] text-ink/60 italic">No reviews for this brand yet.</p>
         )}
         {comments.map((c: BrandReview) => (
@@ -740,7 +751,7 @@ function BrandReviewsSection({ brandName }: { brandName: string }) {
               <span className="text-[11px] font-bold text-ink/70">User {c.userId?.substring(0, 4)}</span>
               {c.createdAt && <span className="text-[10px] text-ink/50">{new Date(c.createdAt).toLocaleDateString()}</span>}
             </div>
-            <p className="text-[13px] text-ink/80">{c.comment}</p>
+            <p className="break-words text-[13px] text-ink/80">{c.comment}</p>
           </div>
         ))}
       </div>

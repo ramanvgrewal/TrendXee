@@ -19,6 +19,7 @@ import java.util.Map;
 public class ProductController {
 
     private final TrendRepository trendRepository;
+    private final org.springframework.data.mongodb.core.ReactiveMongoTemplate mongoTemplate;
     private final BrandStatsRepository brandStatsRepository;
 
     @PostMapping("/{trendId}/rate")
@@ -90,6 +91,10 @@ public class ProductController {
         double blendedRating = (scraperRating + (avg * count)) / (1 + count);
         trend.setUnderdogRating(blendedRating);
 
-        return trendRepository.save(trend);
+        return mongoTemplate.findAndModify(
+                org.springframework.data.mongodb.core.query.Query.query(org.springframework.data.mongodb.core.query.Criteria.where("id").is(trend.getId())),
+                new org.springframework.data.mongodb.core.query.Update()
+                        .set("userRatingCount", count).set("userRatingAverage", avg).set("underdogRating", blendedRating),
+                org.springframework.data.mongodb.core.FindAndModifyOptions.options().returnNew(true), Trend.class);
     }
 }

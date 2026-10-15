@@ -14,8 +14,8 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md overflow-hidden rounded-[28px] border border-0 bg-raised shadow-lift p-0 text-ink">
-        <div className="linen px-8 pb-8 pt-10">
+      <DialogContent className="max-w-md overflow-y-auto rounded-[28px] border border-0 bg-raised shadow-lift p-0 text-ink">
+        <div className="linen px-5 pb-8 pt-10 sm:px-8">
           <p className="hand text-lg text-clay-ink">pin what you like</p>
           <DialogHeader className="mt-1 space-y-3 text-left">
             <DialogTitle className="font-display text-[2.4rem] font-normal leading-[1.02] tracking-tight">
@@ -27,7 +27,7 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
           </DialogHeader>
         </div>
 
-        <div className="border-t border-border px-8 py-7">
+        <div className="border-t border-border px-5 py-7 sm:px-8">
           <button
             type="button"
             onClick={handleGoogleLogin}

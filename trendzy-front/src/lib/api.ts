@@ -1,4 +1,4 @@
-import type { ProductTriad, SignalProduct, Trend } from "@/lib/mock-data";
+import type { ProductMatch, ProductTriad, SignalProduct, Trend } from "@/lib/mock-data";
 
 const configuredBaseUrl =
   import.meta.env?.VITE_API_BASE_URL ||
@@ -65,16 +65,17 @@ export function normalizeTrendList(payload: unknown): Trend[] {
 export function normalizeTrend(raw: any): Trend {
   const signalProducts = normalizeSignalProducts(raw?.signalProducts);
   const productTriad = normalizeProductTriad(raw?.products ?? raw?.signalProducts);
-  const category = String(raw?.aestheticId ?? raw?.category ?? "").toLowerCase();
+  const category = String(raw?.aestheticId ?? raw?.category ?? "").trim().toLowerCase();
   const subcategory = raw?.subcategory;
 
   return {
     ...raw,
     id: String(raw?.id ?? ""),
-    name: raw?.trendName ?? raw?.name ?? "Untitled trend",
+    name: productTriad.underdog?.title?.trim() || raw?.trendName || raw?.name || "Untitled trend",
     aestheticId: category,
     subcategory: subcategory,
-    trendScore: Number(raw?.trendScore ?? 0),
+    trendScore: Number.isFinite(Number(raw?.brandHypeSignals?.followers)) && Number(raw?.brandHypeSignals?.followers) > 0
+      && Number.isFinite(Number(raw?.trendScore)) ? Number(raw.trendScore) : 0,
     brandInstagramHandle: raw?.brandInstagramHandle,
     trendScoreUpdatedAt: raw?.trendScoreUpdatedAt,
     brandHypeSignals: raw?.brandHypeSignals,
@@ -101,11 +102,36 @@ export function normalizeTrend(raw: any): Trend {
   };
 }
 
+function imageIdentity(value: string): string {
+  try {
+    const url = new URL(value);
+    const asset = url.pathname.match(/^\/cdn\/shop\/(files|products)\/(.+)$/)
+      ?? (/^cdn\.shopify(?:cdn)?\.(com|net)$/.test(url.hostname)
+        ? url.pathname.match(/^\/s\/files\/[^/]+\/[^/]+\/[^/]+\/[^/]+\/(files|products)\/(.+)$/) : null);
+    if (asset) {
+      const file = asset[2].replace(/_(?:\d+x\d*|pico|icon|thumb|small|compact|medium|large|grande|original)(?=\.[^.]+$)/, '');
+      return `shopify:${asset[1]}/${file}?v=${url.searchParams.get('v') ?? ''}`;
+    }
+    return value;
+  } catch { return value; }
+}
+
+export function normalizeProduct(raw: any): ProductMatch | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const seen = new Set<string>();
+  const imageUrls = [raw.imageUrl, ...(Array.isArray(raw.imageUrls) ? raw.imageUrls : [])]
+    .filter((url): url is string => typeof url === "string" && !!url.trim())
+    .map((url) => url.trim().startsWith("//") ? `https:${url.trim()}` : url.trim())
+    .filter((url) => /^https?:\/\//i.test(url))
+    .filter((url) => { const key = imageIdentity(url); if (seen.has(key)) return false; seen.add(key); return true; });
+  return { ...raw, imageUrl: imageUrls[0] || "", imageUrls };
+}
+
 function normalizeProductTriad(raw: any): ProductTriad {
   return {
-    underdog: raw?.underdog,
-    amazon: raw?.amazon,
-    flipkart: raw?.flipkart,
+    underdog: normalizeProduct(raw?.underdog),
+    amazon: normalizeProduct(raw?.amazon),
+    flipkart: normalizeProduct(raw?.flipkart),
   };
 }
 
