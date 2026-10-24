@@ -5,6 +5,7 @@ import { lift, spring } from "@/motion/tokens";
 import type { Aesthetic } from "@/lib/mock-data";
 import { laneLabel } from "@/lib/format";
 import { Img } from "@/components/Img";
+import { useAudience } from "@/components/AudienceFilter";
 
 /**
  * A lane as a destination: oversized index numeral, the lane's own photo,
@@ -27,7 +28,8 @@ export function LaneCard({
   className?: string;
   eager?: boolean;
 }) {
-  const src = image || aesthetic.heroImage;
+  const audience = useAudience();
+  const src = image || (audience === "ALL" ? aesthetic.heroImage : "");
 
   return (
     <m.div
@@ -49,12 +51,12 @@ export function LaneCard({
           {/* Photo */}
           <div className="absolute inset-0" style={{ viewTransitionName: `lane-${aesthetic.id}` }}>
             <Parallax depth={5} bleed className="absolute inset-0">
-              <Img
+              {src ? <Img
                 src={src}
                 eager={eager}
                 fallbackLabel={laneLabel(aesthetic.name)}
                 className="h-full w-full object-cover group-hover/lane:scale-[1.03]"
-              />
+              /> : <div className="h-full w-full bg-ink" />}
             </Parallax>
           </div>
           {/* Shade only where type sits (bottom copy, top-left numeral) so the photo stays clean. */}
@@ -78,7 +80,7 @@ export function LaneCard({
                       Today: <span className="font-display text-[13px] normal-case italic tracking-normal text-on-scrim">{brand}</span>
                     </>
                   ) : (
-                    aesthetic.vibeTags.slice(0, 3).join(" · ")
+                    audience === "ALL" ? aesthetic.vibeTags.slice(0, 3).join(" · ") : "New finds soon"
                   )}
                 </span>
                 <span className="flex shrink-0 items-center gap-2 text-on-scrim transition-transform duration-300 group-hover/lane:translate-x-0.5">

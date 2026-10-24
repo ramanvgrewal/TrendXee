@@ -1,3 +1,5 @@
+import type { ProductAudience } from "@/lib/audience";
+
 export interface Aesthetic {
   id: string;
   name: string;
@@ -27,6 +29,7 @@ export interface ProductMatch {
   imageUrl: string;
   imageUrls?: string[];
   shopUrl: string;
+  audience?: ProductAudience;
 }
 
 export interface ProductTriad {
@@ -75,7 +78,7 @@ export const aesthetics: Aesthetic[] = [
     {
     id: "tees",
     name: "TEES",
-    description: "Graphic tees, vintage washes, and oversized fits dominating the torso.",
+    description: "Graphic and plain tees, everyday tops, tanks and oversized fits.",
     signalCount: 3200,
     trendScore: 85,
     colorPalette: ["#0f172a", "#334155", "#64748b", "#cbd5e1"],
@@ -97,12 +100,12 @@ export const aesthetics: Aesthetic[] = [
     {
     id: "jeans",
     name: "JEANS",
-    description: "Baggy, straight, slim, relaxed, wide-leg, bootcut and flared denim fits.",
+    description: "Baggy denim leads the way, with wide-leg, relaxed, bootcut and flared fits.",
     signalCount: 0,
     trendScore: 0,
     colorPalette: ["#1e3a5f", "#64748b"],
     heroImage: "https://images.unsplash.com/photo-1584865288642-42078afe6942?w=900&q=80",
-    vibeTags: ["denim", "baggy", "straight", "wide-leg"],
+    vibeTags: ["baggy", "wide-leg", "relaxed", "denim"],
     underdogRotation: []
   },
   {
@@ -130,18 +133,18 @@ export const aesthetics: Aesthetic[] = [
     {
     id: "sneakers",
     name: "SHOES",
-    description: "Sneakers and sports shoes only: everyday kicks, running and training shoes.",
+    description: "Sneakers, sports shoes, juttis, flats, sandals, slides, clogs, mules and loafers.",
     signalCount: 5120,
     trendScore: 96,
     colorPalette: ["#7f1d1d", "#dc2626", "#fca5a5", "#fef2f2"],
     heroImage: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=900&q=80",
-    vibeTags: ["chunky", "retro", "runner", "grail"],
+    vibeTags: ["sneakers", "flats", "juttis", "everyday"],
     underdogRotation: []
   },
     {
     id: "sportswear",
     name: "SPORTSWEAR",
-    description: "Football, basketball and cricket jerseys, plus gym and compression T-shirts.",
+    description: "Football, basketball and cricket jerseys, gym and compression tees, training tops and performance tanks.",
     signalCount: 1890,
     trendScore: 78,
     colorPalette: ["#facc15", "#78716c", "#1c1917", "#e7e5e4"],
@@ -151,13 +154,13 @@ export const aesthetics: Aesthetic[] = [
   },
     {
     id: "polos",
-    name: "POLOS",
-    description: "Classic, zip-up, and textured polos bringing back the old-money vibe.",
+    name: "POLOS & REGULAR",
+    description: "Polos, regular-fit tees, and easy layering essentials for everyday fits.",
     signalCount: 2200,
     trendScore: 81,
     colorPalette: ["#fde047", "#eab308", "#a16207", "#713f12"],
     heroImage: "https://images.unsplash.com/photo-1618453292459-53424b66bb6a?w=900&q=80",
-    vibeTags: ["classic", "zip-up", "textured", "old-money"],
+    vibeTags: ["polo", "regular-fit", "crew-neck", "layering"],
     underdogRotation: []
   },
     {

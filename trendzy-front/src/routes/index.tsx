@@ -8,10 +8,12 @@ import { EngineSection } from "@/components/home/EngineSection";
 import { FinalCta } from "@/components/home/FinalCta";
 import { ScrollProgress } from "@/motion/ScrollProgress";
 import { fetchLaneRotations, LANE_STALE_TIME, pickDailyFive, type RotationItem } from "@/lib/lanes";
+import { normalizeAudienceFilter } from "@/lib/audience";
 
 export const Route = createFileRoute("/")({
-  loader: async () => {
-    const rotationMap = await fetchLaneRotations();
+  loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
+  loader: async ({ deps }) => {
+    const rotationMap = await fetchLaneRotations(deps.audience);
     return { rotationMap, dailyFive: pickDailyFive(rotationMap) };
   },
   staleTime: LANE_STALE_TIME,
@@ -21,7 +23,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A scrapbook of India's rising fashion drops: jeans, bottoms, tees, outerwear, shoes, sportswear, anime, polos, and caps & accessories, with the underdog brand behind each trend.",
+          "A scrapbook of India's rising fashion drops: jeans, bottoms, tees, outerwear, shoes, sportswear, anime, polos & regular, and caps & accessories, with the underdog brand behind each trend.",
       },
       { property: "og:title", content: "TrendXee — Fits before they go viral" },
       {
@@ -65,11 +67,12 @@ function castTheBoard(rotationMap: Record<string, RotationItem[]>, dailyFive: Ro
 }
 
 function Home() {
+  const { audience = "ALL" } = Route.useSearch();
   const { rotationMap, dailyFive } = Route.useLoaderData();
   const { lead, heroPrints, story, underdog } = castTheBoard(rotationMap, dailyFive);
 
   return (
-    <div className="relative">
+    <div key={audience} className="relative">
       <ScrollProgress />
       <div data-chapter="01" data-chapter-title="The board" className="tone-hero -mt-16 pt-16">
         <Hero lead={lead} prints={heroPrints} />

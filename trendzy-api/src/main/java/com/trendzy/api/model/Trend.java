@@ -31,6 +31,10 @@ public class Trend {
 
     private String category;
     private String subcategory;
+    private String productSelectionFocus;
+    private Object productRefreshedAt;
+    private Object lastProductRefreshAttemptAt;
+    private String lastProductRefreshStatus;
 
     private double trendScore;
     private String brandInstagramHandle;
@@ -105,6 +109,47 @@ public class Trend {
     public static class ProductDetail {
         private String brandName;
         private String title;
+        /** Discovery audience: MEN, WOMEN or UNISEX; legacy unknown values are shared. */
+        private String audience;
+        private String audienceSource;
+
+        public String getAudience() {
+            return ProductAudience.normalize(audience);
+        }
+
+        public String getAudienceSource() {
+            if (audienceSource != null && !audienceSource.isBlank()) return audienceSource;
+            return audience == null || !java.util.Set.of("MEN", "WOMEN", "UNISEX")
+                    .contains(audience.trim().toUpperCase(java.util.Locale.ROOT))
+                    ? "default:unknown-as-unisex" : audienceSource;
+        }
+
+        private String gender;
+        private Object targetGender;
+        @Field("target_gender")
+        @com.fasterxml.jackson.annotation.JsonProperty("target_gender")
+        private Object targetGenderLegacy;
+        private Object retailerAudience;
+        private String productType;
+        private String description;
+        private List<String> tags;
+        private Object color;
+        private Object colors;
+        private Object pattern;
+        private Object fit;
+        private Object material;
+        private Object materials;
+        private Object variantId;
+        private Object selectedVariantId;
+        private Object variantTitle;
+        /** Current-product evidence, never trend-level styling from an earlier pick. */
+        private java.util.Map<String, Object> outfitProfile;
+        private String availability;
+        private String availabilitySource;
+        private Object stockCheckedAt;
+        private Boolean available;
+        private Boolean inStock;
+        private String curationReason;
         private String currency;
         private Double price;
         private Double originalPrice;

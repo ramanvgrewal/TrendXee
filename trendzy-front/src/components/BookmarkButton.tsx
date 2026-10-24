@@ -83,7 +83,7 @@ export function BookmarkButton({
             aria-pressed={archived}
             data-cursor="button"
             aria-label={archived ? `Remove ${trendName} from your archive` : `Save ${trendName} to your archive`}
-            className={`grid size-10 place-items-center rounded-full shadow-card backdrop-blur-sm transition-colors ${
+            className={`grid size-11 place-items-center rounded-full shadow-card backdrop-blur-sm transition-colors ${
               archived ? "bg-clay text-paper" : "bg-raised/90 text-ink/75 hover:bg-raised hover:text-clay"
             }`}
           >

@@ -1,4 +1,4 @@
-import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
+import { useFinePointer, usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, m, useAnimationFrame, useInView, useMotionValue, type MotionValue, type PanInfo } from "framer-motion";
@@ -41,7 +41,9 @@ function rotationItemToTrend(item: RotationItem): Trend {
         originalPrice: item.originalPrice,
         currency: item.currency || "INR",
         imageUrl: item.image,
+        imageUrls: item.imageUrls,
         shopUrl: item.shopUrl,
+        audience: item.audience,
       },
       amazon: item.mainstream?.source === "amazon" ? {
         brandName: item.mainstream.brand,
@@ -72,6 +74,7 @@ function rotationItemToTrend(item: RotationItem): Trend {
  */
 export function DailyFive({ items }: { items: RotationItem[] }) {
   const reduced = useReducedMotion();
+  const finePointer = useFinePointer();
   const [[index, direction], setPage] = useState<[number, number]>([0, 0]);
   const [openTrend, setOpenTrend] = useState<Trend | null>(null);
   const [paused, setPaused] = useState(false);
@@ -96,7 +99,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
   };
 
   // Autoplay driven by one animation-frame clock (no intervals, no re-renders per tick).
-  const autoplay = !reduced && !paused && inView && count > 1;
+  const autoplay = finePointer && !reduced && !paused && !openTrend && inView && count > 1;
   useAnimationFrame((_, delta) => {
     if (!autoplay) return;
     const next = elapsed.get() + delta;
@@ -237,7 +240,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
           </div>
 
           {item.score > 0 && (
-            <div className="absolute -right-3 -top-5 z-10 sm:-right-6 sm:-top-6">
+          <div className="absolute right-1 -top-5 z-10 sm:-right-3 sm:-top-6">
               <Parallax depth={6} follow>
                 <AnimatePresence mode="popLayout" initial={false}>
                   <m.div

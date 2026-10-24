@@ -49,10 +49,10 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
     <section
       ref={sectionRef}
       id="lanes"
-      className="relative scroll-mt-16"
+      className="relative scroll-mt-[7.5rem]"
       style={pinned ? ({ height: `calc(100svh + ${distance}px)` } as CSSProperties) : undefined}
     >
-      <div className={pinned ? "sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden pt-16" : "py-6"}>
+      <div className={pinned ? "sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden pt-[7.5rem]" : "py-6"}>
         <div className={`mx-auto flex w-full max-w-[1440px] flex-wrap items-end justify-between gap-6 px-5 sm:px-8 ${pinned ? "" : "pt-20"}`}>
           <div>
             <p className="eyebrow text-ink/70">

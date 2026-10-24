@@ -1,7 +1,9 @@
 /** "₹2,799" in Indian grouping, or null when there is no usable price. */
 export function formatPrice(price: number | null | undefined, currency?: string | null) {
   if (price == null || !Number.isFinite(price) || price <= 0) return null;
-  const symbol = !currency || currency === "INR" ? "₹" : currency;
+  const value = (currency || "INR").trim();
+  const rupees = ["INR", "RS", "RS.", "RUPEES", "\u20b9", "\u00e2\u201a\u00b9", "\u00e2\u0082\u00b9", "\u00c3\u00a2\u00e2\u20ac\u0161\u00c2\u00b9"];
+  const symbol = rupees.some((alias) => alias.toUpperCase() === value.toUpperCase()) ? "\u20b9" : value;
   return `${symbol}${Math.round(price).toLocaleString("en-IN")}`;
 }
 
@@ -14,6 +16,7 @@ export function discountPercent(price?: number | null, original?: number | null)
 
 /** Display name for a lane id ("tees" → "Tees"). */
 export function laneLabel(name: string) {
+  if (["POLOS", "POLOS & REGULAR"].includes(name.toUpperCase())) return "Polos & Regular";
   return name.charAt(0) + name.slice(1).toLowerCase();
 }
 

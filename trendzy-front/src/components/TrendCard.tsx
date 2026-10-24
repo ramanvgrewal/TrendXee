@@ -8,6 +8,7 @@ import type { Trend } from "@/lib/mock-data";
 import { aesthetics } from "@/lib/mock-data";
 import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
 import { TrustBadge } from "./TrustBadge";
+import { audienceLabel } from "@/lib/audience";
 
 export function trendImage(trend: Trend) {
   return trend.products?.underdog?.imageUrl || trend.products?.amazon?.imageUrl || trend.products?.flipkart?.imageUrl || "";
@@ -111,11 +112,11 @@ export function TrendCard({
             </div>
           )}
 
-          <p className="flex min-w-0 items-baseline gap-2 pr-14">
+          <p className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 pr-12 sm:flex-nowrap sm:pr-14">
             {underdog?.brandName ? (
               <>
                 <span className="eyebrow shrink-0 text-[11px] text-clay-ink">Underdog</span>
-                <span className="min-w-0 font-display text-[15px] italic text-ink/80 flex items-center gap-2">
+                <span className="min-w-0 basis-full font-display text-[15px] italic text-ink/80 flex items-center gap-2 sm:basis-auto">
                   <span className="truncate">{underdog.brandName}</span>
                   <TrustBadge rating={trend.underdogRating} signals={trend.ratingSignals} />
                 </span>
@@ -132,6 +133,8 @@ export function TrendCard({
           >
             {trend.name}
           </m.h3>
+
+          {audienceLabel(underdog?.audience) && <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/60">{audienceLabel(underdog?.audience)}</p>}
 
           {trend.aiSummary && (
             <p className="mt-2.5 line-clamp-2 text-pretty text-[14.5px] leading-relaxed text-ink/70">{firstSentence(trend.aiSummary)}</p>

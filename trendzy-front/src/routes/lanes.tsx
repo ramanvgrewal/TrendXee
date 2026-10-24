@@ -3,9 +3,12 @@ import { LaneCard } from "@/components/LaneCard";
 import { ScrollReveal } from "@/motion/ScrollReveal";
 import { aesthetics } from "@/lib/mock-data";
 import { fetchLaneRotations, LANE_STALE_TIME } from "@/lib/lanes";
+import { normalizeAudienceFilter } from "@/lib/audience";
+import { AudienceFilter } from "@/components/AudienceFilter";
 
 export const Route = createFileRoute("/lanes")({
-  loader: async () => ({ rotationMap: await fetchLaneRotations() }),
+  loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
+  loader: async ({ deps }) => ({ rotationMap: await fetchLaneRotations(deps.audience) }),
   staleTime: LANE_STALE_TIME,
   head: () => ({
     meta: [
@@ -13,7 +16,7 @@ export const Route = createFileRoute("/lanes")({
       {
         name: "description",
         content:
-          "Every TrendXee lane in one place: jeans, bottoms, tees, outerwear, shoes, sportswear, anime, polos, and caps & accessories, each read from live signals.",
+          "Every TrendXee lane in one place: jeans, bottoms, tees, outerwear, shoes, sportswear, anime, polos & regular, and caps & accessories, each read from live signals.",
       },
       { property: "og:title", content: "All lanes — TrendXee" },
       {
@@ -47,7 +50,8 @@ function LanesPage() {
         </p>
       </div>
 
-      <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8"><AudienceFilter /></div>
+      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {aesthetics.map((aesthetic, i) => {
           const first = rotationMap?.[aesthetic.id]?.[0];
           return (

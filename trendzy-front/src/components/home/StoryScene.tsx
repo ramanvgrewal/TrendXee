@@ -4,6 +4,7 @@ import { ScrollScene } from "@/motion/ScrollScene";
 import { ScrollTextReveal } from "@/motion/ScrollTextReveal";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import type { RotationItem } from "@/lib/lanes";
+import { MobileStory } from "@/components/home/MobileStory";
 
 /**
  * 02 — The pinned story. The stage holds still while scrolling plays a short
@@ -47,12 +48,13 @@ export function StoryScene({ items }: { items: RotationItem[] }) {
   const reduced = useReducedMotion();
   const products = items.slice(0, SLOTS.length);
 
-  if (reduced) return <StaticStory chosen={products[CHOSEN]} />;
-
   return (
-    <ScrollScene length={4.2} mobileLength={1.2} id="story">
+    <>
+    <MobileStory products={products} chosen={products[CHOSEN] ?? products[0]} reduced={reduced} />
+    {reduced ? <div className="hidden md:block"><StaticStory chosen={products[CHOSEN]} /></div> : <ScrollScene length={4.2} mobileLength={1.2} id="story-desktop" className="hidden md:block">
       {(progress) => <Stage progress={progress} products={products} />}
-    </ScrollScene>
+    </ScrollScene>}
+    </>
   );
 }
 
@@ -198,7 +200,7 @@ function FeedPrint({
                 style={{ opacity: ring }}
               />
               <m.p
-                className="absolute -bottom-9 left-1/2 -translate-x-1/2 whitespace-nowrap md:left-0 md:translate-x-0 eyebrow text-[11px] text-clay-ink"
+                className="absolute -bottom-9 left-1/2 w-max max-w-[220px] -translate-x-1/2 truncate md:left-auto md:right-0 md:translate-x-0 eyebrow text-[11px] text-clay-ink"
                 style={{ opacity: ring }}
               >
                 The underdog · <span className="font-display text-xs normal-case italic tracking-normal">{item.brand}</span>
@@ -213,7 +215,7 @@ function FeedPrint({
 
 function StaticStory({ chosen }: { chosen?: RotationItem }) {
   return (
-    <section id="story" className="mx-auto max-w-4xl px-5 py-28 text-center sm:px-8">
+    <section id="story-static" className="mx-auto max-w-4xl px-5 py-16 text-center sm:px-8 sm:py-28">
       <p className="text-balance font-display text-[clamp(2.2rem,5vw,4.5rem)] leading-tight tracking-tight">
         The internet moves fast. <em className="text-clay">Trends move faster.</em>
       </p>

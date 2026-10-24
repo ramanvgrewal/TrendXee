@@ -1,4 +1,5 @@
 import type { ProductMatch, ProductTriad, SignalProduct, Trend } from "@/lib/mock-data";
+import { matchesAudience, normalizeProductAudience, type AudienceFilter } from "@/lib/audience";
 
 const configuredBaseUrl =
   import.meta.env?.VITE_API_BASE_URL ||
@@ -8,8 +9,10 @@ const configuredBusinessUrl =
   import.meta.env?.VITE_BUSINESS_API_BASE_URL ||
   (typeof process !== "undefined" ? process.env?.VITE_BUSINESS_API_BASE_URL : undefined);
 
-export const API_BASE_URL =
-  configuredBaseUrl || (import.meta.env?.DEV ? "http://localhost:8080" : "https://api.trendxee.com");
+const localCatalog = import.meta.env?.DEV && (!configuredBaseUrl || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/i.test(configuredBaseUrl));
+export const API_BASE_URL = localCatalog
+  ? (typeof window === "undefined" ? (configuredBaseUrl || "http://localhost:8080").replace("localhost", "127.0.0.1") : configuredBaseUrl || "http://localhost:8080")
+  : configuredBaseUrl || "https://api.trendxee.com";
 
 export const BUSINESS_API_BASE_URL =
   configuredBusinessUrl || (import.meta.env?.DEV ? "http://localhost:8081" : "https://auth.trendxee.com");
@@ -116,15 +119,36 @@ function imageIdentity(value: string): string {
   } catch { return value; }
 }
 
+function imageResolutionRank(value: string): number {
+  if (!imageIdentity(value).startsWith("shopify:")) return 0;
+  const url = new URL(value);
+  const width = url.searchParams.get("width");
+  if (width && /^\d+$/.test(width)) return Number(width);
+  const size = url.pathname.match(/_(\d+)x\d*(?=\.[^.]+$)/);
+  if (size) return Number(size[1]);
+  if (/_(pico|icon|thumb|small|compact|medium|large|grande)(?=\.[^.]+$)/.test(url.pathname)) return 1;
+  return Infinity;
+}
+
 export function normalizeProduct(raw: any): ProductMatch | undefined {
   if (!raw || typeof raw !== "object") return undefined;
-  const seen = new Set<string>();
-  const imageUrls = [raw.imageUrl, ...(Array.isArray(raw.imageUrls) ? raw.imageUrls : [])]
+  const positions = new Map<string, number>();
+  const imageUrls: string[] = [];
+  const candidates = [raw.imageUrl, ...(Array.isArray(raw.imageUrls) ? raw.imageUrls : [])]
     .filter((url): url is string => typeof url === "string" && !!url.trim())
     .map((url) => url.trim().startsWith("//") ? `https:${url.trim()}` : url.trim())
-    .filter((url) => /^https?:\/\//i.test(url))
-    .filter((url) => { const key = imageIdentity(url); if (seen.has(key)) return false; seen.add(key); return true; });
-  return { ...raw, imageUrl: imageUrls[0] || "", imageUrls };
+    .filter((url) => /^https?:\/\//i.test(url));
+  for (const url of candidates) {
+    const key = imageIdentity(url);
+    const position = positions.get(key);
+    if (position === undefined) {
+      positions.set(key, imageUrls.length);
+      imageUrls.push(url);
+    } else if (imageResolutionRank(url) > imageResolutionRank(imageUrls[position])) {
+      imageUrls[position] = url;
+    }
+  }
+  return { ...raw, imageUrl: imageUrls[0] || "", imageUrls, audience: normalizeProductAudience(raw.audience) };
 }
 
 function normalizeProductTriad(raw: any): ProductTriad {
@@ -146,6 +170,7 @@ export async function getTrends(
   size = 100,
   subcategory?: string,
   page = 0,
+  audience: AudienceFilter = "ALL",
 ): Promise<Trend[]> {
   const queryObj: Record<string, string> = {
     category,
@@ -157,17 +182,65 @@ export async function getTrends(
   if (subcategory) {
     queryObj.subcategory = subcategory;
   }
+  if (audience !== "ALL") queryObj.audience = audience;
   
   const params = new URLSearchParams(queryObj);
-  const response = await fetch(apiUrl(`/api/v2/trends?${params.toString()}`), {
-    cache: "no-store",
-  });
+  const response = await fetchCatalog(`/api/v2/trends?${params.toString()}`);
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch trends (${response.status})`);
-  }
+  // Guard older responses too. Unknown fits are shared as unisex; a model's
+  // appearance in a product photo must not determine the product's audience.
+  return normalizeTrendList(await response.json()).filter((trend) => matchesAudience(trend.products.underdog?.audience, audience));
+}
 
-  return normalizeTrendList(await response.json());
+export class CatalogRequestError extends Error {
+  constructor(public status: number) { super(`Catalog request failed (${status})`); }
+}
+
+/** One bounded retry for transient outages; no dependency on AbortSignal.timeout support. */
+async function fetchCatalog(path: string) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+  try {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const response = await fetch(apiUrl(path), { cache: "no-store", signal: controller.signal });
+        if (!response.ok) throw new CatalogRequestError(response.status);
+        return response;
+      } catch (error) {
+        const retryable = !(error instanceof CatalogRequestError) || [408, 429, 500, 502, 503, 504].includes(error.status);
+        if (attempt > 0 || !retryable || controller.signal.aborted) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+    }
+  } finally { clearTimeout(timeout); }
+}
+
+export async function getTrend(id: string, signal?: AbortSignal): Promise<Trend> {
+  const response = await fetch(apiUrl(`/api/v2/trends/${encodeURIComponent(id)}`), { cache: "no-store", signal });
+  if (!response.ok) throw new CatalogRequestError(response.status);
+  return normalizeTrend(await response.json());
+}
+
+/** The lane feed requests facets from the whole category, not just its first page. */
+export async function getCatalogPage(
+  category: string, size: number, page: number, audience: AudienceFilter,
+  filters: { style?: string; subcategory?: string; minPrice?: number; maxPrice?: number } = {},
+  includeFilters = true,
+) {
+  const params = new URLSearchParams({ category, size: String(size), page: String(page), audience, includeFilters: String(includeFilters) });
+  if (filters.subcategory) params.set("subcategory", filters.subcategory);
+  if (filters.style) params.set("style", filters.style);
+  if (filters.minPrice != null) params.set("minPrice", String(filters.minPrice));
+  if (filters.maxPrice != null) params.set("maxPrice", String(filters.maxPrice));
+  const response = await fetchCatalog(`/api/v2/trends?${params}`);
+  const data = await response.json();
+  const trends = normalizeTrendList(data).filter((trend) => matchesAudience(trend.products.underdog?.audience, audience));
+  return {
+    trends,
+    total: typeof data.totalElements === "number" ? data.totalElements : undefined,
+    hasMore: typeof data.hasMore === "boolean" ? data.hasMore : trends.length === size,
+    styles: (Array.isArray(data.styles) ? data.styles.filter((value: any) => typeof value?.id === "string" && typeof value?.label === "string") : []) as { id: string; label: string }[],
+  };
 }
 
 export async function rateTrendProduct(trendId: string, rating: number) {

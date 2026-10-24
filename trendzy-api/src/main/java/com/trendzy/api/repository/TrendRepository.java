@@ -14,17 +14,31 @@ import java.util.List;
 @Repository
 public interface TrendRepository extends ReactiveMongoRepository<Trend, String> {
 
+    String VISIBLE = "'active': { '$ne': false }, '$or': [ { 'enrichmentStatus': 'COMPLETED' }, { 'enrichmentStatus': { '$in': ['PARTIAL', 'AWAITING_UNDERDOG', 'PENDING', 'IN_PROGRESS', 'PROCESSING', 'FAILED'] }, 'signalProducts.underdog.shopUrl': { '$type': 'string', '$ne': '' }, 'signalProducts.underdog.imageUrl': { '$type': 'string', '$ne': '' } } ]";
+    String FEED_SORT = "{ 'trendScore': -1, 'jeansFitPriority': -1, 'lastUpdatedAt': -1, '_id': 1 }";
+    // Normalize in Mongo before pagination, including older documents without audience.
+    String AUDIENCE_VALUE = "{ '$toUpper': { '$trim': { 'input': { '$convert': { 'input': '$signalProducts.underdog.audience', 'to': 'string', 'onError': '', 'onNull': '' } } } } }";
+    String EFFECTIVE_AUDIENCE = "{ '$cond': [ { '$in': [ " + AUDIENCE_VALUE + ", ['MEN', 'WOMEN'] ] }, " + AUDIENCE_VALUE + ", 'UNISEX' ] }";
+
     @Query("{ 'signalProducts.underdog.brandName': ?0 }")
     Flux<Trend> findByBrandName(String brandName);
 
     // Infinite scroll using Flux
-    @Query(value = "{ 'category': { '$in': ?0 }, 'active': { '$ne': false }, '$or': [ { 'enrichmentStatus': 'COMPLETED' }, { 'enrichmentStatus': { '$in': ['PARTIAL', 'AWAITING_UNDERDOG', 'PENDING', 'IN_PROGRESS', 'PROCESSING', 'FAILED'] }, 'signalProducts.underdog.shopUrl': { '$type': 'string', '$ne': '' }, 'signalProducts.underdog.imageUrl': { '$type': 'string', '$ne': '' } } ] }",
-        sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1, '_id': 1 }")
+    @Query(value = "{ 'category': { '$in': ?0 }, " + VISIBLE + " }", sort = FEED_SORT)
     Flux<Trend> findByCategory(List<String> categories, Pageable pageable);
 
-    @Query(value = "{ 'category': { '$in': ?0 }, 'subcategory': { '$regex': ?1, '$options': 'i' }, 'active': { '$ne': false }, '$or': [ { 'enrichmentStatus': 'COMPLETED' }, { 'enrichmentStatus': { '$in': ['PARTIAL', 'AWAITING_UNDERDOG', 'PENDING', 'IN_PROGRESS', 'PROCESSING', 'FAILED'] }, 'signalProducts.underdog.shopUrl': { '$type': 'string', '$ne': '' }, 'signalProducts.underdog.imageUrl': { '$type': 'string', '$ne': '' } } ] }",
-        sort = "{ 'trendScore': -1, 'lastUpdatedAt': -1, '_id': 1 }")
+    @Query(value = "{ 'category': { '$in': ?0 }, 'subcategory': { '$regex': ?1, '$options': 'i' }, " + VISIBLE + " }", sort = FEED_SORT)
     Flux<Trend> findByCategoryAndSubcategory(List<String> categories, String subcategory, Pageable pageable);
+
+    @Query(value = "{ 'category': { '$in': ?0 }, '$expr': { '$in': [ " + EFFECTIVE_AUDIENCE + ", ?1 ] }, " + VISIBLE + " }", sort = FEED_SORT)
+    Flux<Trend> findByCategoryAndAudience(List<String> categories, List<String> audiences, Pageable pageable);
+
+    @Query(value = "{ 'category': { '$in': ?0 }, 'subcategory': { '$regex': ?1, '$options': 'i' }, '$expr': { '$in': [ " + EFFECTIVE_AUDIENCE + ", ?2 ] }, " + VISIBLE + " }", sort = FEED_SORT)
+    Flux<Trend> findByCategoryAndSubcategoryAndAudience(List<String> categories, String subcategory, List<String> audiences, Pageable pageable);
+
+    /** Pairing reads the current selected products across lanes, never curated pools. */
+    @Query(value = "{ 'category': { '$in': ?0 }, " + VISIBLE + " }", sort = FEED_SORT)
+    Flux<Trend> findPairingCandidates(List<String> categories);
 
     // Delete trends by category with score less than a threshold
     Mono<Long> deleteByCategoryAndTrendScoreLessThan(String category, double maxScore);

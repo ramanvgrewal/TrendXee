@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  retainSearchParams,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -15,6 +16,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MotionProvider } from "@/motion/MotionProvider";
 import { ctaClass } from "@/components/Cta";
+import { normalizeAudienceFilter, type AudienceFilter } from "@/lib/audience";
 
 function NotFoundComponent() {
   return (
@@ -75,10 +77,15 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  validateSearch: (search: Record<string, unknown>): { audience?: AudienceFilter } => {
+    const audience = normalizeAudienceFilter(search.audience);
+    return audience === "ALL" ? {} : { audience };
+  },
+  search: { middlewares: [retainSearchParams(["audience"])] },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "TrendXee — fits before they go viral" },
       {
         name: "description",

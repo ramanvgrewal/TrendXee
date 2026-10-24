@@ -3,11 +3,17 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import ts from 'typescript';
 
-const source = await readFile(new URL('../src/lib/api.ts', import.meta.url), 'utf8');
+const audienceSource = await readFile(new URL('../src/lib/audience.ts', import.meta.url), 'utf8');
+const audienceCode = ts.transpileModule(audienceSource, {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+}).outputText;
+const audienceModuleUrl = `data:text/javascript;base64,${Buffer.from(audienceCode).toString('base64')}`;
+const { normalizeAudienceFilter, normalizeProductAudience, matchesAudience, audienceLabel } = await import(audienceModuleUrl);
+const source = (await readFile(new URL('../src/lib/api.ts', import.meta.url), 'utf8')).replace('"@/lib/audience"', JSON.stringify(audienceModuleUrl));
 const { outputText } = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
 });
-const { normalizeTrend, normalizeProduct } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
+const { normalizeTrend, normalizeProduct, getTrends } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
 
 test('uncalculated Instagram hype cannot display a legacy score', () => {
   assert.equal(normalizeTrend({trendScore: 80}).trendScore, 0);
@@ -45,4 +51,47 @@ test('API category whitespace cannot hide a brand from a lane', () => {
   const trend = normalizeTrend({ id: 'veirdo', category: ' TEES ', signalProducts: { underdog: { imageUrls: ['https://store/front.jpg'] } } });
   assert.equal(trend.aestheticId, 'tees');
   assert.equal(trend.products.underdog.imageUrl, 'https://store/front.jpg');
+});
+
+test('unknown and missing product audiences default to unisex and appear in both fits', () => {
+  for (const audience of ['MEN', 'WOMEN', 'UNISEX', 'UNKNOWN', '', 'not-a-fit', null, undefined]) {
+    assert.equal(matchesAudience(audience, 'ALL'), true);
+    assert.equal(matchesAudience(audience, 'MEN'), audience !== 'WOMEN');
+    assert.equal(matchesAudience(audience, 'WOMEN'), audience !== 'MEN');
+    if (audience !== 'MEN' && audience !== 'WOMEN') assert.equal(audienceLabel(audience), 'Unisex');
+  }
+  assert.equal(normalizeAudienceFilter('women'), 'WOMEN');
+  assert.equal(normalizeAudienceFilter('UNISEX'), 'ALL');
+  assert.equal(normalizeAudienceFilter('not-a-fit'), 'ALL');
+  assert.equal(normalizeProductAudience(' women '), 'WOMEN');
+  assert.equal(normalizeProductAudience(''), 'UNISEX');
+  assert.equal(normalizeProduct({ title: 'Oversized tee' }).audience, 'UNISEX');
+});
+
+test('audience travels with pagination and an older API cannot mix filtered products', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests = [];
+  globalThis.fetch = async (url) => {
+    requests.push(new URL(url));
+    return { ok: true, json: async () => ['MEN', 'WOMEN', 'UNISEX', undefined].map((audience, index) => ({ id: `${index}`, signalProducts: { underdog: { title: `Fit ${index}`, audience } } })) };
+  };
+  try {
+    const filtered = await getTrends('jeans', 12, undefined, 2, 'WOMEN');
+    assert.deepEqual(filtered.map((trend) => trend.products.underdog.audience), ['WOMEN', 'UNISEX', 'UNISEX']);
+    assert.equal(requests[0].searchParams.get('audience'), 'WOMEN');
+    assert.equal(requests[0].searchParams.get('page'), '2');
+    assert.equal((await getTrends('jeans')).length, 4);
+    assert.equal(requests[1].searchParams.has('audience'), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+ test('a thumbnail preceding its Shopify original cannot become the cover', () => {
+  const small = 'https://brand.in/cdn/shop/files/front_150x.jpg?v=12&width=150';
+  const clear = 'https://cdn.shopify.com/s/files/1/0750/2685/8234/files/front.jpg?v=12&width=1600';
+  const back = 'https://brand.in/cdn/shop/files/back.jpg?v=12';
+  const result = normalizeProduct({imageUrl:small,imageUrls:[small,back,clear]});
+  assert.equal(result.imageUrl, clear);
+  assert.deepEqual(result.imageUrls, [clear,back]);
 });

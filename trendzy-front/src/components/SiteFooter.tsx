@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AuthModal } from "@/components/AuthModal";
 import { ContactDialog } from "@/components/ContactDialog";
@@ -8,14 +8,16 @@ import { aesthetics } from "@/lib/mock-data";
 import { laneLabel } from "@/lib/format";
 
 export function SiteFooter() {
+  const { pathname } = useLocation();
+  const hasAudienceDock = pathname === "/" || pathname === "/lanes" || pathname.startsWith("/aesthetic/");
   const { data: user } = useQuery(currentUserQuery);
   const [authOpen, setAuthOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
 
-  const linkClass = "ed-link inline-block py-1 text-[14px] text-ink/70 hover:text-clay";
+  const linkClass = "ed-link inline-flex min-h-11 items-center py-1 text-left text-[14px] text-ink/70 hover:text-clay";
 
   return (
-    <footer className="fibre relative border-t border-border bg-deep before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-20 before:bg-gradient-to-b before:from-transparent before:to-deep/70">
+    <footer className={`fibre relative border-t border-border bg-deep before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-20 before:bg-gradient-to-b before:from-transparent before:to-deep/70 ${hasAudienceDock ? "pb-[calc(5rem+env(safe-area-inset-bottom))]" : ""}`}>
       <div className="mx-auto grid w-full max-w-[1440px] grid-cols-2 gap-x-6 gap-y-12 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:py-20">
         <div className="col-span-2 lg:col-span-5">
           <Link to="/" className="inline-flex items-center gap-2.5">
@@ -104,7 +106,7 @@ export function SiteFooter() {
                 behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
               })
             }
-            className="hit ed-link-rest font-semibold text-ink/70 hover:text-clay"
+            className="ed-link-rest min-h-11 font-semibold text-ink/70 hover:text-clay"
           >
             Back to top ↑
           </button>

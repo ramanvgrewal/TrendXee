@@ -8,6 +8,7 @@ import { ScrollTextReveal } from "@/motion/ScrollTextReveal";
 import { aesthetics } from "@/lib/mock-data";
 import type { RotationItem } from "@/lib/lanes";
 import { laneLabel } from "@/lib/format";
+import { useAudience } from "@/components/AudienceFilter";
 
 /**
  * 07 — The close: one line revealed by scrolling, then the lanes as the way in.
@@ -15,10 +16,11 @@ import { laneLabel } from "@/lib/format";
  * (the same covers the lane cards already loaded, so no new requests).
  */
 export function FinalCta({ rotationMap }: { rotationMap: Record<string, RotationItem[]> }) {
+  const audience = useAudience();
   const [active, setActive] = useState(aesthetics[0].id);
   const lane = aesthetics.find((a) => a.id === active) ?? aesthetics[0];
   const index = aesthetics.indexOf(lane);
-  const cover = rotationMap[lane.id]?.[0]?.image || lane.heroImage;
+  const cover = rotationMap[lane.id]?.[0]?.image || (audience === "ALL" ? lane.heroImage : "");
 
   return (
     <section className="relative overflow-hidden">
@@ -77,7 +79,7 @@ export function FinalCta({ rotationMap }: { rotationMap: Record<string, Rotation
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] bg-sand/50">
                 <AnimatePresence initial={false}>
-                  <m.img
+                  {cover ? <m.img
                     key={lane.id}
                     src={cover}
                     alt=""
@@ -87,7 +89,7 @@ export function FinalCta({ rotationMap }: { rotationMap: Record<string, Rotation
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                     className="absolute inset-0 h-full w-full object-cover"
-                  />
+                  /> : <div key={lane.id} className="absolute inset-0 grid place-items-center bg-ink p-8 text-center font-display text-2xl italic text-on-scrim/70">New finds soon</div>}
                 </AnimatePresence>
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-scrim/75 via-scrim/25 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-on-scrim">

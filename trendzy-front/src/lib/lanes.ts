@@ -1,5 +1,8 @@
-import { getTrends } from "@/lib/api";
+import { getTrends, getCatalogPage } from "@/lib/api";
+import type { LaneFilters } from "@/lib/lane-filters";
+import { cachedStyles, markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
 import { aesthetics, type Trend } from "@/lib/mock-data";
+import type { AudienceFilter, ProductAudience } from "@/lib/audience";
 
 export type MainstreamPick = {
   source: "amazon" | "flipkart";
@@ -17,6 +20,7 @@ export type RotationItem = {
   brand: string;
   title: string;
   image: string;
+  imageUrls?: string[];
   shopUrl: string;
   category?: string;
   trendName: string;
@@ -27,6 +31,7 @@ export type RotationItem = {
   originalPrice?: number;
   currency?: string;
   subcategory?: string;
+  audience?: ProductAudience;
   mainstream?: MainstreamPick;
 };
 
@@ -54,6 +59,7 @@ function toRotationItem(t: Trend, laneId: string): RotationItem {
     brand: u.brandName || "",
     title: u.title || "",
     image: u.imageUrl || "",
+    imageUrls: u.imageUrls,
     shopUrl: u.shopUrl || "",
     category: laneId,
     trendName: t.name,
@@ -63,6 +69,7 @@ function toRotationItem(t: Trend, laneId: string): RotationItem {
     originalPrice: u.originalPrice || undefined,
     currency: u.currency || undefined,
     subcategory: t.subcategory || undefined,
+    audience: u.audience,
     mainstream: ms
       ? {
           source: ms.source,
@@ -99,33 +106,38 @@ export function belongsToLane(trend: Trend, laneId: string) {
 }
 
 /** One page of a lane's trends, plus whether another page is worth asking for. */
-export async function fetchLanePage(laneId: string, page: number) {
-  const raw = await getTrends(laneId, LANE_PAGE_SIZE, undefined, page);
-  return {
-    trends: raw.filter((t) => belongsToLane(t, laneId)),
-    hasMore: raw.length === LANE_PAGE_SIZE,
-  };
+export async function fetchLanePage(laneId: string, page: number, audience: AudienceFilter = "ALL", filters: LaneFilters = {}) {
+  try {
+    const result = await getCatalogPage(laneId, LANE_PAGE_SIZE, page, audience, { style: filters.style });
+    rememberStyles(laneId, result.styles);
+    markCatalogFailure(laneId, audience, { ...filters, page: page + 1 }, false);
+    return { ...result, styles: result.styles.length ? result.styles : cachedStyles(laneId), trends: result.trends.filter((t) => belongsToLane(t, laneId)) };
+  } catch (error) {
+    markCatalogFailure(laneId, audience, { ...filters, page: page + 1 }, true);
+    throw error;
+  }
 }
 
 const SSR_ROTATION_TTL = 60_000;
 const BROWSER_ROTATION_TTL = 5 * 60_000;
-let rotationCache: { at: number; data: Promise<RotationMap> } | null = null;
+const rotationCache = new Map<AudienceFilter, { at: number; data: Promise<RotationMap> }>();
 
 /**
  * Up to five underdog products per lane, used by the home hero and lane
  * posters. One failing lane no longer blanks the others. Shared in memory
  * for 60s during SSR to prevent per-lane concurrent fan-out per request, and 5m in browser.
  */
-export function fetchLaneRotations(): Promise<RotationMap> {
+export function fetchLaneRotations(audience: AudienceFilter = "ALL"): Promise<RotationMap> {
   const inBrowser = typeof window !== "undefined";
   const ttl = inBrowser ? BROWSER_ROTATION_TTL : SSR_ROTATION_TTL;
-  if (rotationCache && Date.now() - rotationCache.at < ttl) {
-    return rotationCache.data;
+  const cached = rotationCache.get(audience);
+  if (cached && Date.now() - cached.at < ttl) {
+    return cached.data;
   }
 
   const data = Promise.allSettled(
     aesthetics.map(async (a) => {
-      const trends = await getTrends(a.id, 15);
+      const trends = await getTrends(a.id, 15, undefined, 0, audience);
       const items = trends
         .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
         .slice(0, 5)
@@ -142,12 +154,14 @@ export function fetchLaneRotations(): Promise<RotationMap> {
         console.error("Failed to fetch lane rotation", result.reason);
       }
     }
+    // A partial outage must not pin missing lanes into the home cache for five minutes.
+    if (results.some((result) => result.status === "rejected")) rotationCache.delete(audience);
     return map;
   });
 
-  rotationCache = { at: Date.now(), data };
+  rotationCache.set(audience, { at: Date.now(), data });
   data.catch(() => {
-    rotationCache = null;
+    if (rotationCache.get(audience)?.data === data) rotationCache.delete(audience);
   });
   return data;
 }

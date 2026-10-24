@@ -60,6 +60,7 @@ export function SiteHeader() {
   };
 
   return (
+    <>
     <header
       style={{ viewTransitionName: "site-header" }}
       className={`sticky top-0 z-40 transition-[background-color,box-shadow,border-color] duration-300 ${
@@ -68,7 +69,7 @@ export function SiteHeader() {
           : "border-b border-transparent bg-transparent"
       }`}
     >
-      <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between gap-6 px-5 sm:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between gap-3 px-5 sm:gap-6 sm:px-8">
         <Link to="/" className="group flex items-center gap-2.5" aria-label="TrendXee home">
           <img src="/brand/trendxee-mark.svg" alt="" width={32} height={32} className="size-8 shrink-0" />
           <span className="font-display text-xl tracking-tight">
@@ -105,7 +106,7 @@ export function SiteHeader() {
               <button
                 type="button"
                 aria-label={menuOpen ? "Close menu" : "Open menu"}
-                className="relative grid size-10 place-items-center rounded-full text-ink hover:bg-ink/[0.06]"
+                className="relative grid size-11 place-items-center rounded-full text-ink hover:bg-ink/[0.06]"
               >
                 <span className="relative block h-3 w-5">
                   <m.span
@@ -141,6 +142,7 @@ export function SiteHeader() {
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
       <ContactDialog open={contactOpen} onOpenChange={setContactOpen} user={user} />
     </header>
+    </>
   );
 }
 
@@ -297,7 +299,7 @@ function MobileMenu({
   };
   let i = 0;
   return (
-    <SheetContent side="right" aria-describedby={undefined} className="fibre flex w-full flex-col overflow-y-auto border-l border-border bg-raised p-0 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:duration-200 data-[state=open]:duration-300 sm:max-w-md">
+    <SheetContent side="right" aria-describedby={undefined} className="fibre flex h-dvh w-full flex-col overflow-y-auto overscroll-contain border-l border-border bg-raised p-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:duration-200 data-[state=open]:duration-300 sm:max-w-md">
       <SheetTitle className="sr-only">Menu</SheetTitle>
       <div className="flex h-16 items-center px-6 eyebrow text-ink/70">Menu</div>
       <AnimatePresence>
@@ -327,7 +329,7 @@ function MobileMenu({
               { to: "/archive" as const, label: "Your archive" },
             ].map((l) => (
               <m.li key={l.label} custom={i++} variants={item} initial="hidden" animate="show">
-                <Link to={l.to} hash={l.hash} onClick={onNavigate} className="block py-2 text-lg font-semibold text-ink/80 active:text-clay">
+                <Link to={l.to} hash={l.hash} onClick={onNavigate} className="flex min-h-11 items-center py-2 text-lg font-semibold text-ink/80 active:text-clay">
                   {l.label}
                 </Link>
               </m.li>

@@ -1,37 +1,63 @@
 import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useEffect, useRef, useState } from "react";
-import { createFileRoute, Link, notFound, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, m, useScroll, useTransform } from "framer-motion";
 import { TrendBoard } from "@/components/TrendBoard";
 import { trendImage } from "@/components/TrendCard";
-import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
+import { CtaArrow, ctaClass } from "@/components/Cta";
 import { ease, spring } from "@/motion/tokens";
 import { Img } from "@/components/Img";
 import type { Aesthetic, Trend } from "@/lib/mock-data";
 import { aesthetics } from "@/lib/mock-data";
-import { fetchLanePage, LANE_STALE_TIME } from "@/lib/lanes";
+import { fetchLanePage, LANE_PAGE_SIZE, LANE_STALE_TIME } from "@/lib/lanes";
 import { laneLabel } from "@/lib/format";
+import { audienceLabel, normalizeAudienceFilter, type AudienceFilter } from "@/lib/audience";
+import { useAudience } from "@/components/AudienceFilter";
+import { LaneFilters } from "@/components/LaneFilters";
+import { normalizeLaneFilters, normalizeLanePage, lanePageItems, type LaneFilters as Filters, type StyleOption } from "@/lib/lane-filters";
+import { CatalogRequestError } from "@/lib/api";
+import { cachedStyles, hasCatalogFailure, markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
 
-type LaneData = { aesthetic: Aesthetic; trends: Trend[]; hasMore: boolean; failed: boolean };
+type LaneData = { aesthetic: Aesthetic; trends: Trend[]; hasMore: boolean; failed: boolean; total?: number; styles: StyleOption[] };
 
 export const Route = createFileRoute("/aesthetic/$id")({
-  validateSearch: (search: Record<string, unknown>): { trend?: string } =>
-    typeof search.trend === "string" && search.trend ? { trend: search.trend } : {},
-  loader: async ({ params }): Promise<LaneData> => {
+  validateSearch: (search: Record<string, unknown>): Filters & { trend?: string; page?: number } => ({
+    ...normalizeLaneFilters(search),
+    ...(normalizeLanePage(search.page) > 1 ? { page: normalizeLanePage(search.page) } : {}),
+    ...(typeof search.trend === "string" && search.trend ? { trend: search.trend } : {}),
+  }),
+  loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience), ...normalizeLaneFilters(search), page: normalizeLanePage(search.page) }),
+  shouldReload: ({ params, deps }) => hasCatalogFailure(params.id, deps.audience, deps) ? true : undefined,
+  loader: async ({ params, deps, location }): Promise<LaneData> => {
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
+    let result;
     try {
-      // First page only; the rest loads on demand (backend sorts by score).
-      const { trends, hasMore } = await fetchLanePage(params.id, 0);
-      return { aesthetic, trends, hasMore, failed: false };
+      result = await fetchLanePage(params.id, deps.page - 1, deps.audience, deps);
     } catch (e) {
+      if (e instanceof CatalogRequestError && e.status === 400 && deps.style) {
+        const linkedTrend = (location.search as Record<string, unknown>).trend;
+        // Old or cross-lane style links are a filter reset, not an engine outage.
+        throw redirect({ to: "/aesthetic/$id", params, search: {
+          audience: deps.audience === "ALL" ? undefined : deps.audience,
+          trend: typeof linkedTrend === "string" ? linkedTrend : undefined,
+        }, replace: true });
+      }
       console.error(e);
-      return { aesthetic, trends: [], hasMore: false, failed: true };
+      return { aesthetic, trends: [], hasMore: false, styles: cachedStyles(params.id), failed: true };
     }
+    const lastPage = Math.max(1, Math.ceil(result.total / LANE_PAGE_SIZE));
+    if (deps.page > lastPage) {
+      throw redirect({ to: "/aesthetic/$id", params, search: {
+        ...location.search, page: lastPage > 1 ? lastPage : undefined,
+      }, replace: true });
+    }
+    return { aesthetic, ...result, failed: false };
   },
   staleTime: LANE_STALE_TIME,
-  pendingMs: 400,
+  // Keep the current grid and filter trigger visible during refinement, even on slow connections.
+  pendingMs: Infinity,
   pendingComponent: LanePending,
   head: ({ loaderData }) => {
     const aesthetic = loaderData?.aesthetic;
@@ -62,17 +88,21 @@ export const Route = createFileRoute("/aesthetic/$id")({
 });
 
 function LanePage() {
-  const { aesthetic, trends, hasMore, failed } = Route.useLoaderData();
+  const audience = useAudience();
+  const { aesthetic, trends, failed, total, styles } = Route.useLoaderData();
+  const search = Route.useSearch();
+  const filters = normalizeLaneFilters(search);
+  const page = normalizeLanePage(search.page);
   const index = aesthetics.findIndex((a) => a.id === aesthetic.id);
   const firstDrop = trends.find((trend) => trend.products?.underdog && trendImage(trend));
-  const heroImage = (firstDrop && trendImage(firstDrop)) || aesthetic.heroImage;
+  const heroImage = (firstDrop && trendImage(firstDrop)) || (audience === "ALL" ? aesthetic.heroImage : "");
 
   return (
     <div className="pb-24">
-      <LaneHero aesthetic={aesthetic} index={index} image={heroImage} firstDrop={firstDrop} />
+      <LaneHero key={`hero-${aesthetic.id}-${audience}`} aesthetic={aesthetic} index={index} image={heroImage} firstDrop={firstDrop} />
       <LaneSwitcher activeId={aesthetic.id} />
-      {/* Keyed by lane so switching lanes resets the loaded pages. */}
-      <LaneFeed key={aesthetic.id} aesthetic={aesthetic} initialTrends={trends} initialHasMore={hasMore} failed={failed} />
+      {/* Keep the feed mounted so filters retain focus while results change. */}
+      <LaneFeed key={aesthetic.id} audience={audience} filters={filters} total={total} styles={styles} aesthetic={aesthetic} initialTrends={trends} page={page} failed={failed} />
     </div>
   );
 }
@@ -102,7 +132,11 @@ function LaneHero({ aesthetic, index, image, firstDrop }: { aesthetic: Aesthetic
         exit={{ opacity: 0 }}
         transition={{ duration: 0.55, ease: ease.drift }}
       >
-        <Img src={image} priority className="h-full w-full object-cover" />
+        {image ? <Img src={image} priority className="h-full w-full object-cover" /> : (
+          <div className="grid h-full place-items-center bg-ink p-8 text-center text-on-scrim/75">
+            <p className="font-display text-2xl italic">New finds are on the way.</p>
+          </div>
+        )}
       </m.div>
     </AnimatePresence>
   );
@@ -174,7 +208,7 @@ function HeroDrop({ trend, laneId }: { trend: Trend; laneId: string }) {
     <Link
       to="/aesthetic/$id"
       params={{ id: laneId }}
-      search={{ trend: trend.id }}
+      search={(previous) => ({ ...previous, trend: trend.id })}
       resetScroll={false}
       viewTransition={false}
       aria-label={`Open first drop: ${product.title || trend.name}`}
@@ -219,7 +253,8 @@ function LaneSwitcher({ activeId }: { activeId: string }) {
     // Switching lanes from deep in the feed keeps you at the feed, not the cover.
     const anchor = anchorRef.current;
     if (anchor) {
-      const anchorTop = anchor.getBoundingClientRect().top + window.scrollY - 64;
+      const stickyOffset = 64;
+      const anchorTop = anchor.getBoundingClientRect().top + window.scrollY - stickyOffset;
       if (window.scrollY > anchorTop) window.scrollTo({ top: anchorTop });
     }
   }, [activeId]);
@@ -227,7 +262,7 @@ function LaneSwitcher({ activeId }: { activeId: string }) {
   return (
     <>
     <div ref={anchorRef} aria-hidden />
-    <nav aria-label="Lanes" className="sticky top-16 z-30 mt-6 border-y border-border bg-paper/80 backdrop-blur-md">
+    <nav aria-label="Lanes" className="sticky top-16 z-30 mt-6 border-y border-border bg-paper/95 backdrop-blur-md">
       <div ref={railRef} className="no-scrollbar mx-auto flex w-full max-w-[1440px] gap-1 overflow-x-auto px-5 py-2.5 sm:px-8">
         {aesthetics.map((a, i) => {
           const active = a.id === activeId;
@@ -260,33 +295,60 @@ function LaneSwitcher({ activeId }: { activeId: string }) {
 function LaneFeed({
   aesthetic,
   initialTrends,
-  initialHasMore,
+  page,
   failed,
+  audience,
+  filters,
+  total,
+  styles,
 }: {
   aesthetic: Aesthetic;
   initialTrends: Trend[];
-  initialHasMore: boolean;
+  page: number;
   failed: boolean;
+  audience: AudienceFilter;
+  filters: Filters;
+  total?: number;
+  styles: StyleOption[];
 }) {
   const navigate = useNavigate({ from: Route.fullPath });
   const router = useRouter();
+  const pending = useRouterState({ select: (state) => state.status === "pending" });
   const { trend: openId } = Route.useSearch();
   const [trends, setTrends] = useState(initialTrends);
-  const [hasMore, setHasMore] = useState(initialHasMore);
-  const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const requestRef = useRef(0);
-  const loadingRef = useRef(false);
+  const feedRef = useRef<HTMLElement>(null);
+  const pageKey = `${aesthetic.id}:${audience}:${filters.style || ""}:${page}`;
+  const previousPageRef = useRef(pageKey);
+  const retriesRef = useRef({ key: "", count: 0 });
+  useEffect(() => { rememberStyles(aesthetic.id, styles); }, [aesthetic.id, styles]);
   useEffect(() => {
-    requestRef.current += 1;
-    loadingRef.current = false;
-    setTrends(initialTrends);
-    setHasMore(initialHasMore);
-    setPage(0);
-    setLoading(false);
-    setError(false);
-  }, [initialTrends, initialHasMore]);
+    markCatalogFailure(aesthetic.id, audience, { ...filters, page }, failed);
+    const key = pageKey;
+    if (retriesRef.current.key !== key || !failed) retriesRef.current = { key, count: 0 };
+    if (!failed) return;
+    const retry = () => { void router.invalidate({ filter: (match) => match.routeId === Route.id }); };
+    const onFocus = () => { if (document.visibilityState === "visible") retry(); };
+    window.addEventListener("online", retry);
+    window.addEventListener("focus", onFocus);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (retriesRef.current.count < 2) {
+      retriesRef.current.count++;
+      timer = setTimeout(retry, 1500 * retriesRef.current.count);
+    }
+    return () => { clearTimeout(timer); window.removeEventListener("online", retry); window.removeEventListener("focus", onFocus); };
+  }, [failed, initialTrends, aesthetic.id, audience, filters.style, page, pageKey, router]);
+  useEffect(() => { setTrends(initialTrends); }, [initialTrends]);
+  useEffect(() => {
+    if (previousPageRef.current === pageKey) return;
+    previousPageRef.current = pageKey;
+    // Arrive at the results, below both sticky navigation bars. Never jump to the cover.
+    const heading = feedRef.current?.querySelector<HTMLElement>("h2");
+    if (heading) {
+      const top = heading.getBoundingClientRect().top + window.scrollY - 148;
+      if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+      heading.focus({ preventScroll: true });
+    }
+  }, [pageKey, initialTrends]);
 
   // Opening a story pushes ?trend=… so Back closes it. Closing it ourselves
   // steps back through that entry instead of stacking another one.
@@ -310,34 +372,13 @@ function LaneFeed({
     });
   };
 
-  const loadMore = async () => {
-    if (loadingRef.current) return;
-    loadingRef.current = true;
-    const request = ++requestRef.current;
-    setLoading(true);
-    setError(false);
-    try {
-      const next = await fetchLanePage(aesthetic.id, page + 1);
-      if (request !== requestRef.current) return;
-      setTrends((prev) => {
-        const seen = new Set(prev.map((t) => t.id));
-        return [...prev, ...next.trends.filter((t) => !seen.has(t.id))];
-      });
-      setHasMore(next.hasMore);
-      setPage((p) => p + 1);
-    } catch (e) {
-      console.error(e);
-      if (request === requestRef.current) setError(true);
-    } finally {
-      if (request === requestRef.current) {
-        loadingRef.current = false;
-        setLoading(false);
-      }
-    }
-  };
+  const resetFilters = () => navigate({
+    search: (previous) => ({ ...previous, audience: undefined, style: undefined, page: undefined, trend: undefined }),
+    resetScroll: false,
+    viewTransition: false,
+  });
 
-  if (failed) {
-    return (
+  const emptyContent = failed ? (
       <EmptyState
         title="The board didn't load."
         body="We couldn't reach the trend engine just now. It's usually back in a moment."
@@ -347,74 +388,98 @@ function LaneFeed({
           </button>
         }
       />
-    );
-  }
-
-  if (trends.length === 0) {
-    return (
+    ) : trends.length === 0 ? (
       <EmptyState
-        title={`Nothing pinned in ${laneLabel(aesthetic.name)} yet.`}
-        body="Lanes fill up as new signals come in. Meanwhile, the other lanes are moving."
+        title={filters.style || audience !== "ALL" ? "No drops match these filters." : `Nothing pinned in ${laneLabel(aesthetic.name)} yet.`}
+        body="Try another style or fit, or clear the filters to see every drop in this lane."
         action={
-          <Link to="/lanes" className={ctaClass("primary")}>
-            Browse other lanes <CtaArrow />
-          </Link>
+          <div className="flex flex-wrap justify-center gap-3">
+            {(audience !== "ALL" || filters.style) && <button type="button" onClick={resetFilters} className={ctaClass("primary")}>Clear filters</button>}
+            <Link to="/lanes" className={ctaClass(audience === "ALL" ? "primary" : "outline")}>
+              Browse other lanes <CtaArrow />
+            </Link>
+          </div>
         }
       />
-    );
-  }
+    ) : null;
 
   return (
     <m.section
+      ref={feedRef}
+      aria-busy={pending}
       className="mx-auto w-full max-w-[1440px] px-5 pt-12 sm:px-8 lg:pt-16"
-      initial={{ opacity: 0 }}
+      initial={false}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35, ease: ease.drift }}
     >
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-        <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+      <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0">
+        <h2 tabIndex={-1} className="font-display text-3xl tracking-tight outline-none sm:text-4xl">
           Rising in <em className="italic text-clay">{laneLabel(aesthetic.name)}</em>
         </h2>
-        <p className="meta">
-          {trends.length} {trends.length === 1 ? "drop" : "drops"} · highest score first
+        <p className="meta mt-2" role="status" aria-live="polite" aria-atomic="true">
+          {pending ? "Finding your fits…" : failed ? "Drops temporarily unavailable" : `${total ?? trends.length} ${(total ?? trends.length) === 1 ? "drop" : "drops"}${audience !== "ALL" ? ` · ${audienceLabel(audience)} + unisex` : ""} · highest hype score first`}
         </p>
+        {filters.style && <p className="mt-1 text-xs text-clay-ink">{styles.find((style) => style.id === filters.style)?.label}</p>}
+        </div>
+
+      <LaneFilters audience={audience} filters={filters} styles={styles} laneName={laneLabel(aesthetic.name)} pending={pending} unavailable={failed && styles.length === 0}
+        onApply={(change) => {
+          void navigate({
+            search: (previous) => ({ ...previous, ...change, ...(change.audience === "ALL" ? { audience: undefined } : {}), page: undefined, trend: undefined }),
+            resetScroll: false,
+            viewTransition: false,
+          });
+        }} />
       </div>
 
-      <TrendBoard
+      {emptyContent || <TrendBoard
         trends={trends}
         openId={openId}
         onOpenChange={setOpen}
         onTrendChanged={(t) => setTrends((prev) => prev.map((x) => (x.id === t.id ? { ...x, ...t } : x)))}
-        onTrendDeleted={(id) => setTrends((prev) => prev.filter((x) => x.id !== id))}
-      />
+        onTrendDeleted={(id) => {
+          setTrends((prev) => prev.filter((x) => x.id !== id));
+          // Recount pages and clamp the URL if the last product on a page was removed.
+          void router.invalidate({ filter: (match) => match.routeId === Route.id });
+        }}
+      />}
 
-      {hasMore && (
-        <div className="mt-16 flex flex-col items-center gap-3">
-          <Cta magnetic>
-            <button type="button" onClick={loadMore} disabled={loading} className={`${ctaClass("outline", "lg")} min-w-[15rem]`}>
-              {loading ? (
-                <span className="flex items-center gap-3">
-                  <span className="flex gap-1">
-                    {[0, 1, 2].map((i) => (
-                      <m.span
-                        key={i}
-                        className="size-1.5 rounded-full bg-current"
-                        animate={{ opacity: [0.25, 1, 0.25] }}
-                        transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15 }}
-                      />
-                    ))}
-                  </span>
-                  Pinning more drops
-                </span>
-              ) : (
-                <>Load more drops</>
-              )}
-            </button>
-          </Cta>
-          {error && <p className="text-sm text-ink/70">That didn't load. Try once more.</p>}
-        </div>
+      {!failed && (total ?? 0) > LANE_PAGE_SIZE && (
+        <LanePagination page={page} total={Math.ceil(total! / LANE_PAGE_SIZE)} pending={pending} />
       )}
+
     </m.section>
+  );
+}
+
+function LanePagination({ page, total, pending }: { page: number; total: number; pending: boolean }) {
+  const navigate = useNavigate({ from: Route.fullPath });
+  const go = (next: number) => {
+    if (pending || next === page || next < 1 || next > total) return;
+    void navigate({
+      search: (previous) => ({ ...previous, page: next > 1 ? next : undefined, trend: undefined }),
+      resetScroll: false,
+      viewTransition: false,
+    });
+  };
+  const control = "inline-flex h-11 items-center justify-center gap-2 rounded-full px-4 text-xs font-semibold transition-colors hover:bg-ink/[0.06] disabled:opacity-35 disabled:hover:bg-transparent";
+  return (
+    <nav aria-label="Product pages" className="mx-auto mt-10 max-w-lg border-t border-border pt-5 sm:mt-12">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <button type="button" aria-label="Previous page" disabled={pending || page <= 1} onClick={() => go(page - 1)} className={`${control} justify-self-start`}><span aria-hidden>←</span> Previous</button>
+        <p className="text-xs text-ink/55" aria-live="polite">Page {page} of {total}</p>
+        <button type="button" aria-label="Next page" disabled={pending || page >= total} onClick={() => go(page + 1)} className={`${control} justify-self-end`}>Next <span aria-hidden>→</span></button>
+      </div>
+      <div className="mt-2 flex flex-wrap justify-center gap-1">
+        {lanePageItems(page, total).map((item, index) => item === "gap" ? (
+          <span key={`gap-${index}`} aria-hidden className="grid h-11 w-5 place-items-center text-ink/45">…</span>
+        ) : (
+          <button key={item} type="button" aria-label={`Page ${item}`} aria-current={item === page ? "page" : undefined} disabled={pending} onClick={() => go(item)}
+            className={`grid size-11 place-items-center rounded-full text-sm font-semibold transition-colors disabled:cursor-wait ${item === page ? "bg-ink text-paper" : "text-ink/65 hover:bg-ink/[0.06] hover:text-ink"}`}>{item}</button>
+        ))}
+      </div>
+    </nav>
   );
 }
 

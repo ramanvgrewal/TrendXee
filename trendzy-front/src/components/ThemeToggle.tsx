@@ -132,7 +132,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         const r = e.currentTarget.getBoundingClientRect();
         toggle({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
       }}
-      className={`grid size-10 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink ${className}`}
+      className={`grid size-11 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink ${className}`}
     >
       <ThemeIcon theme={theme} />
     </button>

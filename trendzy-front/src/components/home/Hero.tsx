@@ -4,11 +4,12 @@ import { m, useScroll, useTransform } from "framer-motion";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
 import { Stamp } from "@/components/Stamp";
 import { Parallax, PointerScope } from "@/motion/Parallax";
-import { useMotionAllowed } from "@/motion/hooks";
+import { useFinePointer, useMotionAllowed } from "@/motion/hooks";
 import { aesthetics } from "@/lib/mock-data";
 import type { RotationItem } from "@/lib/lanes";
 import { indiaDateLabel, laneLabel } from "@/lib/format";
 import { trackProductClick } from "@/lib/useTrendActions";
+import { useAudience } from "@/components/AudienceFilter";
 
 const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
@@ -23,8 +24,11 @@ const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
  * Pointer (desktop): three depths of parallax — print, small prints, stamp.
  */
 export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationItem[] }) {
+  const audience = useAudience();
   const ref = useRef<HTMLElement>(null);
-  const allowed = useMotionAllowed();
+  const motionAllowed = useMotionAllowed();
+  const finePointer = useFinePointer();
+  const allowed = motionAllowed && finePointer;
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
 
   const copyY = useTransform(scrollYProgress, [0, 1], [0, -140]);
@@ -34,24 +38,24 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
   const smallY = useTransform(scrollYProgress, [0, 1], [0, -160]);
   const smallY2 = useTransform(scrollYProgress, [0, 1], [0, -60]);
 
-  const leadImage = lead?.image ?? aesthetics[0].heroImage;
+  const leadImage = lead?.image ?? (audience === "ALL" ? aesthetics[0].heroImage : "");
   const [printA, printB] = prints;
 
   return (
     <PointerScope mode="viewport" className="relative isolate overflow-hidden">
-      <section ref={ref} className="relative mx-auto grid min-h-[calc(100svh-4rem)] w-full max-w-[1440px] grid-cols-1 gap-12 px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-12 lg:gap-6 lg:pb-20 lg:pt-20">
+      <section ref={ref} className="home-cover relative mx-auto grid w-full max-w-[1680px] grid-cols-1 gap-9 px-5 pb-8 pt-7 sm:px-8 sm:pt-10 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:grid-rows-[1fr_auto] lg:gap-x-10 lg:gap-y-12 lg:pb-8 lg:pt-12 xl:gap-x-12 xl:pt-14">
         {/* Copy */}
         <m.div
-          className="relative z-10 flex flex-col justify-center lg:col-span-7 lg:pr-6"
+          className="relative z-10 flex min-w-0 flex-col justify-center lg:pr-4"
           style={allowed ? { y: copyY, opacity: copyOpacity } : undefined}
         >
-          <div className="enter-fade flex items-center gap-3 eyebrow text-ink/70" style={d(620)}>
+          <div className="enter-fade flex flex-wrap items-center gap-x-2 gap-y-1 eyebrow text-[10px] text-ink/70 sm:gap-3 sm:text-[11.5px]" style={d(620)}>
             <span className="inline-block size-1.5 rounded-full bg-clay" />
             The daily board <span className="text-ink/30">/</span> {indiaDateLabel()}
           </div>
 
           <Parallax depth={1.5} follow>
-            <h1 className="mt-7 font-display text-[clamp(3.25rem,8.4vw,8.5rem)] font-normal leading-[0.9] tracking-[-0.035em]">
+            <h1 className="mt-5 font-display text-[clamp(2.6rem,12.8vw,4.5rem)] font-normal leading-[0.94] tracking-[-0.035em] sm:mt-7 lg:mt-8 lg:text-[clamp(4rem,8.4vw,8.5rem)] lg:leading-[0.9]">
               <span className="-mb-[0.1em] block overflow-hidden pb-[0.1em]">
                 <span className="enter-line block" style={d(120)}>
                   Fits before
@@ -65,11 +69,11 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
             </h1>
           </Parallax>
 
-          <p className="enter-fade mt-8 max-w-[33rem] text-[16px] leading-[1.75] text-ink/70 sm:text-[17px]" style={d(420)}>
-            TrendXee puts emerging indie clothing brands to the ultimate test - auditing their hype and trust signals to verify and back only the labels that actually deliver.
+          <p className="enter-fade mt-5 max-w-[36rem] text-[16px] leading-[1.75] text-ink/70 sm:mt-7 sm:text-[17px] lg:mt-8 lg:text-[18px]" style={d(420)}>
+            TrendXee puts emerging indie clothing brands in focus, bringing together Instagram hype, trust signals and product details to help you discover the labels behind your next fit.
           </p>
 
-          <div className="enter-fade mt-10 flex flex-wrap items-center gap-x-6 gap-y-4" style={d(520)}>
+          <div className="enter-fade mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 sm:mt-8 lg:mt-10" style={d(520)}>
             <Cta magnetic>
               <a
                 href="#lanes"
@@ -85,7 +89,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
             <Link
               to="/"
               hash="engine"
-              className="hit ed-link-rest text-sm font-semibold text-ink/75 hover:text-clay"
+              className="inline-flex min-h-11 items-center text-sm font-semibold text-ink/75 underline decoration-ink/25 underline-offset-4 hover:text-clay"
             >
               How the engine works
             </Link>
@@ -93,8 +97,8 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
         </m.div>
 
         {/* Pinned prints */}
-        <div className="relative lg:col-span-5">
-          <div className="relative mx-auto w-full max-w-[480px] lg:ml-auto lg:mr-0">
+        <div className="relative min-w-0 self-center">
+          <div className="home-cover-print relative mx-auto w-full max-w-[420px] lg:ml-auto lg:mr-0 lg:max-w-none">
             {/* Small print, top-left, behind */}
             {printA && (
               <m.div
@@ -127,12 +131,16 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
                   <div className="relative rounded-[28px] bg-cream p-2.5 shadow-lift ring-1 ring-border">
                     <div className="enter-clip relative aspect-[4/5] overflow-hidden rounded-[20px] bg-sand/50">
                       <Parallax depth={4} bleed className="absolute inset-0">
-                        <img
+                        {leadImage ? <img
                           src={leadImage}
-                          alt={lead ? `${lead.title} by ${lead.brand}` : "Today's lead drop"}
+                          alt={lead ? `${lead.title} by ${lead.brand}` : "Explore indie fashion"}
                           fetchPriority="high"
                           className="media-zoom h-full w-full object-cover group-hover:scale-[1.03]"
-                        />
+                        /> : <div className="flex h-full flex-col items-center justify-center gap-5 bg-ink px-8 text-center text-on-scrim">
+                          <img src="/brand/trendxee-mark.svg" alt="" className="size-16" />
+                          <p className="font-display text-3xl italic">Your next find is on its way.</p>
+                          <p className="text-sm text-on-scrim/70">No drops for this filter yet. Explore every fit with All.</p>
+                        </div>}
                       </Parallax>
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-scrim/75 via-scrim/25 to-transparent" />
                       {lead && (
@@ -181,8 +189,8 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
         </div>
 
         {/* Lane index + scroll cue along the bottom edge */}
-        <div className="enter-fade relative z-10 flex items-end justify-between gap-6 border-t border-border pt-5 lg:col-span-12" style={d(760)}>
-          <nav aria-label="Lanes" className="no-scrollbar -mx-5 flex gap-x-6 overflow-x-auto px-5 eyebrow sm:mx-0 sm:flex-wrap sm:px-0">
+        <div className="enter-fade relative z-10 flex min-w-0 items-end justify-between gap-6 border-t border-border pt-3 lg:col-span-2" style={d(760)}>
+          <nav aria-label="Lanes" className="no-scrollbar -mx-5 flex min-w-0 flex-1 flex-nowrap gap-x-5 overflow-x-auto overscroll-x-contain whitespace-nowrap px-5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] sm:mx-0 sm:px-0 xl:gap-x-6">
             {aesthetics.map((a, i) => (
               <Link
                 key={a.id}

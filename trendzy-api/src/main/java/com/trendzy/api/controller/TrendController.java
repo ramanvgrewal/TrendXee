@@ -33,19 +33,74 @@ public class TrendController {
                 .switchIfEmpty(Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND)));
     }
 
-    @Operation(summary = "Get trends by category", description = "Paginated list of trend items filtered by category")
+    @Operation(summary = "Get trends by category", description = "Category, audience and grouped styles, applied before pagination. Legacy exact subcategory and price parameters remain supported.")
     @GetMapping
+    public Mono<Map<String, Object>> getFilteredTrends(
+            @RequestParam(defaultValue = "streetwear") String category,
+            @RequestParam(required = false) String subcategory,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "ALL") String audience,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(defaultValue = "false") boolean includeFilters,
+            @RequestParam(required = false) String style) {
+        if (minPrice == null && maxPrice == null && !includeFilters && (style == null || style.isBlank())) {
+            return getTrends(category, subcategory, page, size, audience);
+        }
+        if (page < 0 || size < 1 || size > 100) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "page must be non-negative and size must be 1..100");
+        }
+        var criteria = com.trendzy.api.service.CatalogFilterQuery.build(category, audience, subcategory, minPrice, maxPrice, style);
+        var choices = includeFilters
+                ? mongoTemplate.findDistinct(com.trendzy.api.service.CatalogFilterQuery.build(category, "ALL", null, null, null),
+                        "subcategory", Trend.class, String.class)
+                    .filter(value -> value != null && !value.isBlank()).map(String::trim).distinct()
+                    .sort(String.CASE_INSENSITIVE_ORDER).collectList()
+                : Mono.just(List.<String>of());
+        return Mono.zip(
+                mongoTemplate.find(com.trendzy.api.service.CatalogFilterQuery.page(criteria, page, size), Trend.class).collectList(),
+                mongoTemplate.count(criteria, Trend.class), choices)
+            .map(data -> {
+                Map<String, Object> result = new java.util.HashMap<>();
+                result.put("content", data.getT1());
+                result.put("totalElements", data.getT2());
+                result.put("hasMore", ((long) page + 1) * size < data.getT2());
+                result.put("page", page);
+                result.put("size", size);
+                result.put("audience", audience == null ? "ALL" : audience.trim().toUpperCase(java.util.Locale.ROOT));
+                if (includeFilters) {
+                    result.put("subcategories", data.getT3());
+                    result.put("styles", com.trendzy.api.service.CatalogStyles.options(category, data.getT3()));
+                }
+                return result;
+            });
+    }
+
+    public Mono<Map<String, Object>> getFilteredTrends(String category, String subcategory, int page, int size, String audience,
+                                                       Double minPrice, Double maxPrice, boolean includeFilters) {
+        return getFilteredTrends(category, subcategory, page, size, audience, minPrice, maxPrice, includeFilters, null);
+    }
+
+    // Kept for existing callers and repository-based feeds without facets or price bounds.
     public Mono<Map<String, Object>> getTrends(
             @RequestParam(defaultValue = "streetwear") String category,
             @RequestParam(required = false) String subcategory,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "ALL") String audience) {
 
         log.info("[CTRL] Fetching trends for category: {}, subcategory: {}, page: {}, size: {}",
                 category, subcategory, page, size);
 
         String requested = category.trim().toUpperCase(java.util.Locale.ROOT);
         String normalized = List.of("SHOES", "SNEAKER & SPORTS", "SNEAKERS & SPORTS", "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS").contains(requested) ? "SNEAKERS" : requested;
+        String normalizedAudience = audience == null ? "ALL" : audience.trim().toUpperCase(java.util.Locale.ROOT);
+        if (!List.of("ALL", "MEN", "WOMEN", "UNISEX").contains(normalizedAudience)) {
+            return Mono.error(new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "audience must be ALL, MEN, WOMEN or UNISEX"));
+        }
         if (page < 0 || size < 1 || size > 100) {
             return Mono.error(new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.BAD_REQUEST, "page must be non-negative and size must be 1..100"));
@@ -55,9 +110,22 @@ public class TrendController {
                 ? List.of("CAPS", "ACCESSORIES")
                 : List.of(normalized);
 
-        Flux<Trend> trendsFlux = (subcategory != null && !subcategory.trim().isEmpty())
-                ? trendRepository.findByCategoryAndSubcategory(categories, "^" + java.util.regex.Pattern.quote(subcategory.trim()) + "$", pageable)
-                : trendRepository.findByCategory(categories, pageable);
+        boolean hasSubcategory = subcategory != null && !subcategory.trim().isEmpty();
+        String subcategoryPattern = hasSubcategory ? "^" + java.util.regex.Pattern.quote(subcategory.trim()) + "$" : null;
+        Flux<Trend> trendsFlux;
+        if ("ALL".equals(normalizedAudience)) {
+            trendsFlux = hasSubcategory
+                    ? trendRepository.findByCategoryAndSubcategory(categories, subcategoryPattern, pageable)
+                    : trendRepository.findByCategory(categories, pageable);
+        } else {
+            List<String> audiences = "UNISEX".equals(normalizedAudience)
+                    ? List.of("UNISEX") : List.of(normalizedAudience, "UNISEX");
+            // Audience is normalized by the database query before skip/limit.
+            // Products without a specific audience are shared in both filters.
+            trendsFlux = hasSubcategory
+                    ? trendRepository.findByCategoryAndSubcategoryAndAudience(categories, subcategoryPattern, audiences, pageable)
+                    : trendRepository.findByCategoryAndAudience(categories, audiences, pageable);
+        }
 
         return trendsFlux
                 .collectList()
@@ -65,6 +133,7 @@ public class TrendController {
                     Map<String, Object> result = new java.util.HashMap<>();
                     result.put("content", trends);
                     result.put("category", normalized);
+                    result.put("audience", normalizedAudience);
                     if (subcategory != null && !subcategory.trim().isEmpty()) {
                         result.put("subcategory", subcategory.trim());
                     }

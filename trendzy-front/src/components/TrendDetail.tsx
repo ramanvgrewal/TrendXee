@@ -1,13 +1,17 @@
-import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
-import { useEffect, useRef, useState } from "react";
+import { audienceLabel } from "@/lib/audience";
+import { useEffect, useRef, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { AnimatePresence, m, useDragControls, type DragControls, type PanInfo } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { toast } from "sonner";
-import { Stamp } from "@/components/Stamp";
 import { BookmarkButton } from "@/components/BookmarkButton";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
 import { trendImage, trendLane } from "@/components/TrendCard";
-import { Img } from "@/components/Img";
+import { ProductGallery } from "@/components/ProductGallery";
+import { PairUpWith } from "@/components/PairUpWith";
+import { useAudience } from "@/components/AudienceFilter";
+import type { AudienceFilter } from "@/lib/audience";
+import type { PairingChoices } from "@/lib/pairings";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +23,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Parallax, PointerScope } from "@/motion/Parallax";
 import { ease, spring } from "@/motion/tokens";
 import type { ProductMatch, Trend } from "@/lib/mock-data";
 import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
@@ -34,7 +37,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
  * The story behind a trend. The card's photo and title travel into this
  * view (shared layoutId), so it reads as the card opening rather than a
  * separate modal. Radix supplies focus trapping, Escape and aria-modal; the
- * content is rendered in place (no portal) so the shared layout can connect.
+ * content is portalled above page stacking contexts so sticky navigation never
+ * covers the photos or close control. Shared layout stays in the React tree.
  */
 export function TrendDetail({
   trend,
@@ -51,22 +55,17 @@ export function TrendDetail({
   archivedContext?: boolean;
   onUnarchived?: () => void;
 }) {
-  const reduced = useReducedMotion();
-  const dragControls = useDragControls();
   // No Dialog.Trigger here (cards open the story through the URL), so keep
   // track of the opener ourselves and hand focus back to it on close.
   const openerRef = useRef<HTMLElement | null>(null);
+  const storyScrollRef = useRef<HTMLDivElement | null>(null);
 
-
-  const onDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.y > 120 || info.velocity.y > 600) onClose();
-  };
 
   return (
     <DialogPrimitive.Root open={!!trend} onOpenChange={(open) => !open && onClose()}>
       <AnimatePresence>
         {trend && (
-          <>
+          <DialogPrimitive.Portal forceMount>
             <DialogPrimitive.Overlay forceMount asChild>
               <m.div
                 className="fixed inset-0 z-50 bg-scrim/55 backdrop-blur-[3px]"
@@ -83,7 +82,8 @@ export function TrendDetail({
               onOpenAutoFocus={(e) => {
                 e.preventDefault();
                 openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-                document.querySelector<HTMLElement>("[data-story-close]")?.focus({ preventScroll: true });
+                Array.from(document.querySelectorAll<HTMLElement>("[data-story-close]"))
+                  .find((button) => button.getClientRects().length > 0)?.focus({ preventScroll: true });
               }}
               onCloseAutoFocus={(e) => {
                 e.preventDefault();
@@ -91,15 +91,9 @@ export function TrendDetail({
                 if (opener?.isConnected) opener.focus({ preventScroll: true });
               }}
             >
-              <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center p-2 sm:items-center sm:p-6 lg:p-10">
+              <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6 lg:p-10">
                 <m.div
-                  className="pointer-events-auto relative h-[calc(100svh-1.5rem)] w-full max-w-6xl sm:h-[min(88svh,860px)]"
-                  drag={reduced ? false : "y"}
-                  dragControls={dragControls}
-                  dragListener={false}
-                  dragConstraints={{ top: 0, bottom: 0 }}
-                  dragElastic={{ top: 0, bottom: 0.6 }}
-                  onDragEnd={onDragEnd}
+                  className="pointer-events-auto relative h-[100dvh] w-full max-w-6xl sm:h-[min(88svh,860px)]"
                 >
                   {/* The card's own paper, expanded: shared layout with the card surface. */}
                   <m.div
@@ -108,25 +102,98 @@ export function TrendDetail({
                     className="fibre absolute inset-0 bg-raised shadow-lift"
                     style={{ borderRadius: 28 }}
                   />
-                  <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] lg:flex-row">
-                  <DetailBody
-                    trend={trend}
+                  <DialogPrimitive.Close
+                    data-story-close
+                    className="absolute right-3 top-[max(.75rem,env(safe-area-inset-top))] z-40 grid size-11 place-items-center rounded-full bg-paper/95 text-ink shadow-card lg:hidden"
+                    aria-label="Close story"
+                  >
+                    <svg viewBox="0 0 20 20" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden><path d="M5 5l10 10M15 5L5 15" /></svg>
+                  </DialogPrimitive.Close>
+                  <div ref={storyScrollRef} data-story-scroll className="relative flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain sm:rounded-[28px] lg:flex-row lg:overflow-hidden">
+                  <StorySession
+                    key={`${trend.id}-${trend.products.underdog?.shopUrl ?? ""}`}
+                    source={trend}
+                    scrollRef={storyScrollRef}
                     onClose={onClose}
                     onChanged={onChanged}
                     onDeleted={onDeleted}
                     archivedContext={archivedContext}
                     onUnarchived={onUnarchived}
-                    dragControls={dragControls}
                   />
                   </div>
                 </m.div>
               </div>
             </DialogPrimitive.Content>
-          </>
+          </DialogPrimitive.Portal>
         )}
       </AnimatePresence>
     </DialogPrimitive.Root>
   );
+}
+
+/** Browse an outfit in one dialog, keeping its starting piece and choices intact. */
+function StorySession({ source, scrollRef, onClose, onChanged, onDeleted, archivedContext, onUnarchived }: {
+  source: Trend;
+  scrollRef: RefObject<HTMLDivElement | null>;
+  onClose: () => void;
+  onChanged?: (trend: Trend) => void;
+  onDeleted?: (id: string) => void;
+  archivedContext: boolean;
+  onUnarchived?: () => void;
+}) {
+  const globalAudience = useAudience();
+  const [audience, setAudience] = useState<AudienceFilter>(globalAudience);
+  const [choices, setChoices] = useState<PairingChoices>({});
+  const [pairing, setPairing] = useState<Trend | null>(null);
+  const savedScroll = useRef({ outer: 0, copy: 0, rail: 0, identity: "" });
+  const backRef = useRef(false);
+  const current = pairing ?? source;
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const outer = scrollRef.current;
+      if (!outer) return;
+      const copy = outer.querySelector<HTMLElement>('[data-story-copy-scroll]');
+      if (backRef.current) {
+        outer.scrollTop = savedScroll.current.outer;
+        if (copy) copy.scrollTop = savedScroll.current.copy;
+        const rail = outer.querySelector<HTMLElement>('[data-pairing-rail]');
+        if (rail) rail.scrollLeft = savedScroll.current.rail;
+        Array.from(outer.querySelectorAll<HTMLElement>('[data-pairing-identity]')).find((button) => button.dataset.pairingIdentity === savedScroll.current.identity)?.focus({ preventScroll: true });
+        backRef.current = false;
+      } else if (pairing) {
+        outer.scrollTop = 0;
+        if (copy) copy.scrollTop = 0;
+        outer.querySelector<HTMLElement>('[data-story-title]')?.focus({ preventScroll: true });
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pairing?.id, scrollRef]);
+
+  const back = () => { backRef.current = true; setPairing(null); };
+  const openPairing = (next: Trend, identity: string) => {
+    const outer = scrollRef.current;
+    savedScroll.current = { outer: outer?.scrollTop ?? 0, copy: outer?.querySelector('[data-story-copy-scroll]')?.scrollTop ?? 0, rail: outer?.querySelector('[data-pairing-rail]')?.scrollLeft ?? 0, identity };
+    setPairing(next);
+  };
+
+  return <>
+    {pairing && scrollRef.current?.parentElement && createPortal(
+      <button type="button" onClick={back} className="absolute left-3 top-[max(.75rem,env(safe-area-inset-top))] z-40 inline-flex min-h-11 max-w-[calc(100%-5rem)] items-center gap-2 rounded-full bg-paper/95 px-4 text-xs font-semibold text-ink shadow-card lg:hidden"><span aria-hidden>←</span> Back to outfit</button>,
+      scrollRef.current.parentElement,
+    )}
+    <DetailBody
+    key={`${current.id}-${current.products.underdog?.shopUrl ?? ""}`}
+    trend={current}
+    onClose={onClose}
+    onChanged={(changed) => { if (pairing) setPairing(changed); onChanged?.(changed); }}
+    onDeleted={(id) => { onDeleted?.(id); if (pairing) back(); }}
+    archivedContext={pairing ? false : archivedContext}
+    onUnarchived={pairing ? undefined : onUnarchived}
+    backToSource={pairing ? back : undefined}
+    sourceName={source.products.underdog?.title || source.name}
+    pairingSection={!pairing ? <PairUpWith source={source} audience={audience} setAudience={setAudience} choices={choices} setChoices={setChoices} onOpen={openPairing} /> : undefined}
+  /></>;
 }
 
 function DetailBody({
@@ -136,7 +203,9 @@ function DetailBody({
   onDeleted,
   archivedContext,
   onUnarchived,
-  dragControls,
+  backToSource,
+  sourceName,
+  pairingSection,
 }: {
   trend: Trend;
   onClose: () => void;
@@ -144,15 +213,13 @@ function DetailBody({
   onDeleted?: (id: string) => void;
   archivedContext: boolean;
   onUnarchived?: () => void;
-  dragControls: DragControls;
+  backToSource?: () => void;
+  sourceName?: string;
+  pairingSection?: React.ReactNode;
 }) {
   const { isAdmin } = useSession();
   const underdog = trend.products?.underdog;
   const images = [...new Set([trendImage(trend), ...(underdog?.imageUrls ?? [])].filter(Boolean))];
-  const [imageIndex, setImageIndex] = useState(0);
-  useEffect(() => setImageIndex(0), [trend.id, underdog?.shopUrl]);
-  const activeImageIndex = Math.min(imageIndex, Math.max(0, images.length - 1));
-  const image = images[activeImageIndex];
   const lane = trendLane(trend);
   const price = formatPrice(underdog?.price, underdog?.currency);
   const off = discountPercent(underdog?.price, underdog?.originalPrice);
@@ -171,68 +238,25 @@ function DetailBody({
 
   return (
     <>
-      {/* Mobile grab handle: drag down to close */}
-      <div
-        className="absolute inset-x-0 top-0 z-30 flex h-9 touch-none items-center justify-center sm:hidden"
-        onPointerDown={(e) => dragControls.start(e)}
-        aria-hidden
-      >
-        <span className="h-1 w-10 rounded-full bg-on-scrim/90 shadow-[0_0_0_1px_color-mix(in_oklab,var(--scrim)_30%,transparent),0_1px_4px_color-mix(in_oklab,var(--scrim)_45%,transparent)]" />
-      </div>
-
-      {/* Media */}
-      <PointerScope className="relative h-[42%] shrink-0 lg:h-full lg:w-[48%]">
-        <m.div
-          layoutId={`trend-media-${trend.id}`}
-          className="absolute inset-0 overflow-hidden bg-cream"
-          style={{ borderRadius: 0 }}
-          transition={spring.layout}
-        >
-          <Parallax depth={4} bleed className="absolute inset-0">
-            <Img src={image} alt={underdog?.title || trend.name} eager fallbackLabel={lane ? laneLabel(lane.name) : undefined} className="h-full w-full object-cover" />
-          </Parallax>
-        </m.div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-scrim/50 to-transparent lg:hidden" />
-        {images.length > 1 && (
-          <div className="absolute inset-x-3 bottom-3 z-20 flex items-center gap-2 rounded-2xl bg-paper/95 p-2 shadow-card" role="group" aria-label="Product photos"
-            onKeyDown={(event) => {
-              if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-                event.preventDefault();
-                setImageIndex((activeImageIndex + (event.key === "ArrowRight" ? 1 : -1) + images.length) % images.length);
-              }
-            }}>
-            <button type="button" aria-label="Previous product photo" className="size-10 shrink-0" onClick={() => setImageIndex((activeImageIndex - 1 + images.length) % images.length)}>←</button>
-            <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto">
-              {images.map((src, index) => (
-                <button type="button" key={src} aria-label={`Show product photo ${index + 1}`} aria-pressed={index === activeImageIndex}
-                  onClick={() => setImageIndex(index)} className={`size-12 shrink-0 overflow-hidden rounded-lg border-2 ${index === activeImageIndex ? "border-clay" : "border-transparent"}`}>
-                  <Img src={src} alt="" className="h-full w-full object-cover" />
-                </button>
-              ))}
-            </div>
-            <span className="text-xs tabular-nums" aria-live="polite">{activeImageIndex + 1}/{images.length}</span>
-            <button type="button" aria-label="Next product photo" className="size-10 shrink-0" onClick={() => setImageIndex((activeImageIndex + 1) % images.length)}>→</button>
-          </div>
-        )}
-        {score > 0 && (
-          <m.div
-            className={`absolute left-5 z-10 lg:left-8 ${images.length > 1 ? "bottom-24" : "bottom-5 lg:bottom-8"}`}
-            initial={{ scale: 1.5, rotate: -18, opacity: 0 }}
-            animate={{ scale: 1, rotate: -6, opacity: 1 }}
-            transition={{ ...spring.settle, delay: 0.3 }}
-          >
-            <Stamp score={score} size="lg" pressable className="shadow-print" />
-          </m.div>
-        )}
-      </PointerScope>
+      <ProductGallery
+        key={`${trend.id}-${underdog?.shopUrl ?? ""}`}
+        images={images}
+        title={underdog?.title || trend.name}
+        trendId={trend.id}
+        score={score}
+      />
 
       {/* Story */}
       <m.div
-        className="relative flex min-h-0 flex-1 flex-col"
+        className="relative flex shrink-0 flex-col lg:min-h-0 lg:flex-1"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { duration: 0.3, delay: 0.12 } }}
         exit={{ opacity: 0, transition: { duration: 0.12 } }}
       >
+        {backToSource && <div className="hidden border-b border-border px-6 py-3 lg:block lg:px-10">
+          <button type="button" onClick={backToSource} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-clay-ink"><span aria-hidden>←</span> Back to outfit</button>
+          <p className="truncate text-xs text-ink/60">Starting with {sourceName}</p>
+        </div>}
         <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-6 sm:py-4 lg:px-10">
           <p className="flex min-w-0 flex-1 flex-col gap-1 eyebrow text-ink/70 sm:flex-row sm:items-center sm:gap-2">
             {lane && <span className="max-w-full truncate text-clay-ink">{laneLabel(lane.name)}</span>}
@@ -248,7 +272,7 @@ function DetailBody({
           <ShareButton trend={trend} laneId={lane?.id} />
           <DialogPrimitive.Close
             data-story-close
-            className="grid size-10 shrink-0 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink"
+            className="hidden size-10 shrink-0 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink lg:grid"
             aria-label="Close story"
           >
             <svg viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
@@ -258,9 +282,11 @@ function DetailBody({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-10 pt-6 lg:px-10 lg:pt-8">
+        <div data-story-copy-scroll className="px-5 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-6 sm:px-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain lg:px-10 lg:pt-8">
           <DialogPrimitive.Title asChild>
             <m.h2
+              data-story-title
+              tabIndex={-1}
               layoutId={`trend-title-${trend.id}`}
               transition={spring.layout}
               className="font-display text-[clamp(2rem,3.4vw,3.1rem)] leading-[1.02] tracking-[-0.02em] [overflow-wrap:anywhere]"
@@ -270,6 +296,7 @@ function DetailBody({
           </DialogPrimitive.Title>
 
           <m.div custom={0} variants={stagger} initial="hidden" animate="show" className="meta mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
+            {audienceLabel(underdog?.audience) && <span className="rounded-full border border-border px-2.5 py-1">{audienceLabel(underdog?.audience)} fit</span>}
             {score > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-cream/70 px-2.5 py-1 text-ink/80 ring-1 ring-border">
                 <span>Brand hype {score}</span>
@@ -303,6 +330,7 @@ function DetailBody({
                 </TooltipProvider>
               </span>
             )}
+            {score === 0 && <span className="text-ink/55" title="Usable Instagram analytics are not available for this brand yet.">Hype not measured</span>}
             {trend.indiaRelevant && <span>Relevant in India</span>}
           </m.div>
 
@@ -361,6 +389,8 @@ function DetailBody({
               </div>
             </m.div>
           )}
+
+          {pairingSection}
 
           {/* Mainstream lookalikes */}
           {mainstream.length > 0 && (
