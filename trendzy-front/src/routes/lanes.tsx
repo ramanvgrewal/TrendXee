@@ -4,7 +4,6 @@ import { ScrollReveal } from "@/motion/ScrollReveal";
 import { aesthetics } from "@/lib/mock-data";
 import { fetchLaneRotations, LANE_STALE_TIME } from "@/lib/lanes";
 import { normalizeAudienceFilter } from "@/lib/audience";
-import { AudienceFilter } from "@/components/AudienceFilter";
 
 export const Route = createFileRoute("/lanes")({
   loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
@@ -50,7 +49,6 @@ function LanesPage() {
         </p>
       </div>
 
-      <div className="mt-8"><AudienceFilter /></div>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {aesthetics.map((aesthetic, i) => {
           const first = rotationMap?.[aesthetic.id]?.[0];
