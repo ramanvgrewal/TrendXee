@@ -4,6 +4,7 @@ import { ScrollScene } from "@/motion/ScrollScene";
 import { ScrollTextReveal } from "@/motion/ScrollTextReveal";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import type { RotationItem } from "@/lib/lanes";
+import { productImageFit } from "@/lib/format";
 import { MobileStory } from "@/components/home/MobileStory";
 
 /**
@@ -189,7 +190,7 @@ function FeedPrint({
             src={item.image}
             alt=""
             loading="lazy"
-            className="w-full rounded-lg object-cover"
+            className={`w-full rounded-lg ${productImageFit(item.category)}`}
             style={{ aspectRatio: slot.aspect ?? "4/5" }}
           />
           {chosen && (

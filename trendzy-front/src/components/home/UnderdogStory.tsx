@@ -4,7 +4,7 @@ import { m, useScroll, useTransform } from "framer-motion";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { RevealHeading } from "@/motion/RevealHeading";
 import type { RotationItem } from "@/lib/lanes";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, isShoeCategory, productImageFit } from "@/lib/format";
 import { trackProductClick } from "@/lib/useTrendActions";
 
 /**
@@ -70,7 +70,7 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
                   className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-sand/50 shadow-lift"
                   style={reduced ? undefined : { scale: cardScale }}
                 >
-                  <img src={item.image} alt={item.title} loading="lazy" className="media-zoom h-full w-full object-cover group-hover:scale-[1.03]" />
+                  <img src={item.image} alt={item.title} loading="lazy" className={`h-full w-full ${productImageFit(item.category)} ${isShoeCategory(item.category) ? "" : "media-zoom group-hover:scale-[1.03]"}`} />
                   <span className="absolute left-4 top-4 rounded-full bg-stamp-clay px-3 py-1 eyebrow text-[11px] text-paper">
                     <span className="max-sm:hidden">The </span>underdog
                   </span>
@@ -95,7 +95,7 @@ export function UnderdogStory({ item }: { item?: RotationItem }) {
                 className="group block"
               >
                 <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-sand/40 opacity-90 ring-1 ring-border transition-opacity duration-500 group-hover:opacity-100">
-                  <img src={ms.image} alt={ms.title} loading="lazy" className="media-zoom h-full w-full object-cover grayscale-[35%] group-hover:scale-[1.03] group-hover:grayscale-0" />
+                  <img src={ms.image} alt={ms.title} loading="lazy" className={`h-full w-full ${productImageFit(item.category)} grayscale-[35%] group-hover:grayscale-0 ${isShoeCategory(item.category) ? "" : "media-zoom group-hover:scale-[1.03]"}`} />
                   <span className="absolute left-4 top-4 rounded-full bg-paper/90 px-3 py-1 eyebrow text-[11px] text-ink/70">
                     <span className="max-sm:hidden">The lookalike · </span>
                     {source}

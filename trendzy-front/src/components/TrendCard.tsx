@@ -6,7 +6,7 @@ import { Parallax, PointerScope } from "@/motion/Parallax";
 import { lift, spring } from "@/motion/tokens";
 import type { Trend } from "@/lib/mock-data";
 import { aesthetics } from "@/lib/mock-data";
-import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
+import { discountPercent, formatPrice, laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { TrustBadge } from "./TrustBadge";
 import { audienceLabel } from "@/lib/audience";
 
@@ -80,12 +80,12 @@ export function TrendCard({
           className="relative aspect-[4/5] overflow-hidden bg-cream"
           style={{ borderRadius: 0 }}
         >
-          <Parallax depth={3} bleed className="absolute inset-0">
+          <Parallax depth={isShoeCategory(trend.aestheticId) ? 0 : 3} bleed={!isShoeCategory(trend.aestheticId)} className="absolute inset-0">
             <Img
               src={image}
               eager={priority}
               fallbackLabel={lane ? laneLabel(lane.name) : "TrendXee"}
-              className="h-full w-full object-cover group-hover/card:scale-[1.03]"
+              className={`h-full w-full ${productImageFit(trend.aestheticId)} ${isShoeCategory(trend.aestheticId) ? "" : "group-hover/card:scale-[1.03]"}`}
             />
           </Parallax>
           {/* Only a light top veil, so the chips stay legible on bright photos. */}

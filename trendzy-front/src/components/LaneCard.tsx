@@ -3,7 +3,7 @@ import { m } from "framer-motion";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { lift, spring } from "@/motion/tokens";
 import type { Aesthetic } from "@/lib/mock-data";
-import { laneLabel } from "@/lib/format";
+import { laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { Img } from "@/components/Img";
 import { useAudience } from "@/components/AudienceFilter";
 
@@ -50,12 +50,12 @@ export function LaneCard({
         <PointerScope className="relative h-full overflow-hidden rounded-[20px] bg-cream shadow-print transition-shadow duration-[350ms] group-hover/lane:shadow-lift group-active/lane:shadow-press">
           {/* Photo */}
           <div className="absolute inset-0" style={{ viewTransitionName: `lane-${aesthetic.id}` }}>
-            <Parallax depth={5} bleed className="absolute inset-0">
+            <Parallax depth={isShoeCategory(aesthetic.id) ? 0 : 5} bleed={!isShoeCategory(aesthetic.id)} className="absolute inset-0">
               {src ? <Img
                 src={src}
                 eager={eager}
                 fallbackLabel={laneLabel(aesthetic.name)}
-                className="h-full w-full object-cover group-hover/lane:scale-[1.03]"
+                className={`h-full w-full ${productImageFit(aesthetic.id)} ${isShoeCategory(aesthetic.id) ? "" : "group-hover/lane:scale-[1.03]"}`}
               /> : <div className="h-full w-full bg-ink" />}
             </Parallax>
           </div>

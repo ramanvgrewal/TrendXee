@@ -10,7 +10,7 @@ import { Img } from "@/components/Img";
 import type { Aesthetic, Trend } from "@/lib/mock-data";
 import { aesthetics } from "@/lib/mock-data";
 import { fetchLanePage, LANE_PAGE_SIZE, LANE_STALE_TIME } from "@/lib/lanes";
-import { laneLabel } from "@/lib/format";
+import { laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { audienceLabel, normalizeAudienceFilter, type AudienceFilter } from "@/lib/audience";
 import { useAudience } from "@/components/AudienceFilter";
 import { LaneFilters } from "@/components/LaneFilters";
@@ -127,12 +127,12 @@ function LaneHero({ aesthetic, index, image, firstDrop }: { aesthetic: Aesthetic
       <m.div
         key={aesthetic.id}
         className="absolute inset-0"
-        initial={{ opacity: 0, scale: 1.03 }}
+        initial={{ opacity: 0, scale: isShoeCategory(aesthetic.id) ? 1 : 1.03 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.55, ease: ease.drift }}
       >
-        {image ? <Img src={image} priority className="h-full w-full object-cover" /> : (
+        {image ? <Img src={image} priority className={`h-full w-full ${productImageFit(aesthetic.id)}`} /> : (
           <div className="grid h-full place-items-center bg-ink p-8 text-center text-on-scrim/75">
             <p className="font-display text-2xl italic">New finds are on the way.</p>
           </div>
@@ -147,7 +147,7 @@ function LaneHero({ aesthetic, index, image, firstDrop }: { aesthetic: Aesthetic
         <div className="relative grid min-h-[min(64svh,620px)] overflow-hidden rounded-[28px] bg-sand/40 shadow-lift lg:min-h-[clamp(460px,62svh,580px)] lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:items-center lg:fibre lg:bg-cream lg:shadow-none lg:ring-1 lg:ring-border">
           {/* Phones and tablets: full-bleed photo under a scrim */}
           <div className="absolute inset-0 lg:hidden" style={vt}>
-            <m.div className="absolute inset-0" style={reduced ? undefined : { y, scale }}>
+            <m.div className="absolute inset-0" style={reduced || isShoeCategory(aesthetic.id) ? undefined : { y, scale }}>
               {cover}
             </m.div>
           </div>
@@ -222,7 +222,7 @@ function HeroDrop({ trend, laneId }: { trend: Trend; laneId: string }) {
             loading="eager"
             decoding="async"
             onError={() => setPhotoIndex((index) => index + 1)}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover/drop:scale-[1.03]"
+            className={`h-full w-full transition-transform duration-500 ${productImageFit(trend.aestheticId)} ${isShoeCategory(trend.aestheticId) ? "" : "group-hover/drop:scale-[1.03]"}`}
           />
         ) : (
           <div className="grid h-full place-items-center p-3 font-display text-xl italic text-ink/50">{product.brandName || "Indie label"}</div>

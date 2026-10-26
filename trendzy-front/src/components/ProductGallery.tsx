@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { m } from "framer-motion";
 import { ArrowLeft, ArrowRight, Expand, X, ZoomIn, ZoomOut } from "lucide-react";
+import { isShoeCategory, productImageFit } from "@/lib/format";
 import { Img } from "@/components/Img";
 import { Stamp } from "@/components/Stamp";
 import { Parallax, PointerScope } from "@/motion/Parallax";
@@ -30,7 +31,8 @@ function GalleryPhoto({ src, alt, className = "" }: { src?: string; alt: string;
 }
 
 /** Large, uncropped mobile photos; the desktop portrait keeps its existing layout. */
-export function ProductGallery({ images, title, trendId, score }: {
+export function ProductGallery({ images, title, trendId, score, category }: {
+  category?: string;
   images: string[];
   title: string;
   trendId: string;
@@ -97,8 +99,8 @@ export function ProductGallery({ images, title, trendId, score }: {
       <PointerScope className="relative shrink-0 bg-cream lg:h-full lg:w-[48%]">
         <div className="relative h-[min(125vw,72svh)] lg:h-full">
           <m.div layoutId={`trend-media-${trendId}`} className="absolute inset-0 overflow-hidden bg-cream" style={{ borderRadius: 0 }} transition={spring.layout}>
-            <Parallax depth={4} bleed className="absolute inset-0">
-              <GalleryPhoto key={image} src={image} alt={`${title}${images.length > 1 ? ` — photo ${active + 1} of ${images.length}` : ""}`} className="object-contain lg:object-cover" />
+            <Parallax depth={isShoeCategory(category) ? 0 : 4} bleed={!isShoeCategory(category)} className="absolute inset-0">
+              <GalleryPhoto key={image} src={image} alt={`${title}${images.length > 1 ? ` — photo ${active + 1} of ${images.length}` : ""}`} className={isShoeCategory(category) ? productImageFit(category) : "object-contain lg:object-cover"} />
             </Parallax>
           </m.div>
           <button
@@ -132,7 +134,7 @@ export function ProductGallery({ images, title, trendId, score }: {
             <div ref={railRef} className="no-scrollbar relative flex min-w-0 flex-1 gap-2 overflow-x-auto">
               {images.map((src, photo) => <button type="button" key={src} aria-label={`Show product photo ${photo + 1}`} aria-pressed={photo === active}
                 onClick={() => select(photo)} className={`size-14 shrink-0 overflow-hidden rounded-lg border-2 lg:size-12 ${photo === active ? "border-clay" : "border-transparent"}`}>
-                <Img src={src} alt="" draggable={false} className="h-full w-full object-cover" />
+                <Img src={src} alt="" draggable={false} className={`h-full w-full ${productImageFit(category, true)}`} />
               </button>)}
             </div>
             <span className="px-1 text-xs tabular-nums text-ink/70" aria-live="polite" aria-atomic="true">{active + 1}/{images.length}</span>

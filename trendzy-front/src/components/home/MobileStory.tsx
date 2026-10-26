@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { m, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { productImageFit } from "@/lib/format";
 import { Img } from "@/components/Img";
 import { useMediaQuery } from "@/motion/hooks";
 import type { RotationItem } from "@/lib/lanes";
@@ -78,13 +79,13 @@ export function MobileStory({ products, chosen, reduced }: { products: RotationI
           {sideProducts.map((item, index) => <m.div key={item.id} aria-hidden
             style={still ? { x: index ? 36 : -36, rotate: index ? 9 : -10, opacity: .5 } : { x: index ? rightX : leftX, rotate: index ? rightRotate : leftRotate, opacity: sideOpacity }}
             className="mobile-story-print pointer-events-none absolute top-1/2 -translate-y-1/2 rounded-2xl border border-border bg-cream p-1.5 shadow-print">
-            <Img src={item.image} alt="" className="aspect-[4/5] w-full rounded-xl object-cover" />
+            <Img src={item.image} alt="" className={`aspect-[4/5] w-full rounded-xl ${productImageFit(item.category)}`} />
           </m.div>)}
           {chosen && <m.div style={still ? undefined : { rotate: frontRotate, scale: frontScale, y: frontY }} className="mobile-story-print relative z-10">
             <Link to="/aesthetic/$id" params={{ id: chosen.category || "tees" }} search={{ trend: chosen.id }}
               aria-label={`Explore ${chosen.title} by ${chosen.brand}`} className="group block rounded-2xl border border-border bg-raised p-1.5 shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-clay">
               <div className="relative overflow-hidden rounded-xl">
-                <Img src={chosen.image} alt={chosen.title} eager fallbackLabel={chosen.brand} className="aspect-[4/5] w-full object-cover" />
+                <Img src={chosen.image} alt={chosen.title} eager fallbackLabel={chosen.brand} className={`aspect-[4/5] w-full ${productImageFit(chosen.category)}`} />
                 <span className="absolute left-2 top-2 rounded-full bg-paper/95 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[.12em] text-ink">On today’s board</span>
               </div>
               <div className="flex min-h-11 items-center justify-between gap-2 px-2 py-2">

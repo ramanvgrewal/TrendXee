@@ -239,6 +239,7 @@ function DetailBody({
     <>
       <ProductGallery
         key={`${trend.id}-${underdog?.shopUrl ?? ""}`}
+        category={trend.aestheticId}
         images={images}
         title={underdog?.title || trend.name}
         trendId={trend.id}

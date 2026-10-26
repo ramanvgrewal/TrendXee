@@ -7,7 +7,7 @@ import { Parallax, PointerScope } from "@/motion/Parallax";
 import { useFinePointer, useMotionAllowed } from "@/motion/hooks";
 import { aesthetics } from "@/lib/mock-data";
 import type { RotationItem } from "@/lib/lanes";
-import { indiaDateLabel, laneLabel } from "@/lib/format";
+import { indiaDateLabel, laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { trackProductClick } from "@/lib/useTrendActions";
 import { Img } from "@/components/Img";
 import { useAudience } from "@/components/AudienceFilter";
@@ -114,13 +114,13 @@ export function Hero({ lead, dateKey }: { lead?: RotationItem; dateKey: string }
                 >
                   <div className="relative rounded-[28px] bg-cream p-2.5 shadow-lift ring-1 ring-border">
                     <div className="enter-clip relative aspect-[4/5] overflow-hidden rounded-[20px] bg-sand/50">
-                      <Parallax depth={4} bleed className="absolute inset-0">
+                      <Parallax depth={isShoeCategory(lead?.category) ? 0 : 4} bleed={!isShoeCategory(lead?.category)} className="absolute inset-0">
                         {leadImage ? <Img
                           src={leadImage}
                           alt={lead ? `${lead.title} by ${lead.brand}` : "Explore indie fashion"}
                           priority
                           fallbackLabel={lead?.brand || "Explore indie fashion"}
-                          className="media-zoom h-full w-full object-cover group-hover:scale-[1.03]"
+                          className={`h-full w-full ${productImageFit(lead?.category)} ${isShoeCategory(lead?.category) ? "" : "media-zoom group-hover:scale-[1.03]"}`}
                         /> : <div className="flex h-full flex-col items-center justify-center gap-5 bg-ink px-8 text-center text-on-scrim">
                           <img src="/brand/trendxee-mark.svg" alt="" className="size-16" />
                           <p className="font-display text-3xl italic">Your next find is on its way.</p>

@@ -11,7 +11,7 @@ import { ease, spring } from "@/motion/tokens";
 import { aesthetics, type Trend } from "@/lib/mock-data";
 import { TrendDetail } from "@/components/TrendDetail";
 import type { RotationItem } from "@/lib/lanes";
-import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
+import { discountPercent, formatPrice, laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { toast } from "sonner";
 import { businessApiFetch, getTrend } from "@/lib/api";
 
@@ -182,7 +182,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                         // settling from a slight zoom; the previous one recedes the other way.
                         enter: (dir: number) => ({
                           clipPath: dir >= 0 ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)",
-                          scale: 1.06,
+                          scale: isShoeCategory(item.category) ? 1 : 1.06,
                           zIndex: 2,
                         }),
                         center: { clipPath: "inset(0% 0% 0% 0%)", scale: 1, x: 0, opacity: 1, zIndex: 2 },
@@ -199,8 +199,8 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                 onDragEnd={onDragEnd}
                 draggable={false}
               >
-                <Parallax depth={5} bleed className="absolute inset-0">
-                  <Img src={item.image} draggable={false} eager className="h-full w-full select-none object-cover" />
+                <Parallax depth={isShoeCategory(item.category) ? 0 : 5} bleed={!isShoeCategory(item.category)} className="absolute inset-0">
+                  <Img src={item.image} draggable={false} eager className={`h-full w-full select-none ${productImageFit(item.category)}`} />
                 </Parallax>
               </m.a>
             </AnimatePresence>

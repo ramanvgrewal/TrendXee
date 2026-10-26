@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, LoaderCircle, RefreshCw } from "lucide-react";
 import { Img } from "@/components/Img";
 import { audienceLabel, normalizeProductAudience, type AudienceFilter } from "@/lib/audience";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, isShoeCategory, productImageFit } from "@/lib/format";
 import type { Trend } from "@/lib/mock-data";
 import { advancePairing, chosenPairing, getPairings, getPairingTrend, nextPairing, PairingRequestError, type PairingChoices, type PairingItem } from "@/lib/pairings";
 
@@ -99,7 +99,7 @@ export function PairUpWith({ source, audience, setAudience, choices, setChoices,
               return <article key={slot.role} className="group/row grid min-w-0 grid-cols-[minmax(0,1fr)_44px] items-center overflow-hidden rounded-xl border border-border bg-cream/15 pr-1 transition-colors hover:border-ink/25 hover:bg-cream/35 sm:grid-cols-[minmax(0,1fr)_56px] sm:pr-2">
                 <button type="button" disabled={!!opening} aria-busy={busy} onClick={() => void open(item)} data-pairing-identity={item.identity} aria-label={`Open pairing: ${product.title}`} className="group flex min-w-0 items-center gap-3 rounded-xl p-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-clay disabled:cursor-wait sm:gap-3.5 sm:p-2.5">
                   <div className="relative h-[100px] w-[72px] shrink-0 overflow-hidden rounded-lg bg-cream sm:w-[80px]">
-                    <Img src={product.imageUrl} alt="" eager fallbackLabel="View photos" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04] [&>span]:px-2 [&>span]:text-center [&>span]:text-[11px] [&>span]:not-italic [&>span]:text-ink/50" />
+                    <Img src={product.imageUrl} alt="" eager fallbackLabel="View photos" className={`h-full w-full ${productImageFit(item.trend.aestheticId, true)} transition-transform duration-300 ${isShoeCategory(item.trend.aestheticId) ? "" : "group-hover:scale-[1.04]"} [&>span]:px-2 [&>span]:text-center [&>span]:text-[11px] [&>span]:not-italic [&>span]:text-ink/50`} />
                     {busy && <span className="absolute inset-0 grid place-items-center bg-paper/60"><LoaderCircle className="size-5 motion-safe:animate-spin" /><span className="sr-only" role="status">Checking this pick…</span></span>}
                   </div>
                   <div className="min-w-0 flex-1 py-0.5">

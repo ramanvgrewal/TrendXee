@@ -29,3 +29,13 @@ export function indiaDateLabel(now = new Date()) {
     month: "short",
   }).format(now);
 }
+/** Shoes use wide studio photos; preserve their complete silhouette in portrait frames. */
+export function isShoeCategory(category?: string) {
+  return ["SHOES", "SNEAKERS", "SNEAKER", "SNEAKER & SPORTS", "SNEAKERS & SPORTS", "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS"]
+    .includes((category || "").trim().toUpperCase());
+}
+
+export function productImageFit(category?: string, compact = false) {
+  if (!isShoeCategory(category)) return "object-cover";
+  return compact ? "object-contain bg-white p-1" : "object-contain bg-white p-3";
+}
