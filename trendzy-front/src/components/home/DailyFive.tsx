@@ -12,59 +12,10 @@ import { aesthetics, type Trend } from "@/lib/mock-data";
 import { TrendDetail } from "@/components/TrendDetail";
 import type { RotationItem } from "@/lib/lanes";
 import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
-import { businessApiFetch } from "@/lib/api";
+import { toast } from "sonner";
+import { businessApiFetch, getTrend } from "@/lib/api";
 
 const STORY_MS = 7000;
-
-function rotationItemToTrend(item: RotationItem): Trend {
-  return {
-    id: item.id,
-    name: item.trendName,
-    aestheticId: item.category || "streetwear",
-    trendScore: item.score,
-    vibeTags: item.subcategory ? [item.subcategory] : [],
-    aiSummary: item.summary,
-    whyTrending: [],
-    indiaRelevant: true,
-    totalSignals: 1,
-    supportingSignals: [],
-    enrichmentStatus: "COMPLETED",
-    signalProducts: [],
-    estimatedPrice: item.price || 0,
-    lastUpdatedAt: new Date().toISOString(),
-    active: true,
-    products: {
-      underdog: {
-        brandName: item.brand,
-        title: item.title,
-        price: item.price || 0,
-        originalPrice: item.originalPrice,
-        currency: item.currency || "INR",
-        imageUrl: item.image,
-        imageUrls: item.imageUrls,
-        shopUrl: item.shopUrl,
-        audience: item.audience,
-      },
-      amazon: item.mainstream?.source === "amazon" ? {
-        brandName: item.mainstream.brand,
-        title: item.mainstream.title,
-        price: item.mainstream.price || 0,
-        currency: item.mainstream.currency || "INR",
-        imageUrl: item.mainstream.image,
-        shopUrl: item.mainstream.shopUrl,
-      } : undefined,
-      flipkart: item.mainstream?.source === "flipkart" ? {
-        brandName: item.mainstream.brand,
-        title: item.mainstream.title,
-        price: item.mainstream.price || 0,
-        currency: item.mainstream.currency || "INR",
-        imageUrl: item.mainstream.image,
-        shopUrl: item.mainstream.shopUrl,
-      } : undefined,
-    },
-    subcategory: item.subcategory,
-  };
-}
 
 /**
  * 03 — The Daily Five: five underdog drops, one per page, like flipping a
@@ -75,13 +26,17 @@ function rotationItemToTrend(item: RotationItem): Trend {
 export function DailyFive({ items }: { items: RotationItem[] }) {
   const reduced = useReducedMotion();
   const finePointer = useFinePointer();
-  const [[index, direction], setPage] = useState<[number, number]>([0, 0]);
+  const [[requestedIndex, direction], setPage] = useState<[number, number]>([0, 0]);
   const [openTrend, setOpenTrend] = useState<Trend | null>(null);
+  const [opening, setOpening] = useState(false);
+  const openRequest = useRef<AbortController | null>(null);
   const [paused, setPaused] = useState(false);
   const elapsed = useMotionValue(0);
   const regionRef = useRef<HTMLElement>(null);
   const draggedRef = useRef(false);
   const count = items.length;
+  const index = Math.min(requestedIndex, Math.max(0, count - 1));
+  useEffect(() => () => openRequest.current?.abort(), []);
   const inView = useInView(regionRef, { amount: 0.35 });
 
   const go = useCallback(
@@ -99,7 +54,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
   };
 
   // Autoplay driven by one animation-frame clock (no intervals, no re-renders per tick).
-  const autoplay = finePointer && !reduced && !paused && !openTrend && inView && count > 1;
+  const autoplay = finePointer && !reduced && !paused && !openTrend && !opening && inView && count > 1;
   useAnimationFrame((_, delta) => {
     if (!autoplay) return;
     const next = elapsed.get() + delta;
@@ -133,6 +88,20 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
     else if (swipe > 60) go(-1);
   };
 
+  const openStory = async () => {
+    if (opening) return;
+    const request = new AbortController();
+    openRequest.current?.abort();
+    openRequest.current = request;
+    setOpening(true);
+    try {
+      const current = await getTrend(item.id, request.signal);
+      if (!request.signal.aborted) setOpenTrend(current);
+    } catch {
+      if (!request.signal.aborted) toast.error("This drop couldn't be opened. Please try again.");
+    } finally { if (!request.signal.aborted) setOpening(false); }
+  };
+
   const track = () =>
     businessApiFetch("/api/analytics/click", {
       method: "POST",
@@ -154,8 +123,11 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
         if (!regionRef.current?.contains(e.relatedTarget as Node)) setPaused(false);
       }}
       onKeyDown={(e) => {
-        if (e.key === "ArrowRight") go(1);
-        if (e.key === "ArrowLeft") go(-1);
+        if (openTrend || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          go(e.key === "ArrowRight" ? 1 : -1);
+        }
       }}
     >
       <div className="flex flex-wrap items-end justify-between gap-6">
@@ -288,12 +260,8 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                   </>
                 )}
               </p>
-              <h3
-                onClick={() => setOpenTrend(rotationItemToTrend(item))}
-                className="mt-4 font-display text-[clamp(2rem,3.4vw,3.25rem)] leading-[1.02] tracking-[-0.02em] cursor-pointer hover:text-clay transition-colors"
-                title="View full trend details & proof"
-              >
-                {item.trendName}
+              <h3 className="mt-4 font-display text-[clamp(2rem,3.4vw,3.25rem)] leading-[1.02] tracking-[-0.02em]">
+                <button type="button" disabled={opening} onClick={() => void openStory()} className="text-left transition-colors hover:text-clay disabled:cursor-wait" title="View full trend details & proof">{item.title}</button>
               </h3>
               {item.summary && <p className="mt-5 text-[16px] leading-relaxed text-ink/70">{item.summary}</p>}
 
@@ -319,10 +287,12 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
                 </Cta>
                 <button
                   type="button"
-                  onClick={() => setOpenTrend(rotationItemToTrend(item))}
+                  onClick={() => void openStory()}
+                  disabled={opening}
+                  aria-busy={opening}
                   className={ctaClass("outline")}
                 >
-                  Inspect drop proof
+                  {opening ? "Opening drop…" : "Inspect drop proof"}
                 </button>
                 {lane && (
                   <Link

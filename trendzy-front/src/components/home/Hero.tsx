@@ -9,21 +9,22 @@ import { aesthetics } from "@/lib/mock-data";
 import type { RotationItem } from "@/lib/lanes";
 import { indiaDateLabel, laneLabel } from "@/lib/format";
 import { trackProductClick } from "@/lib/useTrendActions";
+import { Img } from "@/components/Img";
 import { useAudience } from "@/components/AudienceFilter";
 
 const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
 /**
  * 01 — Hero. An asymmetrical editorial cover: oversized Lora headline on the
- * left, a layered "pinned print" of today's lead underdog on the right.
+ * left, a portrait print of today's lead underdog on the right.
  *
  * Entrance is CSS (plays from server HTML, ~900ms total): image unclips →
  * headline lines rise → copy → CTA → metadata.
  * Scroll (MotionValues): the print sinks and scales gently while the headline
  * lifts away faster, so the cover peels off into the story below.
- * Pointer (desktop): three depths of parallax — print, small prints, stamp.
+ * Pointer (desktop): the print and stamp move at different depths.
  */
-export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationItem[] }) {
+export function Hero({ lead, dateKey }: { lead?: RotationItem; dateKey: string }) {
   const audience = useAudience();
   const ref = useRef<HTMLElement>(null);
   const motionAllowed = useMotionAllowed();
@@ -35,15 +36,12 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
   const copyOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const printY = useTransform(scrollYProgress, [0, 1], [0, 90]);
   const printScale = useTransform(scrollYProgress, [0, 1], [1, 1.06]);
-  const smallY = useTransform(scrollYProgress, [0, 1], [0, -160]);
-  const smallY2 = useTransform(scrollYProgress, [0, 1], [0, -60]);
 
   const leadImage = lead?.image ?? (audience === "ALL" ? aesthetics[0].heroImage : "");
-  const [printA, printB] = prints;
 
   return (
     <PointerScope mode="viewport" className="relative isolate overflow-hidden">
-      <section ref={ref} className="home-cover relative mx-auto grid w-full max-w-[1680px] grid-cols-1 gap-9 px-5 pb-8 pt-7 sm:px-8 sm:pt-10 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:grid-rows-[1fr_auto] lg:gap-x-10 lg:gap-y-12 lg:pb-8 lg:pt-12 xl:gap-x-12 xl:pt-14">
+      <section ref={ref} data-board-date={dateKey} data-board-lead={lead?.id} className="home-cover relative mx-auto grid w-full max-w-[1680px] grid-cols-1 gap-9 px-5 pb-8 pt-7 sm:px-8 sm:pt-10 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:grid-rows-[1fr_auto] lg:gap-x-10 lg:gap-y-12 lg:pb-8 lg:pt-12 xl:gap-x-12 xl:pt-14">
         {/* Copy */}
         <m.div
           className="relative z-10 flex min-w-0 flex-col justify-center lg:pr-4"
@@ -51,7 +49,7 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
         >
           <div className="enter-fade flex flex-wrap items-center gap-x-2 gap-y-1 eyebrow text-[10px] text-ink/70 sm:gap-3 sm:text-[11.5px]" style={d(620)}>
             <span className="inline-block size-1.5 rounded-full bg-clay" />
-            The daily board <span className="text-ink/30">/</span> {indiaDateLabel()}
+            The daily board <span className="text-ink/30">/</span> {indiaDateLabel(new Date(`${dateKey}T12:00:00+05:30`))}
           </div>
 
           <Parallax depth={1.5} follow>
@@ -96,23 +94,9 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
           </div>
         </m.div>
 
-        {/* Pinned prints */}
+        {/* Lead portrait */}
         <div className="relative min-w-0 self-center">
           <div className="home-cover-print relative mx-auto w-full max-w-[420px] lg:ml-auto lg:mr-0 lg:max-w-none">
-            {/* Small print, top-left, behind */}
-            {printA && (
-              <m.div
-                className="absolute -left-[19%] bottom-[7%] z-0 hidden w-[24%] xl:block"
-                style={allowed ? { y: smallY } : undefined}
-              >
-                <Parallax depth={6}>
-                  <div className="enter-print overflow-hidden rounded-xl bg-cream p-1.5 shadow-print ring-1 ring-border" style={d(520)}>
-                    <img src={printA.image} alt="" loading="lazy" className="aspect-[4/5] w-full rounded-lg object-cover" />
-                  </div>
-                </Parallax>
-              </m.div>
-            )}
-
             {/* Lead print */}
             <m.div className="relative z-10" style={allowed ? { y: printY, scale: printScale } : undefined}>
               <Parallax depth={3}>
@@ -131,10 +115,11 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
                   <div className="relative rounded-[28px] bg-cream p-2.5 shadow-lift ring-1 ring-border">
                     <div className="enter-clip relative aspect-[4/5] overflow-hidden rounded-[20px] bg-sand/50">
                       <Parallax depth={4} bleed className="absolute inset-0">
-                        {leadImage ? <img
+                        {leadImage ? <Img
                           src={leadImage}
                           alt={lead ? `${lead.title} by ${lead.brand}` : "Explore indie fashion"}
-                          fetchPriority="high"
+                          priority
+                          fallbackLabel={lead?.brand || "Explore indie fashion"}
                           className="media-zoom h-full w-full object-cover group-hover:scale-[1.03]"
                         /> : <div className="flex h-full flex-col items-center justify-center gap-5 bg-ink px-8 text-center text-on-scrim">
                           <img src="/brand/trendxee-mark.svg" alt="" className="size-16" />
@@ -171,20 +156,6 @@ export function Hero({ lead, prints }: { lead?: RotationItem; prints: RotationIt
                 </div>
               )}
             </m.div>
-
-            {/* Small print, bottom-right, in front */}
-            {printB && (
-              <m.div
-                className="absolute -bottom-10 right-4 z-20 hidden w-[30%] sm:block lg:hidden"
-                style={allowed ? { y: smallY2 } : undefined}
-              >
-                <Parallax depth={8}>
-                  <div className="enter-print overflow-hidden rounded-xl bg-cream p-1.5 shadow-lift ring-1 ring-border" style={d(640)}>
-                    <img src={printB.image} alt="" loading="lazy" className="aspect-square w-full rounded-lg object-cover" />
-                  </div>
-                </Parallax>
-              </m.div>
-            )}
           </div>
         </div>
 

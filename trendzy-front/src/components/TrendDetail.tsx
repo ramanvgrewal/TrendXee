@@ -30,8 +30,7 @@ import { adminActions, trackProductClick, useSession } from "@/lib/useTrendActio
 import { TrustBadge } from "./TrustBadge";
 import { rateTrendProduct, getBrandComments, addBrandComment, type BrandReview } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ScoreDetails } from "@/components/ScoreDetails";
 
 /**
  * The story behind a trend. The card's photo and title travel into this
@@ -297,39 +296,7 @@ function DetailBody({
 
           <m.div custom={0} variants={stagger} initial="hidden" animate="show" className="meta mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
             {audienceLabel(underdog?.audience) && <span className="rounded-full border border-border px-2.5 py-1">{audienceLabel(underdog?.audience)} fit</span>}
-            {score > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-cream/70 px-2.5 py-1 text-ink/80 ring-1 ring-border">
-                <span>Brand hype {score}</span>
-                <TooltipProvider>
-                  <Tooltip delayDuration={150}>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className="inline-flex items-center justify-center rounded-full p-0.5 text-ink/45 hover:text-ink hover:bg-raised transition-colors focus-visible:outline-none"
-                        aria-label="How Brand Hype is calculated"
-                      >
-                        <Eye className="size-3.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" align="start" sideOffset={6} className="bg-raised text-ink border border-border shadow-lift rounded-2xl p-3.5 flex flex-col gap-1.5 max-w-[270px] z-[120]">
-                      <p className="text-[12px] font-bold text-clay-ink">⚡ How Brand Hype (0–100) is Scored</p>
-                      <p className="text-[11.5px] text-ink/75 leading-relaxed">
-                        Algorithmically audited from the indie brand's real Instagram footprint:
-                      </p>
-                      <div className="space-y-1 border-t border-border/60 pt-1.5 text-[11px] font-mono">
-                        <div className="flex justify-between text-ink/80"><span>Audited baseline</span> <strong className="text-ink">60 pts</strong></div>
-                        <div className="flex justify-between text-ink/80"><span>Reach (Followers)</span> <strong className="text-ink">up to 25</strong></div>
-                        <div className="flex justify-between text-ink/80"><span>Engagement Rate</span> <strong className="text-ink">up to 8</strong></div>
-                        <div className="flex justify-between text-ink/80"><span>Posting Cadence</span> <strong className="text-ink">up to 7</strong></div>
-                      </div>
-                      <p className="text-[10px] text-ink/55 italic border-t border-border/40 pt-1">
-                        Inactivity subtracts up to 20 points. Brands without usable Instagram analytics receive 0.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </span>
-            )}
+            {score > 0 && <ScoreDetails kind="hype" score={score} />}
             {score === 0 && <span className="text-ink/55" title="Usable Instagram analytics are not available for this brand yet.">Hype not measured</span>}
             {trend.indiaRelevant && <span>Relevant in India</span>}
           </m.div>
@@ -675,39 +642,18 @@ function BrandHypeSection({ trend }: { trend: Trend }) {
       </h4>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
         <div className="flex flex-col">
-          <span className="text-[11px] font-bold text-ink/60 uppercase tracking-wider mb-1">Followers</span>
+          <span className="text-[11px] font-bold text-ink/60 uppercase tracking-wider mb-1 min-h-11 flex items-center">Followers</span>
           <span className="text-xl font-display text-ink">{followers ? followers.toLocaleString() : 'N/A'}</span>
         </div>
         <div className="flex flex-col border-t border-border pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
-          <div className="flex items-center gap-1 mb-1">
+          <div className="flex min-h-11 items-center gap-1 mb-1">
             <span className="text-[11px] font-bold text-ink/60 uppercase tracking-wider">Engagement</span>
-            <TooltipProvider>
-              <Tooltip delayDuration={150}>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center rounded-full p-0.5 text-ink/40 hover:text-ink hover:bg-cream transition-colors focus-visible:outline-none"
-                    aria-label="How Instagram engagement score is calculated"
-                  >
-                    <Eye className="size-3" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" align="center" sideOffset={6} className="bg-raised text-ink border border-border shadow-lift rounded-2xl p-3 flex flex-col gap-1 max-w-[240px] z-[120]">
-                  <p className="text-[12px] font-bold text-clay-ink">Instagram Engagement Rate</p>
-                  <p className="text-[11px] text-ink/75 leading-relaxed">
-                    Calculated as <code className="bg-cream px-1 py-0.5 rounded font-mono text-[10px]">(Avg Likes + Comments) / Followers</code> across recent organic posts.
-                  </p>
-                  <p className="text-[10px] text-ink/60 border-t border-border/50 pt-1">
-                    Benchmark: &gt;2.5% indicates real, active community interest without inflated bot followers.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <ScoreDetails kind="engagement" />
           </div>
           <span className="text-xl font-display text-ink">{engagementRate != null ? engagementRate.toFixed(1) + '%' : 'N/A'}</span>
         </div>
         <div className="flex flex-col border-t border-border pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
-          <span className="text-[11px] font-bold text-ink/60 uppercase tracking-wider mb-1">Posts/Wk</span>
+          <span className="text-[11px] font-bold text-ink/60 uppercase tracking-wider mb-1 min-h-11 flex items-center">Posts/Wk</span>
           <span className="text-xl font-display text-ink">{postsPerWeek != null ? postsPerWeek.toFixed(1) : 'N/A'}</span>
         </div>
       </div>

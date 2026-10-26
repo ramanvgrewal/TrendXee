@@ -123,7 +123,7 @@ const BROWSER_ROTATION_TTL = 5 * 60_000;
 const rotationCache = new Map<AudienceFilter, { at: number; data: Promise<RotationMap> }>();
 
 /**
- * Up to five underdog products per lane, used by the home hero and lane
+ * Up to fifteen underdog products per lane, used by the home hero and lane
  * posters. One failing lane no longer blanks the others. Shared in memory
  * for 60s during SSR to prevent per-lane concurrent fan-out per request, and 5m in browser.
  */
@@ -140,7 +140,6 @@ export function fetchLaneRotations(audience: AudienceFilter = "ALL"): Promise<Ro
       const trends = await getTrends(a.id, 15, undefined, 0, audience);
       const items = trends
         .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
-        .slice(0, 5)
         .map((t) => toRotationItem(t, a.id));
       return [a.id, items] as const;
     }),
@@ -164,41 +163,4 @@ export function fetchLaneRotations(audience: AudienceFilter = "ALL"): Promise<Ro
     if (rotationCache.get(audience)?.data === data) rotationCache.delete(audience);
   });
   return data;
-}
-
-/** Today's date in India, e.g. "2026-10-04" — identical on server and browser. */
-export function indiaDateKey(now = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(now);
-}
-
-/**
- * The Daily Five: a seeded shuffle of every lane's products that changes at
- * midnight IST. Computed in the route loader, so the server-rendered hero and
- * the hydrated hero always agree (the old version used the machine's local
- * date — UTC on the server, IST in the browser).
- */
-export function pickDailyFive(rotationMap: RotationMap, dateKey = indiaDateKey()): RotationItem[] {
-  const all = Object.values(rotationMap).flat();
-
-  let seed = 0;
-  for (let i = 0; i < dateKey.length; i++) {
-    seed = (Math.imul(31, seed) + dateKey.charCodeAt(i)) | 0;
-  }
-  seed = Math.abs(seed) || 1;
-  const random = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-
-  const shuffled = [...all];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled.slice(0, 5);
 }

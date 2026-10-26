@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Hero } from "@/components/home/Hero";
 import { StoryScene } from "@/components/home/StoryScene";
 import { DailyFive } from "@/components/home/DailyFive";
@@ -7,16 +8,18 @@ import { UnderdogStory } from "@/components/home/UnderdogStory";
 import { EngineSection } from "@/components/home/EngineSection";
 import { FinalCta } from "@/components/home/FinalCta";
 import { ScrollProgress } from "@/motion/ScrollProgress";
-import { fetchLaneRotations, LANE_STALE_TIME, pickDailyFive, type RotationItem } from "@/lib/lanes";
+import { fetchLaneRotations } from "@/lib/lanes";
+import { buildDailyBoard, indiaDateKey, untilNextIndiaDay } from "@/lib/daily-board";
 import { normalizeAudienceFilter } from "@/lib/audience";
 
 export const Route = createFileRoute("/")({
   loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
   loader: async ({ deps }) => {
     const rotationMap = await fetchLaneRotations(deps.audience);
-    return { rotationMap, dailyFive: pickDailyFive(rotationMap) };
+    const dateKey = indiaDateKey();
+    return { rotationMap, dateKey, ...buildDailyBoard(rotationMap, dateKey) };
   },
-  staleTime: LANE_STALE_TIME,
+  staleTime: 0,
   head: () => ({
     meta: [
       { title: "TrendXee — Fits before they go viral" },
@@ -38,44 +41,28 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-/**
- * Picks every module's products from the same loader data, so the server
- * render and the hydrated page always agree. Each product appears once.
- */
-function castTheBoard(rotationMap: Record<string, RotationItem[]>, dailyFive: RotationItem[]) {
-  const used = new Set(dailyFive.map((i) => i.id));
-  const rest = Object.values(rotationMap)
-    .flat()
-    .filter((i) => i.image && !used.has(i.id));
-  // Each lane's first product is its lane card's cover, so skip it here too.
-  for (const items of Object.values(rotationMap)) if (items[0]) used.add(items[0].id);
-  // Interleave lanes so neighbouring prints are visually different.
-  const byLane = Object.values(rotationMap).map((items) => items.filter((i) => i.image && !used.has(i.id)));
-  const interleaved: RotationItem[] = [];
-  for (let round = 0; round < 5; round++) {
-    for (const lane of byLane) if (lane[round]) interleaved.push(lane[round]);
-  }
-  const pool = interleaved.length ? interleaved : rest;
-
-  // The hero takes a product that is NOT in the Daily Five, so nothing repeats.
-  const lead = pool[0] ?? dailyFive[0];
-  const heroPrints = pool.slice(1, 3);
-  const story = pool.slice(3, 10);
-  const underdog =
-    pool.slice(10).find((i) => i.mainstream?.image) ?? [...dailyFive, ...pool].find((i) => i.mainstream?.image);
-  return { lead, heroPrints, story, underdog };
-}
-
 function Home() {
   const { audience = "ALL" } = Route.useSearch();
-  const { rotationMap, dailyFive } = Route.useLoaderData();
-  const { lead, heroPrints, story, underdog } = castTheBoard(rotationMap, dailyFive);
+  const { rotationMap, dateKey, dailyFive, lead, story, underdog } = Route.useLoaderData();
+  const router = useRouter();
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "visible" && indiaDateKey() !== dateKey) {
+        void router.invalidate({ filter: (match) => match.routeId === Route.id });
+      }
+    };
+    const timer = window.setTimeout(refresh, untilNextIndiaDay() + 100);
+    refresh(); // A server render can finish just before midnight and hydrate just after it.
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.clearTimeout(timer); window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
+  }, [dateKey, router]);
 
   return (
     <div key={audience} className="relative">
       <ScrollProgress />
       <div data-chapter="01" data-chapter-title="The board" className="tone-hero -mt-16 pt-16">
-        <Hero lead={lead} prints={heroPrints} />
+        <Hero key={dateKey} lead={lead} dateKey={dateKey} />
       </div>
       {story.length >= 5 && (
         <div data-chapter="02" data-chapter-title="The story" className="tone-deep">
@@ -83,7 +70,7 @@ function Home() {
         </div>
       )}
       <div data-chapter="03" data-chapter-title="Daily five" className="tone-raised">
-        <DailyFive items={dailyFive} />
+        <DailyFive key={`${dateKey}-${dailyFive.map((item) => item.id).join("-")}`} items={dailyFive} />
       </div>
       <div data-chapter="04" data-chapter-title="The lanes" className="tone-lanes">
         <LaneUniverse rotationMap={rotationMap} />
