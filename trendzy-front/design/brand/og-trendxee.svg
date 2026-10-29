@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f1eadb"/>
+  <rect x="24" y="24" width="1152" height="582" rx="28" fill="none" stroke="#302218" stroke-opacity=".18"/>
+  <path d="M64 135h1072M64 526h1072" stroke="#302218" stroke-opacity=".18"/>
+  <svg x="60" y="55" width="54" height="54" viewBox="0 0 64 64" fill="none">
+    <defs><mask id="weave"><rect width="64" height="64" fill="white"/><path d="M42 8H55C49 26 32 48 22 56H9C25 41 37 21 42 8Z" fill="black" stroke="black" stroke-width="6"/></mask></defs>
+    <g fill="#b96947"><path d="M9 8H22C28 24 39 41 55 56H41C25 42 15 24 9 8Z" mask="url(#weave)"/><path d="M42 8H55C49 26 32 48 22 56H9C25 41 37 21 42 8Z"/></g>
+  </svg>
+  <text x="128" y="94" font-family="Georgia, serif" font-size="36" fill="#302218">Trend<tspan fill="#b96947" font-style="italic">Xee</tspan></text>
+  <text x="1136" y="91" text-anchor="end" font-family="Arial, sans-serif" font-size="14" letter-spacing="3" fill="#67584d">INDIE FASHION / INDIA</text>
+  <text x="64" y="267" font-family="Georgia, serif" font-size="88" letter-spacing="-3" fill="#302218">Fits before</text>
+  <text x="64" y="370" font-family="Georgia, serif" font-size="88" letter-spacing="-3" fill="#302218">they <tspan fill="#b96947" font-style="italic">go viral.</tspan></text>
+  <text x="68" y="446" font-family="Arial, sans-serif" font-size="24" fill="#67584d">Discover the labels. Find your fit. Build an outfit.</text>
+  <g transform="translate(882 185) rotate(9 100 130)">
+    <rect x="0" y="0" width="228" height="292" rx="22" fill="#ded4bf" stroke="#302218" stroke-opacity=".16"/>
+    <path d="m56 74 34-15q24 22 48 0l34 15 33 45-40 26-12-17 7 109H68l7-109-12 17-40-26 33-45Z" fill="#b96947" stroke="#302218" stroke-width="1.5"/>
+    <path d="M90 59q24 36 48 0M71 224h85" stroke="#f1eadb" stroke-width="2"/>
+    <text x="114" y="274" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" letter-spacing="2" fill="#67584d">UNDERDOGS FIRST</text>
+  </g>
+  <text x="64" y="566" font-family="Arial, sans-serif" font-size="16" letter-spacing="2" fill="#67584d">TEES / DENIM / LAYERS / SHOES + MORE</text>
+  <text x="1136" y="566" text-anchor="end" font-family="Arial, sans-serif" font-size="19" fill="#302218">trendxee.com ↗</text>
+</svg>

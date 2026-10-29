@@ -6,9 +6,7 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -23,7 +21,7 @@ public interface TrendRepository extends ReactiveMongoRepository<Trend, String> 
     @Query("{ 'signalProducts.underdog.brandName': ?0 }")
     Flux<Trend> findByBrandName(String brandName);
 
-    // Infinite scroll using Flux
+    // Filter before pagination so each page contains the requested audience and style.
     @Query(value = "{ 'category': { '$in': ?0 }, " + VISIBLE + " }", sort = FEED_SORT)
     Flux<Trend> findByCategory(List<String> categories, Pageable pageable);
 
@@ -36,13 +34,8 @@ public interface TrendRepository extends ReactiveMongoRepository<Trend, String> 
     @Query(value = "{ 'category': { '$in': ?0 }, 'subcategory': { '$regex': ?1, '$options': 'i' }, '$expr': { '$in': [ " + EFFECTIVE_AUDIENCE + ", ?2 ] }, " + VISIBLE + " }", sort = FEED_SORT)
     Flux<Trend> findByCategoryAndSubcategoryAndAudience(List<String> categories, String subcategory, List<String> audiences, Pageable pageable);
 
-    /** Pairing reads the current selected products across lanes, never curated pools. */
-    @Query(value = "{ 'category': { '$in': ?0 }, " + VISIBLE + " }", sort = FEED_SORT)
-    Flux<Trend> findPairingCandidates(List<String> categories);
+    /** Never hydrate large scraper pools/marketplace stories to revalidate an outfit. */
+    @Query(value = "{ '_id': { '$in': ?0 } }", fields = "{ 'category': 1, 'subcategory': 1, 'active': 1, 'enrichmentStatus': 1, 'signalProducts.underdog': 1 }")
+    Flux<Trend> findCurrentOutfitMembers(List<String> ids);
 
-    // Delete trends by category with score less than a threshold
-    Mono<Long> deleteByCategoryAndTrendScoreLessThan(String category, double maxScore);
-
-    // Delete trends that haven't been updated since a specific date
-    Mono<Long> deleteByLastUpdatedAtBefore(LocalDateTime date);
 }

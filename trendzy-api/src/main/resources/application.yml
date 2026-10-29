@@ -10,6 +10,10 @@ spring:
       uri: ${MONGODB_URI:mongodb://localhost:27017/trendzy}
 
 app:
+  outfits:
+    enabled: ${OUTFIT_VISUAL_ENABLED:true}
+    feedback-enabled: ${OUTFIT_FEEDBACK_ENABLED:false}
+    feedback-secret: ${OUTFIT_FEEDBACK_SECRET:}
   jwt:
     public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public.pem}
   cookie:

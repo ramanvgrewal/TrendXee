@@ -29,6 +29,8 @@ class CatalogStylesTest {
         assertEquals("graphic", CatalogStyles.classify("TEES", "Classical Mythology Tees"));
         assertEquals("oversized", CatalogStyles.classify("TEES", "Oversized Graphic Tees"));
         assertEquals("hoodies", CatalogStyles.classify("ANIME", "Embroidered Anime Hoodies"));
+        assertEquals("overshirts", CatalogStyles.classify("OUTERWEAR", "Crochet Cardigan"));
+        assertEquals("overshirts", CatalogStyles.classify("OUTERWEAR", "Knitted Vest"));
         assertEquals("sweats", CatalogStyles.classify("BOTTOMS", "Trackpants"));
         assertEquals("gym", CatalogStyles.classify("SPORTSWEAR", "Women's Performance Tanks"));
         assertEquals("regular", CatalogStyles.classify("POLOS", "Regular-Fit Graphic T-Shirt"));

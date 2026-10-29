@@ -11,12 +11,14 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MotionProvider } from "@/motion/MotionProvider";
 import { ctaClass } from "@/components/Cta";
 import { normalizeAudienceFilter, type AudienceFilter } from "@/lib/audience";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { pageSeo, notFoundSeo, siteSchema, jsonLd } from "@/lib/seo";
+import { GOOGLE_ANALYTICS_ID, googleAnalyticsBootstrap } from "@/lib/google-analytics";
 
 function NotFoundComponent() {
   return (
@@ -41,12 +43,8 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
-  const reportableError = error instanceof Error ? error : new Error(String(error));
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(reportableError, { boundary: "tanstack_root_error_component" });
-  }, [reportableError]);
 
   return (
     <div className="mx-auto flex min-h-[70svh] w-full max-w-[1440px] flex-col justify-center px-5 py-24 sm:px-8">
@@ -82,24 +80,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     return audience === "ALL" ? {} : { audience };
   },
   search: { middlewares: [retainSearchParams(["audience"])] },
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "TrendXee — fits before they go viral" },
-      {
-        name: "description",
-        content:
-          "A proving ground for India's indie fashion brands — audited for trust, scored for real Instagram hype, and backed before they go viral.",
-      },
-      { property: "og:title", content: "TrendXee — fits before they go viral" },
-      {
-        property: "og:description",
-        content:
-          "A proving ground for India's indie fashion brands — audited for trust, scored for real Instagram hype, and backed before they go viral.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      ...pageSeo({ title: "TrendXee — Indian indie fashion discovery", description: "Discover rising Indian fashion brands, explore current drops and find reviewed outfit combinations on TrendXee." }).meta,
+      ...(matches.some(match => match.status === "notFound" || match._notFound) ? notFoundSeo().meta : []),
     ],
     links: [
       {
@@ -129,6 +115,9 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        {/* One Google tag for full page loads and enhanced SPA measurement. */}
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`} />
+        <script dangerouslySetInnerHTML={{ __html: googleAnalyticsBootstrap }} />
         {/* Set the saved theme before first paint so the board never flashes. */}
         <script
           dangerouslySetInnerHTML={{
@@ -138,13 +127,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: "TrendXee",
-              alternateName: ["Trendxee", "TrendXee AI"],
-              url: "https://trendxee.com/"
-            })
+            __html: jsonLd(siteSchema)
           }}
         />
       </head>
@@ -183,9 +166,10 @@ function RootComponent() {
       <MotionProvider>
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
-          <div className="flex-1">
+          <main id="main-content" className="flex-1">
+            <Breadcrumbs />
             <Outlet />
-          </div>
+          </main>
           <SiteFooter />
         </div>
         <Toaster />

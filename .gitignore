@@ -1,26 +1,37 @@
-# ── Secrets & Keys ──
+# Secrets and keys
 .env
+.env.*
+!.env.example
+!.env.production.example
 *.pem
-GenerateKeys.java
-GenerateKeys.class
+*.class
 
-# ── IDE ──
+# IDE files
 .idea/
 *.iml
 .vscode/
 *.swp
 *.swo
 
-# ── Java build artifacts ──
+# Java build artifacts
 trendzy-api/target/
 trendzy-business/target/
 
-# ── Node ──
+# Node files
 trendzy-front/node_modules/
 trendzy-front/.output/
 trendzy-front/.vinxi/
+trendzy-front/.tanstack/
+trendzy-front/dist/
+.qa/
+output/
+*.log
+*.tmp
+*.bak
+__pycache__/
+.pytest_cache/
 
-# ── OS junk ──
+# OS files
 .DS_Store
 Thumbs.db
 # Ignore temp patches and design zips

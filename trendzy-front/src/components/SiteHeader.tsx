@@ -23,12 +23,13 @@ import { currentUserQuery, type CurrentUser } from "@/lib/user";
 import { aesthetics } from "@/lib/mock-data";
 import { laneLabel } from "@/lib/format";
 
-type NavKey = "lanes" | "about" | "archive" | null;
+type NavKey = "lanes" | "about" | "archive" | "journal" | null;
 
 function activeKey(pathname: string): NavKey {
   if (pathname === "/lanes" || pathname.startsWith("/aesthetic/")) return "lanes";
   if (pathname === "/about") return "about";
   if (pathname === "/archive") return "archive";
+  if (pathname.startsWith("/journal")) return "journal";
   return null;
 }
 
@@ -82,6 +83,7 @@ export function SiteHeader() {
           <LanesMenu active={active === "lanes"} />
           <NavLink to="/" hash="engine" label="Engine" />
           <NavLink to="/about" label="About" active={active === "about"} />
+          <NavLink to="/journal" label="Journal" active={active === "journal"} />
           <NavLink to="/archive" label="Archive" active={active === "archive"} />
         </nav>
 
@@ -146,7 +148,7 @@ export function SiteHeader() {
   );
 }
 
-function NavLink({ to, hash, label, active = false }: { to: "/" | "/about" | "/archive"; hash?: string; label: string; active?: boolean }) {
+function NavLink({ to, hash, label, active = false }: { to: "/" | "/about" | "/archive" | "/journal"; hash?: string; label: string; active?: boolean }) {
   return (
     <Magnetic max={4}>
       <Link
@@ -326,6 +328,7 @@ function MobileMenu({
               { to: "/lanes" as const, label: "All lanes" },
               { to: "/" as const, hash: "engine", label: "How the engine works" },
               { to: "/about" as const, label: "About TrendXee" },
+              { to: "/journal" as const, label: "The Journal" },
               { to: "/archive" as const, label: "Your archive" },
             ].map((l) => (
               <m.li key={l.label} custom={i++} variants={item} initial="hidden" animate="show">

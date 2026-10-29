@@ -60,7 +60,7 @@ public class Trend {
     private String enrichmentQuery;
     private List<String> aiBrandNames;
 
-    // Product triad (underdog + amazon + flipkart)
+    // Selected retailer product and optional marketplace comparisons.
     @Builder.Default
     private SignalProducts signalProducts = new SignalProducts();
 
@@ -79,7 +79,7 @@ public class Trend {
     @Builder.Default
     private Integer userRatingCount = 0;
 
-    // Bucket for supporting signal products
+    // Instagram inputs shown in the brand hype section.
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -96,10 +96,10 @@ public class Trend {
     public static class SignalProducts {
         private String signalId;
         private String authorUsername;
-        private String queryUsed;          // debug: keywords fed to Amazon/Flipkart
-        private ProductDetail underdog;    // creator store product (nullable)
-        private ProductDetail amazon;      // marketplace aesthetic match (nullable)
-        private ProductDetail flipkart;    // marketplace aesthetic match (nullable)
+        private String queryUsed;
+        private ProductDetail underdog;
+        private ProductDetail amazon;
+        private ProductDetail flipkart;
     }
 
     @Data

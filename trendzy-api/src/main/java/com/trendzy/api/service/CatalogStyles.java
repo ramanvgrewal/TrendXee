@@ -33,7 +33,7 @@ public final class CatalogStyles {
                     style("hoodies", "Hoodies & sweats", "hood|sweat"),
                     style("denim", "Denim jackets", "denim"),
                     style("bomber", "Bomber & varsity", "bomber|varsity"),
-                    style("overshirts", "Overshirts", "overshirt|shacket"),
+                    style("overshirts", "Knitwear & overshirts", "overshirt|shacket|knit|crochet|cardigan|sweater|pullover"),
                     style("jackets", "Jackets & layers", ".*"));
             case "BOTTOMS" -> List.of(
                     style("cargo", "Cargo pants", "cargo"),

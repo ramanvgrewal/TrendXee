@@ -1,11 +1,10 @@
+import { pageSeo } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage } from "@/components/LegalPage";
 
 export const Route = createFileRoute("/terms")({
   component: TermsPage,
-  head: () => ({
-    meta: [{ title: "Terms of Use \u2014 TrendXee" }],
-  }),
+  head: () => pageSeo({ title: "Terms of use — TrendXee", description: "Understand TrendXee’s discovery service, retailer links, brand information and terms. Orders, payments and delivery are handled by the retailer.", path: "/terms" }),
 });
 
 function TermsPage() {

@@ -1,59 +1,57 @@
 import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { m, useScroll, useSpring, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { LaneCard } from "@/components/LaneCard";
 import { RevealHeading } from "@/motion/RevealHeading";
-import { useMediaQuery } from "@/motion/hooks";
-import { follow } from "@/motion/tokens";
 import { aesthetics } from "@/lib/mock-data";
 import type { RotationMap } from "@/lib/lanes";
 
 /**
- * 04 — The lane universe. On desktop this is the site's one horizontal
- * moment: the section pins and vertical scrolling slides the lanes
- * across the stage, then normal scrolling resumes. On phones (and with
- * reduced motion) it is a native swipeable rail — nothing hijacked.
+ * One native horizontal rail at every viewport and browser zoom level.
+ * Vertical scrolling always continues through the page.
  */
 export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
-  const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  const desktop = useMediaQuery("(min-width: 1024px) and (min-height: 800px)");
-  const pinned = desktop && !reduced;
-  const [distance, setDistance] = useState(0);
+  const [bounds, setBounds] = useState({ previous: false, next: false });
 
   useEffect(() => {
-    if (!pinned) return;
+    const track = trackRef.current;
+    if (!track) return;
     const measure = () => {
-      const track = trackRef.current;
-      if (track) setDistance(Math.max(0, track.scrollWidth - window.innerWidth + 64));
+      setBounds({
+        previous: track.scrollLeft > 2,
+        next: track.scrollLeft + track.clientWidth < track.scrollWidth - 2,
+      });
     };
     measure();
     const ro = new ResizeObserver(measure);
-    if (trackRef.current) ro.observe(trackRef.current);
-    window.addEventListener("resize", measure);
+    ro.observe(track);
+    for (const card of track.children) ro.observe(card);
+    track.addEventListener("scroll", measure, { passive: true });
     return () => {
       ro.disconnect();
-      window.removeEventListener("resize", measure);
+      track.removeEventListener("scroll", measure);
     };
-  }, [pinned]);
+  }, []);
 
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
-  const smooth = useSpring(scrollYProgress, follow.scroll);
-  const x = useTransform(smooth, [0.04, 0.96], [0, -distance]);
-  const counter = useTransform(smooth, (v) => String(Math.min(aesthetics.length, Math.max(1, Math.round(v * (aesthetics.length - 1)) + 1))).padStart(2, "0"));
-  const bar = useTransform(smooth, [0.04, 0.96], [0, 1]);
+  const move = (direction: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const card = track.firstElementChild;
+    const step = (card?.getBoundingClientRect().width ?? track.clientWidth * .8)
+      + (Number.parseFloat(getComputedStyle(track).columnGap) || 0);
+    track.scrollBy({ left: direction * step, behavior: reduced ? "instant" : "smooth" });
+  };
 
   return (
     <section
-      ref={sectionRef}
       id="lanes"
       className="relative scroll-mt-[7.5rem]"
-      style={pinned ? ({ height: `calc(100svh + ${distance}px)` } as CSSProperties) : undefined}
     >
-      <div className={pinned ? "sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden pt-[7.5rem]" : "py-6"}>
-        <div className={`mx-auto flex w-full max-w-[1440px] flex-wrap items-end justify-between gap-6 px-5 sm:px-8 ${pinned ? "" : "pt-20"}`}>
+      <div className="py-6">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-end justify-between gap-6 px-5 pt-20 sm:px-8">
           <div>
             <p className="eyebrow text-ink/70">
               <span className="text-clay-ink">04</span> · The lanes
@@ -69,15 +67,18 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
             />
           </div>
           <div className="flex items-center gap-5">
-            {pinned && (
-              <div className="flex items-center gap-3 font-mono text-[12px] font-bold tracking-[0.14em] text-ink/70">
-                <m.span className="text-ink">{counter}</m.span>
-                <span className="relative block h-px w-28 overflow-hidden bg-ink/15">
-                  <m.span className="absolute inset-0 origin-left bg-clay" style={{ scaleX: bar }} />
-                </span>
-                {String(aesthetics.length).padStart(2, "0")}
-              </div>
-            )}
+            <div className="flex gap-2" aria-label="Lane navigation">
+              <button type="button" aria-label="Previous lane" aria-controls="lane-universe-rail"
+                disabled={!bounds.previous} onClick={() => move(-1)}
+                className="hit flex items-center justify-center rounded-full border border-ink/20 text-ink transition-colors hover:bg-ink/5 disabled:cursor-default disabled:opacity-30">
+                <ArrowLeft size={18} aria-hidden />
+              </button>
+              <button type="button" aria-label="Next lane" aria-controls="lane-universe-rail"
+                disabled={!bounds.next} onClick={() => move(1)}
+                className="hit flex items-center justify-center rounded-full border border-ink/20 text-ink transition-colors hover:bg-ink/5 disabled:cursor-default disabled:opacity-30">
+                <ArrowRight size={18} aria-hidden />
+              </button>
+            </div>
             <Link
               to="/lanes"
               className="hit ed-link-rest text-sm font-semibold text-ink/75 hover:text-clay"
@@ -87,12 +88,12 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
           </div>
         </div>
 
-        <m.div
+        <div
           ref={trackRef}
-          className={`no-scrollbar mt-8 flex gap-5 px-5 sm:px-8 ${
-            pinned ? "w-max gap-6" : "snap-x snap-mandatory scroll-px-5 overflow-x-auto pb-6 sm:scroll-px-8"
-          }`}
-          style={pinned ? { x } : undefined}
+          id="lane-universe-rail"
+          aria-label="Fashion lanes"
+          tabIndex={0}
+          className="no-scrollbar mt-8 flex snap-x snap-mandatory scroll-px-5 gap-5 overflow-x-auto px-5 pb-6 sm:scroll-px-8 sm:px-8"
         >
           {aesthetics.map((aesthetic, i) => {
             const first = rotationMap[aesthetic.id]?.[0];
@@ -107,8 +108,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
               />
             );
           })}
-          {pinned && <div aria-hidden className="w-[10vw] shrink-0" />}
-        </m.div>
+        </div>
       </div>
     </section>
   );

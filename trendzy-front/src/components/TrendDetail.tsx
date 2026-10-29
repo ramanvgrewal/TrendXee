@@ -11,7 +11,7 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { PairUpWith } from "@/components/PairUpWith";
 import { useAudience } from "@/components/AudienceFilter";
 import type { AudienceFilter } from "@/lib/audience";
-import type { PairingChoices } from "@/lib/pairings";
+import { trackOutfit, type PairingChoices, type PairingResult, type OutfitReceipt } from "@/lib/pairings";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -143,10 +143,22 @@ function StorySession({ source, scrollRef, onClose, onChanged, onDeleted, archiv
   const globalAudience = useAudience();
   const [audience, setAudience] = useState<AudienceFilter>(globalAudience);
   const [choices, setChoices] = useState<PairingChoices>({});
+  const [outfit, setOutfit] = useState<PairingResult | null>(null);
+  const [receipt, setReceipt] = useState<OutfitReceipt | undefined>();
   const [pairing, setPairing] = useState<Trend | null>(null);
   const savedScroll = useRef({ outer: 0, copy: 0, rail: 0, identity: "" });
   const backRef = useRef(false);
   const current = pairing ?? source;
+
+  useEffect(() => {
+    if (!pairing || !receipt) return;
+    const listener = (event: Event) => {
+      const action = (event as CustomEvent<{ trendId: string; type: 'SAVE' | 'SHOP_CLICK' }>).detail;
+      if (action?.trendId === pairing.id && ['SAVE', 'SHOP_CLICK'].includes(action.type)) trackOutfit(receipt, action.type, pairing.id);
+    };
+    window.addEventListener('trendxee:outfit-action', listener);
+    return () => window.removeEventListener('trendxee:outfit-action', listener);
+  }, [pairing?.id, receipt]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -170,10 +182,11 @@ function StorySession({ source, scrollRef, onClose, onChanged, onDeleted, archiv
   }, [pairing?.id, scrollRef]);
 
   const back = () => { backRef.current = true; setPairing(null); };
-  const openPairing = (next: Trend, identity: string) => {
+  const openPairing = (next: Trend, identity: string, nextReceipt?: OutfitReceipt) => {
     const outer = scrollRef.current;
     savedScroll.current = { outer: outer?.scrollTop ?? 0, copy: outer?.querySelector('[data-story-copy-scroll]')?.scrollTop ?? 0, rail: outer?.querySelector('[data-pairing-rail]')?.scrollLeft ?? 0, identity };
     setPairing(next);
+    setReceipt(nextReceipt);
   };
 
   return <>
@@ -191,7 +204,7 @@ function StorySession({ source, scrollRef, onClose, onChanged, onDeleted, archiv
     onUnarchived={pairing ? undefined : onUnarchived}
     backToSource={pairing ? back : undefined}
     sourceName={source.products.underdog?.title || source.name}
-    pairingSection={!pairing ? <PairUpWith source={source} audience={audience} setAudience={setAudience} choices={choices} setChoices={setChoices} onOpen={openPairing} /> : undefined}
+    pairingSection={!pairing ? <PairUpWith source={source} audience={audience} setAudience={setAudience} choices={choices} setChoices={setChoices} outfit={outfit} setOutfit={setOutfit} onOpen={openPairing} /> : undefined}
   /></>;
 }
 

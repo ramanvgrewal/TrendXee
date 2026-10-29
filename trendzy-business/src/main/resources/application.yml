@@ -36,8 +36,14 @@ spring:
           auth: true
           starttls:
             enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 app:
+  contact:
+    from: ${CONTACT_FROM:${MAIL_USERNAME:hello@trendxee.com}}
+    to: ${CONTACT_TO:hello@trendxee.com}
   jwt:
     private-key-path: ${JWT_PRIVATE_KEY_PATH:file:../private.pem}
     public-key-path: ${JWT_PUBLIC_KEY_PATH:file:../public.pem}

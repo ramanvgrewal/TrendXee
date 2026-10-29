@@ -1,3 +1,4 @@
+import { pageSeo } from "@/lib/seo";
 import { useEffect } from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Hero } from "@/components/home/Hero";
@@ -20,24 +21,7 @@ export const Route = createFileRoute("/")({
     return { rotationMap, dateKey, ...buildDailyBoard(rotationMap, dateKey) };
   },
   staleTime: 0,
-  head: () => ({
-    meta: [
-      { title: "TrendXee — Fits before they go viral" },
-      {
-        name: "description",
-        content:
-          "A scrapbook of India's rising fashion drops: jeans, bottoms, tees, outerwear, shoes, sportswear, anime, polos & regular, and caps & accessories, with the underdog brand behind each trend.",
-      },
-      { property: "og:title", content: "TrendXee — Fits before they go viral" },
-      {
-        property: "og:description",
-        content:
-          "Nine lanes of rising fits audited for trust and Instagram hype, with the indie brand behind each trend and where to buy it.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => pageSeo({ title: "TrendXee — Fits before they go viral", description: "Discover Indian indie fashion: tees, baggy jeans, outerwear, shoes and more. Explore brands, compare hype signals and find pieces that work together.", path: "/" }),
   component: Home,
 });
 

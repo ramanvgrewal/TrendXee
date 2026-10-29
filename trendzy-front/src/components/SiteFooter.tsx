@@ -1,18 +1,10 @@
-import { useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { AuthModal } from "@/components/AuthModal";
-import { ContactDialog } from "@/components/ContactDialog";
-import { currentUserQuery } from "@/lib/user";
 import { aesthetics } from "@/lib/mock-data";
 import { laneLabel } from "@/lib/format";
 
 export function SiteFooter() {
   const { pathname } = useLocation();
   const hasAudienceDock = pathname === "/" || pathname === "/lanes" || pathname.startsWith("/aesthetic/");
-  const { data: user } = useQuery(currentUserQuery);
-  const [authOpen, setAuthOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
 
   const linkClass = "ed-link inline-flex min-h-11 items-center py-1 text-left text-[14px] text-ink/70 hover:text-clay";
 
@@ -62,18 +54,19 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link to="/journal" className={linkClass}>
+                Journal
+              </Link>
+            </li>
+            <li>
               <Link to="/archive" className={linkClass}>
                 Archive
               </Link>
             </li>
             <li>
-              <button
-                type="button"
-                onClick={() => (user ? setContactOpen(true) : setAuthOpen(true))}
-                className={linkClass}
-              >
+              <Link to="/contact" className={linkClass}>
                 Contact
-              </button>
+              </Link>
             </li>
           </ul>
         </nav>
@@ -113,8 +106,6 @@ export function SiteFooter() {
         </div>
       </div>
 
-      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
-      <ContactDialog open={contactOpen} onOpenChange={setContactOpen} user={user} />
     </footer>
   );
 }

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_server/
+
+Sitemap: https://www.trendxee.com/sitemap.xml

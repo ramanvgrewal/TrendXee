@@ -1,3 +1,4 @@
+import { pageSeo } from "@/lib/seo";
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,19 +10,7 @@ import type { Trend } from "@/lib/mock-data";
 import { currentUserQuery } from "@/lib/user";
 
 export const Route = createFileRoute("/archive")({
-  head: () => ({
-    meta: [
-      { title: "Your archive — TrendXee" },
-      {
-        name: "description",
-        content: "The trend drops you pinned to your own TrendXee board, with the brands and links kept alongside them.",
-      },
-      { property: "og:title", content: "Your archive — TrendXee" },
-      { property: "og:description", content: "Trend drops you pinned to your own TrendXee board." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () => pageSeo({ title: "Your saved fashion archive — TrendXee", description: "Your personal collection of saved TrendXee products and brands. Sign in to revisit your fashion discoveries and retailer links.", path: "/archive", noindex: true }),
   component: ArchivePage,
 });
 

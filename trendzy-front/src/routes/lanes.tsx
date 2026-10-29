@@ -1,3 +1,4 @@
+import { pageSeo } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { LaneCard } from "@/components/LaneCard";
 import { ScrollReveal } from "@/motion/ScrollReveal";
@@ -9,23 +10,7 @@ export const Route = createFileRoute("/lanes")({
   loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
   loader: async ({ deps }) => ({ rotationMap: await fetchLaneRotations(deps.audience) }),
   staleTime: LANE_STALE_TIME,
-  head: () => ({
-    meta: [
-      { title: "All lanes — TrendXee" },
-      {
-        name: "description",
-        content:
-          "Every TrendXee lane in one place: jeans, bottoms, tees, outerwear, shoes, sportswear, anime, polos & regular, and caps & accessories, each read from live signals.",
-      },
-      { property: "og:title", content: "All lanes — TrendXee" },
-      {
-        property: "og:description",
-        content: "Nine lanes of rising Indian fashion drops, with the underdog brand behind each.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => pageSeo({ title: "All nine fashion lanes — TrendXee", description: "Browse tees, outerwear, jeans, bottoms, anime, shoes, sportswear, polos & regular and accessories from Indian fashion brands.", path: "/lanes" }),
   component: LanesPage,
 });
 

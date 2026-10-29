@@ -41,6 +41,16 @@ test('legacy single-image products still work', () => {
   assert.deepEqual(product.imageUrls, ['https://store/front.jpg']);
 });
 
+test('Wix listing thumbnails yield to the clearer copy of the same photo', () => {
+  const asset = 'https://static.wixstatic.com/media/front~mv2.jpg';
+  const thumb = asset + '/v1/fill/w_275,h_275,al_c,q_80/front.jpg';
+  const clear = asset + '/v1/fit/w_500,h_500,q_90/file.jpg';
+  const back = 'https://static.wixstatic.com/media/back~mv2.jpg/v1/fit/w_500,h_500,q_90/file.jpg';
+  const product = normalizeProduct({ imageUrl: thumb, imageUrls: [thumb, clear, back] });
+  assert.equal(product.imageUrl, clear);
+  assert.deepEqual(product.imageUrls, [clear, back]);
+});
+
 test('gallery-only products acquire a cover and discard invalid entries', () => {
   const product = normalizeProduct({ imageUrls: [null, '//store/front.jpg', '//store/front.jpg', 'https://store/back.jpg', 'javascript:bad'] });
   assert.equal(product.imageUrl, 'https://store/front.jpg');

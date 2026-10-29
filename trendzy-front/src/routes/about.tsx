@@ -1,25 +1,10 @@
+import { pageSeo } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
 import { ScrollReveal } from "@/motion/ScrollReveal";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About TrendXee — no gatekeeping, just the underdogs" },
-      {
-        name: "description",
-        content:
-          "Why TrendXee exists: spot rising Indian fashion trends early, credit the small brands making them first, and send you straight to the official store.",
-      },
-      { property: "og:title", content: "About TrendXee" },
-      {
-        property: "og:description",
-        content: "Indie fashion labels audited for trust, scored for real Instagram hype, and backed before they go viral.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () => pageSeo({ title: "About TrendXee — Discover the underdogs", description: "Meet TrendXee, a fashion discovery platform for Indian indie labels. Learn how we bring retailer details, Instagram hype and reviewed outfits together.", path: "/about" }),
   component: AboutPage,
 });
 

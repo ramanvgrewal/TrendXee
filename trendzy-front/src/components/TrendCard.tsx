@@ -83,6 +83,7 @@ export function TrendCard({
           <Parallax depth={isShoeCategory(trend.aestheticId) ? 0 : 3} bleed={!isShoeCategory(trend.aestheticId)} className="absolute inset-0">
             <Img
               src={image}
+              alt={trend.products.underdog?.title || trend.name}
               eager={priority}
               fallbackLabel={lane ? laneLabel(lane.name) : "TrendXee"}
               className={`h-full w-full ${productImageFit(trend.aestheticId)} ${isShoeCategory(trend.aestheticId) ? "" : "group-hover/card:scale-[1.03]"}`}

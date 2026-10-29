@@ -108,6 +108,10 @@ export function normalizeTrend(raw: any): Trend {
 function imageIdentity(value: string): string {
   try {
     const url = new URL(value);
+    if (url.hostname === "static.wixstatic.com") {
+      const asset = url.pathname.match(/^\/media\/([^/]+)(?:\/v1\/.*)?$/);
+      if (asset) return `wix:${asset[1]}`;
+    }
     const asset = url.pathname.match(/^\/cdn\/shop\/(files|products)\/(.+)$/)
       ?? (/^cdn\.shopify(?:cdn)?\.(com|net)$/.test(url.hostname)
         ? url.pathname.match(/^\/s\/files\/[^/]+\/[^/]+\/[^/]+\/[^/]+\/(files|products)\/(.+)$/) : null);
@@ -120,6 +124,10 @@ function imageIdentity(value: string): string {
 }
 
 function imageResolutionRank(value: string): number {
+  if (imageIdentity(value).startsWith("wix:")) {
+    const size = new URL(value).pathname.match(/\/v1\/(?:fit|fill)\/w_(\d+),h_(\d+)(?:,|\/)/);
+    return size ? Math.min(Number(size[1]), Number(size[2])) : Infinity;
+  }
   if (!imageIdentity(value).startsWith("shopify:")) return 0;
   const url = new URL(value);
   const width = url.searchParams.get("width");

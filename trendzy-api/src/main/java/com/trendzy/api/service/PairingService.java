@@ -22,21 +22,25 @@ public class PairingService {
             "SNEAKERS", "SPORTSWEAR", "POLOS", "CAPS", "ACCESSORIES");
     private static final Set<String> PUBLIC_STATUSES = Set.of("COMPLETED", "PARTIAL", "AWAITING_UNDERDOG",
             "PENDING", "IN_PROGRESS", "PROCESSING", "FAILED");
-    private static final Set<String> ACCESSORIES = Set.of("HEADWEAR", "BAG", "BELT", "JEWELRY", "EYEWEAR");
-    private static final Set<String> NEUTRALS = Set.of("BLACK", "WHITE", "GREY", "GRAY", "NAVY", "BEIGE", "CREAM", "BROWN");
     private static final Map<String, Pattern> PATTERNS = new ConcurrentHashMap<>();
-    private static final Map<String, String> LABELS = Map.of("TOP", "A top", "BOTTOM", "Jeans & bottoms",
-            "LAYER", "A layer", "SHOES", "Shoes", "HEADWEAR", "Headwear", "BAG", "A bag", "BELT", "A belt",
-            "JEWELRY", "Jewelry", "EYEWEAR", "Eyewear");
+    private static final Set<String> ROLES = Set.of("TOP", "BOTTOM", "LAYER", "SHOES", "HEADWEAR", "BAG", "BELT", "JEWELRY", "EYEWEAR");
 
     private final TrendRepository repository;
+    private VisualOutfitService visualOutfits;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setVisualOutfits(VisualOutfitService visualOutfits) { this.visualOutfits = visualOutfits; }
 
     public record Item(Trend trend, String identity, String reason) {}
     public record Slot(String role, String label, List<Item> items) {}
-    public record Pairings(String sourceIdentity, String audience, boolean needsAudience, List<Slot> slots) {}
-    private record Profile(String role, boolean bulky, boolean closedLayer, Set<String> activities, Set<String> colors,
-                           String pattern, String fit, Set<String> styles, Set<String> occasions) {}
-    private record Candidate(Trend trend, String identity, Profile profile, double score, String reason) {}
+    public record Pairings(String sourceIdentity, String audience, boolean needsAudience, List<Slot> slots,
+                           String engine, String outfitId, String modelVersion, String reason,
+                           List<String> swappableRoles, String impressionId, String feedbackToken) {
+        public Pairings(String sourceIdentity, String audience, boolean needsAudience, List<Slot> slots) {
+            this(sourceIdentity, audience, needsAudience, slots, "curation-pending", null, null, null, List.of(), null, null);
+        }
+    }
+    private record Profile(String role, boolean closedLayer, Set<String> activities) {}
 
     public Mono<Trend> selectedProduct(String id, String expectedIdentity) {
         return Mono.defer(() -> {
@@ -54,6 +58,11 @@ public class PairingService {
     }
 
     public Mono<Pairings> pairings(String id, String requestedAudience, String expectedIdentity) {
+        return pairings(id, requestedAudience, expectedIdentity, null, null, List.of(), null);
+    }
+
+    public Mono<Pairings> pairings(String id, String requestedAudience, String expectedIdentity,
+                                   String lookId, String swapRole, List<String> excluded, String session) {
         String requested = upper(requestedAudience == null ? "ALL" : requestedAudience);
         if (!Set.of("ALL", "MEN", "WOMEN").contains(requested))
             return Mono.error(error(HttpStatus.BAD_REQUEST, "audience must be ALL, MEN or WOMEN"));
@@ -66,57 +75,19 @@ public class PairingService {
             if (audiences.isEmpty()) return Mono.just(new Pairings(identity, effective, true, List.of()));
             Profile profile = profile(selected);
             if (profile.role().equals("UNKNOWN")) return Mono.just(new Pairings(identity, effective, false, List.of()));
-            return repository.findPairingCandidates(LANES).filter(PairingService::eligible).collectList()
-                    .map(trends -> recommend(source, identity, effective, audiences, profile, trends));
+            // A refresh invalidates its old image review. Never fill that gap with
+            // independently ranked metadata picks or call an inference provider.
+            Mono<Pairings> unavailable = lookId != null || swapRole != null
+                    ? Mono.error(error(HttpStatus.CONFLICT, "This outfit changed. Reload its pairings."))
+                    : Mono.just(new Pairings(identity, effective, false, List.of()));
+            if (visualOutfits == null) return unavailable;
+            return visualOutfits.recommend(source, effective, audiences, lookId, swapRole, excluded, session)
+                    .switchIfEmpty(unavailable);
         });
-    }
-
-    private Pairings recommend(Trend source, String identity, String audience, Set<String> audiences,
-                               Profile sourceProfile, List<Trend> trends) {
-        List<Candidate> candidates = new ArrayList<>();
-        for (Trend trend : trends) {
-            ProductDetail target = product(trend);
-            String targetIdentity = ProductIdentity.canonical(target.getShopUrl());
-            if (identity.equals(targetIdentity) || Objects.equals(source.getId(), trend.getId())
-                    || !audiences.contains(upper(target.getAudience()))) continue;
-            Profile targetProfile = profile(target);
-            if (targetProfile.role().equals("UNKNOWN") || targetProfile.role().equals(sourceProfile.role())
-                    || !compatibleActivity(sourceProfile, targetProfile)) continue;
-            if (sourceProfile.bulky() && targetProfile.role().equals("LAYER")) continue;
-            candidates.add(rank(source, sourceProfile, trend, targetIdentity, targetProfile));
-        }
-        candidates.sort(Comparator.comparingDouble(Candidate::score).reversed()
-                .thenComparing(Candidate::identity).thenComparing(c -> String.valueOf(c.trend().getId())));
-        List<String> roles = new ArrayList<>(switch (sourceProfile.role()) {
-            case "TOP" -> List.of("BOTTOM", "SHOES");
-            case "BOTTOM" -> List.of("TOP", "SHOES");
-            case "LAYER" -> sourceProfile.closedLayer() ? List.of("BOTTOM", "SHOES") : List.of("TOP", "BOTTOM", "SHOES");
-            case "SHOES" -> List.of("TOP", "BOTTOM");
-            default -> List.of("TOP", "BOTTOM", "SHOES");
-        });
-        // The final slot is optional. A garment and an accessory never compete inside one role.
-        if (roles.size() < 3) {
-            candidates.stream().filter(c -> ACCESSORIES.contains(c.profile().role())
-                            || (!sourceProfile.bulky() && c.profile().role().equals("LAYER") && !c.profile().bulky()))
-                    .map(c -> c.profile().role()).findFirst().ifPresent(roles::add);
-        }
-        List<Slot> slots = new ArrayList<>();
-        Set<String> used = new HashSet<>(Set.of(identity));
-        for (String role : roles) {
-            List<Item> items = new ArrayList<>();
-            for (Candidate candidate : candidates) {
-                if (candidate.profile().role().equals(role) && used.add(candidate.identity())) {
-                    items.add(new Item(cardPreview(candidate.trend()), candidate.identity(), candidate.reason()));
-                    if (items.size() == 4) break;
-                }
-            }
-            if (!items.isEmpty()) slots.add(new Slot(role, LABELS.get(role), List.copyOf(items)));
-        }
-        return new Pairings(identity, audience, false, List.copyOf(slots));
     }
 
     /** Cards need one photo; the full gallery/story is fetched only after identity revalidation. */
-    private static Trend cardPreview(Trend trend) {
+    static Trend cardPreview(Trend trend) {
         ProductDetail p = product(trend);
         ProductDetail preview = ProductDetail.builder().brandName(p.getBrandName()).title(p.getTitle())
                 .audience(p.getAudience()).currency(p.getCurrency()).price(p.getPrice()).originalPrice(p.getOriginalPrice())
@@ -128,11 +99,10 @@ public class PairingService {
 
     private static Set<String> matchingAudiences(String sourceAudience, String requested) {
         String source = ProductAudience.normalize(sourceAudience);
-        Set<String> allowed = source.equals("UNISEX")
-                ? new HashSet<>(requested.equals("ALL") ? Set.of("UNISEX") : Set.of(requested, "UNISEX"))
-                : new HashSet<>(Set.of(source, "UNISEX"));
-        if (!requested.equals("ALL")) allowed.retainAll(Set.of(requested, "UNISEX"));
-        return allowed;
+        // A product correction must override a stale browsing preference. A
+        // women's source always produces a women's look, including shared items.
+        if (!source.equals("UNISEX")) return Set.of(source, "UNISEX");
+        return requested.equals("ALL") ? Set.of("UNISEX") : Set.of(requested, "UNISEX");
     }
 
     static boolean eligible(Trend trend) {
@@ -154,54 +124,27 @@ public class PairingService {
         return trend.getSignalProducts() == null ? null : trend.getSignalProducts().getUnderdog();
     }
 
+    static String outfitRole(Trend trend) { return profile(product(trend)).role(); }
+    static boolean outfitCompatible(Trend first, Trend second) {
+        Profile a = profile(product(first)), b = profile(product(second));
+        if (a.role().equals("UNKNOWN") || b.role().equals("UNKNOWN") || a.role().equals(b.role())) return false;
+        if ((a.closedLayer() && b.role().equals("TOP")) || (b.closedLayer() && a.role().equals("TOP"))) return false;
+        return compatibleActivity(a, b);
+    }
+
     private static Profile profile(ProductDetail p) {
         // Product type and title identify the garment itself. Descriptions often include
         // other styled pieces, and collection tags can name unrelated garment categories.
         String primary = text(p.getTitle()) + " " + text(p.getProductType());
         String role = role(primary);
-        boolean bulky = role.equals("LAYER") && has(primary, "hoodies?|sweatshirts?|pullovers?|puffers?|padded|heavyweight");
-        boolean closedLayer = role.equals("LAYER") && has(primary, "hoodies?|sweatshirts?|pullovers?");
+        boolean closedLayer = role.equals("LAYER") && has(primary, "hoodies?|sweatshirts?|pullovers?|sweaters?|knit(?:ted)?[ -]?vests?");
         Set<String> activities = activities(primary);
-        String attributes = primary + " " + text(p.getTags());
-        Set<String> colors = new HashSet<>();
-        // Named characters/graphics (Black Panther, Blue Lock) are not garment colors.
-        // Only explicit color tags are used by the legacy fallback.
-        for (String color : List.of("BLACK", "WHITE", "GREY", "GRAY", "NAVY", "BEIGE", "CREAM", "BROWN", "BLUE", "RED", "GREEN", "PINK"))
-            if (p.getTags() != null && p.getTags().stream().anyMatch(tag ->
-                    text(tag).matches("(?:colou?r\\s*[:_=-]?\\s*)?" + color.toLowerCase(Locale.ROOT)))) colors.add(color);
-        String pattern = has(attributes, "graphic|printed|print|floral|camo|striped|checked") ? "PATTERNED"
-                : has(attributes, "plain|solid|minimalist") ? "PLAIN" : "UNKNOWN";
-        String fit = has(attributes, "oversized|baggy|wide[ -]leg|relaxed") ? "RELAXED"
-                : has(attributes, "straight") ? "STRAIGHT" : has(attributes, "slim|skinny") ? "SLIM" : "UNKNOWN";
-        Set<String> styles = new HashSet<>();
-        for (String style : List.of("STREETWEAR", "VINTAGE", "MINIMAL", "ETHNIC"))
-            if (has(attributes, style.toLowerCase(Locale.ROOT))) styles.add(style);
-        Set<String> occasions = new HashSet<>();
-        if (has(primary, "casual")) occasions.add("CASUAL");
         Map<String, Object> stored = p.getOutfitProfile();
         if (currentProfile(p, stored)) {
             String storedRole = upper(string(stored.get("role")));
-            if (LABELS.containsKey(storedRole) && supported(p, stored, "role", storedRole)
+            if (ROLES.contains(storedRole) && supported(p, stored, "role", storedRole)
                     && (role.equals("UNKNOWN") || role.equals(storedRole))) role = storedRole;
-            if (role.equals("LAYER") && "BULKY".equals(stored.get("layering")) && supported(p, stored, "layering", "BULKY")) bulky = true;
-            Set<String> verifiedColors = supportedValues(p, stored, "colors");
-            if (!verifiedColors.isEmpty()) {
-                colors.clear(); // Scoped variant/title evidence outranks broad collection color tags.
-                colors.addAll(verifiedColors);
-            }
-            styles.addAll(supportedValues(p, stored, "styles"));
-            occasions.addAll(supportedValues(p, stored, "occasions"));
             activities.addAll(supportedValues(p, stored, "activities"));
-            String storedPattern = upper(string(stored.get("pattern")));
-            if (supported(p, stored, "pattern", storedPattern)) {
-                if (storedPattern.equals("PLAIN")) pattern = "PLAIN";
-                else if (Set.of("GRAPHIC", "STRIPED", "CHECKED", "FLORAL", "CAMO").contains(storedPattern)) pattern = "PATTERNED";
-            }
-            String storedFit = upper(string(stored.get("fit")));
-            if (supported(p, stored, "fit", storedFit)) {
-                if (Set.of("OVERSIZED", "WIDE_LEG", "RELAXED").contains(storedFit)) fit = "RELAXED";
-                else if (Set.of("STRAIGHT", "SLIM").contains(storedFit)) fit = storedFit;
-            }
         }
         if (unsupportedOutfit(primary)) role = "UNKNOWN";
         // Activity words in a graphic tee or a sneaker's inspiration are not
@@ -211,7 +154,7 @@ public class PairingService {
             activities.clear();
         if (has(primary, "inspired|culture|graphic|artwork|print|slogan|lifestyle")) activities.clear();
         activities.retainAll(Set.of("FOOTBALL", "BASKETBALL", "CRICKET", "RUNNING", "TRAINING", "TENNIS", "BADMINTON", "WALKING", "ACTIVE"));
-        return new Profile(role, bulky, closedLayer, activities, colors, pattern, fit, styles, occasions);
+        return new Profile(role, closedLayer, activities);
     }
 
     private static boolean currentProfile(ProductDetail product, Map<String, Object> profile) {
@@ -281,7 +224,7 @@ public class PairingService {
         Set<String> roles = new HashSet<>();
         if (has(primary, "jeans?|trousers?|pants|joggers?|sweatpants|shorts?|skirts?|leggings?")) roles.add("BOTTOM");
         if (has(primary, "sneakers?|sports shoes?|running shoes?|trainers?|training shoes?|football (?:boots?|shoes?)|soccer cleats?|basketball shoes?|cricket shoes?|tennis shoes?|badminton shoes?|walking shoes?|sandals?|slides?|clogs?|mules?|juttis?|mojaris?|ballerinas?|ballet flats?|ballets?|flats|loafers?")) roles.add("SHOES");
-        if (has(primary, "jackets?|coats?|blazers?|cardigans?|hoodies?|sweatshirts?|pullovers?|overshirts?|shackets?|puffers?|windbreakers?")) roles.add("LAYER");
+        if (has(primary, "jackets?|coats?|blazers?|cardigans?|hoodies?|sweatshirts?|pullovers?|overshirts?|shackets?|puffers?|windbreakers?|sweaters?|knit(?:ted)?[ -]?vests?")) roles.add("LAYER");
         if (has(primary, "t[ -]?shirts?|tees?|polos?|jerseys?|shirts?|tops?|blouses?|tank tops?")) roles.add("TOP");
         if (has(primary, "caps?|beanies?|hats?|headbands?")) roles.add("HEADWEAR");
         if (has(primary, "bags?|backpacks?|totes?|satchels?")) roles.add("BAG");
@@ -315,51 +258,6 @@ public class PairingService {
         // "Sports shoes" alone does not establish suitability for football/running/gym.
         if (common.isEmpty()) return false;
         return !(common.equals(Set.of("ACTIVE")) && (source.role().equals("SHOES") || target.role().equals("SHOES")));
-    }
-
-    private static Candidate rank(Trend source, Profile sourceProfile, Trend target, String identity, Profile targetProfile) {
-        ProductDetail p = product(target);
-        double score = 20;
-        String reason = switch (targetProfile.role()) {
-            case "TOP" -> "A top to wear with this piece.";
-            case "BOTTOM" -> "A separate bottom to complete the outfit.";
-            case "LAYER" -> "An outer layer for this outfit.";
-            case "SHOES" -> "A casual footwear option for this outfit.";
-            case "HEADWEAR" -> "Headwear to finish the outfit.";
-            case "BAG" -> "A bag to carry with this outfit.";
-            case "BELT" -> "A belt to complement the outfit.";
-            case "JEWELRY" -> "Jewelry as a finishing detail.";
-            default -> "Eyewear as a finishing detail.";
-        };
-        if (!sourceProfile.activities().isEmpty()) {
-            score += 20;
-            String activity = sourceProfile.activities().stream().filter(targetProfile.activities()::contains).sorted()
-                    .findFirst().orElse("active").toLowerCase(Locale.ROOT);
-            reason = "Both products carry " + activity + " details in their retailer metadata.";
-        } else if (Set.of("TOP", "LAYER").contains(sourceProfile.role()) && sourceProfile.fit().equals("RELAXED") && targetProfile.role().equals("BOTTOM")
-                && Set.of("RELAXED", "STRAIGHT").contains(targetProfile.fit())) {
-            score += 12;
-            reason = targetProfile.fit().equals("STRAIGHT") ? "A straight silhouette alongside the relaxed top."
-                    : "A relaxed silhouette to continue the easy fit.";
-        }
-        if (sourceProfile.pattern().equals("PATTERNED") && targetProfile.pattern().equals("PLAIN")) {
-            score += 15;
-            reason = "A plain piece to balance the patterned starting piece.";
-        }
-        if (!targetProfile.colors().isEmpty() && NEUTRALS.containsAll(targetProfile.colors())) {
-            score += 5;
-            if (reason.startsWith("A separate") || reason.startsWith("A top") || reason.startsWith("A casual"))
-                reason = "A neutral-colored " + (targetProfile.role().equals("SHOES") ? "shoe" : "piece") + " for easy styling.";
-        }
-        if (!sourceProfile.colors().isEmpty() && !Collections.disjoint(sourceProfile.colors(), targetProfile.colors())) score += 4;
-        if (!Collections.disjoint(sourceProfile.styles(), targetProfile.styles())) score += 8;
-        if (!Collections.disjoint(sourceProfile.occasions(), targetProfile.occasions())) score += 5;
-        if (sourceProfile.pattern().equals("PATTERNED") && targetProfile.pattern().equals("PATTERNED")) score -= 5;
-        if (!Objects.equals(upper(product(source).getBrandName()), upper(p.getBrandName()))) score += 2;
-        double ratio = p.getPrice() / product(source).getPrice();
-        if (ratio >= .4 && ratio <= 2.5) score += 1;
-        if (Double.isFinite(target.getTrendScore())) score += Math.min(100, Math.max(0, target.getTrendScore())) / 100;
-        return new Candidate(target, identity, targetProfile, score, reason);
     }
 
     private static String upper(String value) { return value == null ? "" : value.trim().toUpperCase(Locale.ROOT); }

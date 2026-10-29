@@ -47,7 +47,10 @@ export function useToggleArchive(trendId: string, onUnarchived?: () => void) {
     },
     onSuccess: (nowArchived) => {
       queryClient.setQueryData(["archiveStatus", trendId], nowArchived);
-      if (nowArchived) toast.success("Pinned to your archive");
+      if (nowArchived) {
+        toast.success("Pinned to your archive");
+        if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('trendxee:outfit-action', { detail: { trendId, type: 'SAVE' } }));
+      }
       else {
         toast("Removed from your archive");
         onUnarchived?.();
@@ -58,6 +61,7 @@ export function useToggleArchive(trendId: string, onUnarchived?: () => void) {
 }
 
 export function trackProductClick(trendId: string, source: "underdog" | "amazon" | "flipkart", url: string) {
+  if (source === 'underdog' && typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('trendxee:outfit-action', { detail: { trendId, type: 'SHOP_CLICK' } }));
   businessApiFetch("/api/analytics/click", {
     method: "POST",
     body: JSON.stringify({ trendId, source, url }),

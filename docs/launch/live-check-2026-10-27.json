@@ -1,0 +1,43 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "finalUrl": "https://www.trendxee.com/",
+    "contentType": "text/html; charset=utf-8",
+    "ogImage": null,
+    "twitterImage": null,
+    "description": "A scrapbook of India's rising fashion drops: jeans, bottoms, tees, outerwear, shoes, sportswear, anime, polos & regular, and caps & accessories, with the underdog brand behind each trend.",
+    "canonical": [],
+    "textPreview": null
+  },
+  {
+    "path": "/lanes",
+    "status": 200,
+    "finalUrl": "https://www.trendxee.com/lanes",
+    "contentType": "text/html; charset=utf-8",
+    "ogImage": null,
+    "twitterImage": null,
+    "description": "Every TrendXee lane in one place: jeans, bottoms, tees, outerwear, shoes, sportswear, anime, polos & regular, and caps & accessories, each read from live signals.",
+    "canonical": [],
+    "textPreview": null
+  },
+  {
+    "path": "/aesthetic/jeans",
+    "status": 200,
+    "finalUrl": "https://www.trendxee.com/aesthetic/jeans",
+    "contentType": "text/html; charset=utf-8",
+    "ogImage": null,
+    "twitterImage": null,
+    "description": "Baggy denim leads the way, with wide-leg, relaxed, bootcut and flared fits.",
+    "canonical": [],
+    "textPreview": null
+  },
+  {
+    "path": "/robots.txt",
+    "status": 404
+  },
+  {
+    "path": "/sitemap.xml",
+    "status": 404
+  }
+]

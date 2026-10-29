@@ -53,6 +53,7 @@ export function LaneCard({
             <Parallax depth={isShoeCategory(aesthetic.id) ? 0 : 5} bleed={!isShoeCategory(aesthetic.id)} className="absolute inset-0">
               {src ? <Img
                 src={src}
+                alt={`${laneLabel(aesthetic.name)} fashion${brand ? ` from ${brand}` : ""}`}
                 eager={eager}
                 fallbackLabel={laneLabel(aesthetic.name)}
                 className={`h-full w-full ${productImageFit(aesthetic.id)} ${isShoeCategory(aesthetic.id) ? "" : "group-hover/lane:scale-[1.03]"}`}

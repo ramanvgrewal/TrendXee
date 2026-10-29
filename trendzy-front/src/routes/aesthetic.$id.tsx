@@ -1,3 +1,4 @@
+import { laneSeo, notFoundSeo } from "@/lib/seo";
 import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, notFound, redirect, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
@@ -59,21 +60,9 @@ export const Route = createFileRoute("/aesthetic/$id")({
   // Keep the current grid and filter trigger visible during refinement, even on slow connections.
   pendingMs: Infinity,
   pendingComponent: LanePending,
-  head: ({ loaderData }) => {
-    const aesthetic = loaderData?.aesthetic;
-    const title = aesthetic ? `${laneLabel(aesthetic.name)} trends on TrendXee` : "Lane — TrendXee";
-    const description = aesthetic ? `${aesthetic.description}` : "A TrendXee lane of rising fits.";
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-    };
-  },
+  head: ({ loaderData, match }) => loaderData?.aesthetic
+    ? laneSeo(match.params.id, laneLabel(loaderData.aesthetic.name), loaderData.aesthetic.description, match.search)
+    : notFoundSeo(),
   component: LanePage,
   errorComponent: () => (
     <StateShell
@@ -132,7 +121,7 @@ function LaneHero({ aesthetic, index, image, firstDrop }: { aesthetic: Aesthetic
         exit={{ opacity: 0 }}
         transition={{ duration: 0.55, ease: ease.drift }}
       >
-        {image ? <Img src={image} priority className={`h-full w-full ${productImageFit(aesthetic.id)}`} /> : (
+        {image ? <Img src={image} alt={firstDrop?.products.underdog?.title || `${laneLabel(aesthetic.name)} on TrendXee`} priority className={`h-full w-full ${productImageFit(aesthetic.id)}`} /> : (
           <div className="grid h-full place-items-center bg-ink p-8 text-center text-on-scrim/75">
             <p className="font-display text-2xl italic">New finds are on the way.</p>
           </div>
@@ -454,30 +443,25 @@ function LaneFeed({
 }
 
 function LanePagination({ page, total, pending }: { page: number; total: number; pending: boolean }) {
-  const navigate = useNavigate({ from: Route.fullPath });
-  const go = (next: number) => {
-    if (pending || next === page || next < 1 || next > total) return;
-    void navigate({
-      search: (previous) => ({ ...previous, page: next > 1 ? next : undefined, trend: undefined }),
-      resetScroll: false,
-      viewTransition: false,
-    });
+  const search = Route.useSearch();
+  const { id } = Route.useParams();
+  const control = "inline-flex h-11 items-center justify-center gap-2 rounded-full px-4 text-xs font-semibold transition-colors hover:bg-ink/[0.06]";
+  const link = (next: number, label: string, children: React.ReactNode, className: string, rel?: string) => {
+    const disabled = pending || next < 1 || next > total || next === page;
+    return disabled ? <span aria-label={label} aria-current={next === page ? "page" : undefined} className={`${className} ${next === page ? "" : "opacity-35"}`}>{children}</span>
+      : <Link to="/aesthetic/$id" params={{ id }} search={{ ...search, page: next > 1 ? next : undefined, trend: undefined }} aria-label={label} rel={rel} resetScroll={false} viewTransition={false} className={className}>{children}</Link>;
   };
-  const control = "inline-flex h-11 items-center justify-center gap-2 rounded-full px-4 text-xs font-semibold transition-colors hover:bg-ink/[0.06] disabled:opacity-35 disabled:hover:bg-transparent";
   return (
     <nav aria-label="Product pages" className="mx-auto mt-10 max-w-lg border-t border-border pt-5 sm:mt-12">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <button type="button" aria-label="Previous page" disabled={pending || page <= 1} onClick={() => go(page - 1)} className={`${control} justify-self-start`}><span aria-hidden>←</span> Previous</button>
+        {link(page - 1, "Previous page", <><span aria-hidden>←</span> Previous</>, `${control} justify-self-start`, "prev")}
         <p className="text-xs text-ink/55" aria-live="polite">Page {page} of {total}</p>
-        <button type="button" aria-label="Next page" disabled={pending || page >= total} onClick={() => go(page + 1)} className={`${control} justify-self-end`}>Next <span aria-hidden>→</span></button>
+        {link(page + 1, "Next page", <>Next <span aria-hidden>→</span></>, `${control} justify-self-end`, "next")}
       </div>
       <div className="mt-2 flex flex-wrap justify-center gap-1">
         {lanePageItems(page, total).map((item, index) => item === "gap" ? (
           <span key={`gap-${index}`} aria-hidden className="grid h-11 w-5 place-items-center text-ink/45">…</span>
-        ) : (
-          <button key={item} type="button" aria-label={`Page ${item}`} aria-current={item === page ? "page" : undefined} disabled={pending} onClick={() => go(item)}
-            className={`grid size-11 place-items-center rounded-full text-sm font-semibold transition-colors disabled:cursor-wait ${item === page ? "bg-ink text-paper" : "text-ink/65 hover:bg-ink/[0.06] hover:text-ink"}`}>{item}</button>
-        ))}
+        ) : <span key={item}>{link(item, `Page ${item}`, item, `grid size-11 place-items-center rounded-full text-sm font-semibold transition-colors ${item === page ? "bg-ink text-paper" : "text-ink/65 hover:bg-ink/[0.06] hover:text-ink"}`)}</span>)}
       </div>
     </nav>
   );

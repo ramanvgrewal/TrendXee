@@ -21,9 +21,15 @@ public class PairingController {
             @PathVariable String id,
             @RequestParam(defaultValue = "ALL") String audience,
             @RequestParam(required = false) String sourceIdentity,
+            @RequestParam(required = false) String lookId,
+            @RequestParam(required = false) String swapRole,
+            @RequestParam(required = false) java.util.List<String> exclude,
             ServerHttpResponse response) {
         response.getHeaders().setCacheControl(CacheControl.noStore());
-        return pairingService.pairings(id, audience, sourceIdentity)
+        return (lookId == null && swapRole == null
+                ? pairingService.pairings(id, audience, sourceIdentity)
+                : pairingService.pairings(id, audience, sourceIdentity, lookId, swapRole,
+                    exclude == null ? java.util.List.of() : exclude, null))
                 .map(result -> ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(result));
     }
 
