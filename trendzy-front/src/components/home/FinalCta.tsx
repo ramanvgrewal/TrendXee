@@ -63,6 +63,9 @@ export function FinalCta({ rotationMap }: { rotationMap: Record<string, Rotation
             <Link to="/about" className="hit ed-link-rest text-sm font-semibold text-ink/75 hover:text-clay">
               Why we built TrendXee
             </Link>
+            <Link to="/trending-streetwear" className="hit ed-link-rest text-sm font-semibold text-ink/75 hover:text-clay">
+              Discover Indian streetwear
+            </Link>
           </div>
         </div>
 

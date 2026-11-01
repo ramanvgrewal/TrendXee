@@ -49,7 +49,7 @@ export function Hero({ lead, dateKey }: { lead?: RotationItem; dateKey: string }
         >
           <div className="enter-fade flex flex-wrap items-center gap-x-2 gap-y-1 eyebrow text-[10px] text-ink/70 sm:gap-3 sm:text-[11.5px]" style={d(620)}>
             <span className="inline-block size-1.5 rounded-full bg-clay" />
-            The daily board <span className="text-ink/30">/</span> {indiaDateLabel(new Date(`${dateKey}T12:00:00+05:30`))}
+            TrendXee · Indian fashion discovery <span className="text-ink/30">/</span> {indiaDateLabel(new Date(`${dateKey}T12:00:00+05:30`))}
           </div>
 
           <Parallax depth={1.5} follow>
@@ -68,7 +68,7 @@ export function Hero({ lead, dateKey }: { lead?: RotationItem; dateKey: string }
           </Parallax>
 
           <p className="enter-fade mt-5 max-w-[36rem] text-[16px] leading-[1.75] text-ink/70 sm:mt-7 sm:text-[17px] lg:mt-8 lg:text-[18px]" style={d(420)}>
-            TrendXee puts emerging indie clothing brands in focus, bringing together Instagram hype, trust signals and product details to help you discover the labels behind your next fit.
+            Discover fashion trends and emerging Indian indie brands on TrendXee. Explore tees, denim, streetwear and more, with Instagram hype, brand details and links to the labels behind your next fit.
           </p>
 
           <div className="enter-fade mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 sm:mt-8 lg:mt-10" style={d(520)}>

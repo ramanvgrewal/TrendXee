@@ -26,7 +26,7 @@ import { laneLabel } from "@/lib/format";
 type NavKey = "lanes" | "about" | "archive" | "journal" | null;
 
 function activeKey(pathname: string): NavKey {
-  if (pathname === "/lanes" || pathname.startsWith("/aesthetic/")) return "lanes";
+  if (pathname === "/lanes" || pathname === "/trending-streetwear" || pathname.startsWith("/aesthetic/")) return "lanes";
   if (pathname === "/about") return "about";
   if (pathname === "/archive") return "archive";
   if (pathname.startsWith("/journal")) return "journal";
@@ -219,6 +219,11 @@ function LanesMenu({ active }: { active: boolean }) {
             See every lane <span aria-hidden>→</span>
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild className="rounded-xl focus:bg-ink/[0.05]">
+          <Link to="/trending-streetwear" className="flex items-center justify-between px-3 py-2 text-[13px] font-semibold">
+            Discover Indian streetwear <span aria-hidden>→</span>
+          </Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -326,6 +331,7 @@ function MobileMenu({
           <ul className="mt-8 space-y-1">
             {[
               { to: "/lanes" as const, label: "All lanes" },
+              { to: "/trending-streetwear" as const, label: "Discover Indian streetwear" },
               { to: "/" as const, hash: "engine", label: "How the engine works" },
               { to: "/about" as const, label: "About TrendXee" },
               { to: "/journal" as const, label: "The Journal" },

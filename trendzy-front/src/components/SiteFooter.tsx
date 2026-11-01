@@ -44,6 +44,11 @@ export function SiteFooter() {
           <p className="eyebrow text-ink/70">TrendXee</p>
           <ul className="mt-4 space-y-2.5">
             <li>
+              <Link to="/trending-streetwear" className={linkClass}>
+                Discover streetwear
+              </Link>
+            </li>
+            <li>
               <Link to="/about" className={linkClass}>
                 About
               </Link>

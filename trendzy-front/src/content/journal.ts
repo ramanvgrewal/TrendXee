@@ -8,6 +8,7 @@ export type JournalSection = {
 export type JournalArticle = {
   slug: string;
   title: string;
+  seoTitle: string;
   excerpt: string;
   category: "Field notes" | "Style guide" | "Behind the board";
   publishedAt: string;
@@ -18,6 +19,7 @@ export type JournalArticle = {
   sections: JournalSection[];
   lane: string;
   laneLabel: string;
+  relatedLanes?: string[];
 };
 
 // Editorial content ships with the site. No storefront data or product records
@@ -26,6 +28,7 @@ export const journalArticles: JournalArticle[] = [
   {
     slug: "why-we-built-trendxee",
     title: "Good clothes. Smaller labels. Less searching.",
+    seoTitle: "Indian Indie Fashion, Easier to Discover",
     excerpt: "Why we built a discovery board for Indian indie fashion, and how to use it to find your next fit.",
     category: "Behind the board",
     publishedAt: "2026-10-27",
@@ -73,6 +76,7 @@ export const journalArticles: JournalArticle[] = [
   {
     slug: "how-to-style-baggy-jeans",
     title: "Baggy jeans, without overthinking the rest.",
+    seoTitle: "How to Style Baggy Jeans",
     excerpt: "A practical way to balance wider denim with tees, layers and shoes you already own.",
     category: "Style guide",
     publishedAt: "2026-10-27",
@@ -117,10 +121,12 @@ export const journalArticles: JournalArticle[] = [
     ],
     lane: "jeans",
     laneLabel: "Find your denim",
+    relatedLanes: ["jeans"],
   },
   {
     slug: "choosing-a-tee-for-layering",
     title: "The quiet tee that makes a jacket work.",
+    seoTitle: "How to Choose a T-Shirt for Layering",
     excerpt: "Neckline, sleeve, length and fabric: four things to check when choosing a base layer.",
     category: "Field notes",
     publishedAt: "2026-10-27",
@@ -164,6 +170,7 @@ export const journalArticles: JournalArticle[] = [
     ],
     lane: "polos",
     laneLabel: "Explore everyday layers",
+    relatedLanes: ["tees", "outerwear", "polos"],
   },
 ];
 

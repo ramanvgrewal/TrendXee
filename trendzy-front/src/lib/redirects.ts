@@ -3,6 +3,8 @@ import { SITE_ORIGIN } from "./seo";
 const aliases: Record<string, string> = {
   "/blog": "/journal", "/aesthetic/shoes": "/aesthetic/sneakers",
   "/aesthetic/accessories": "/aesthetic/caps", "/aesthetic/polos-and-regular": "/aesthetic/polos",
+  // The original TEES lane used "upper" before the category rename.
+  "/aesthetic/upper": "/aesthetic/tees",
 };
 
 /** Normalize known aliases, never send unknown URLs to the home page. */

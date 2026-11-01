@@ -18,6 +18,7 @@ import { Route as LanesRouteImport } from './routes/lanes'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TrendingStreetwearRouteImport } from './routes/trending-streetwear'
 import { Route as AestheticIdRouteImport } from './routes/aesthetic.$id'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as JournalIndexRouteImport } from './routes/journal.index'
@@ -68,6 +69,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrendingStreetwearRoute = TrendingStreetwearRouteImport.update({
+  id: '/trending-streetwear',
+  path: '/trending-streetwear',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AestheticIdRoute = AestheticIdRouteImport.update({
   id: '/aesthetic/$id',
   path: '/aesthetic/$id',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/trending-streetwear': typeof TrendingStreetwearRoute
   '/aesthetic/$id': typeof AestheticIdRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/journal/$slug': typeof JournalSlugRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/trending-streetwear': typeof TrendingStreetwearRoute
   '/aesthetic/$id': typeof AestheticIdRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/journal/$slug': typeof JournalSlugRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/trending-streetwear': typeof TrendingStreetwearRoute
   '/aesthetic/$id': typeof AestheticIdRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/journal/$slug': typeof JournalSlugRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
+    | '/trending-streetwear'
     | '/aesthetic/$id'
     | '/auth/callback'
     | '/journal/$slug'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
+    | '/trending-streetwear'
     | '/aesthetic/$id'
     | '/auth/callback'
     | '/journal/$slug'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
+    | '/trending-streetwear'
     | '/aesthetic/$id'
     | '/auth/callback'
     | '/journal/$slug'
@@ -193,6 +205,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  TrendingStreetwearRoute: typeof TrendingStreetwearRoute
   AestheticIdRoute: typeof AestheticIdRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   JournalSlugRoute: typeof JournalSlugRoute
@@ -264,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trending-streetwear': {
+      id: '/trending-streetwear'
+      path: '/trending-streetwear'
+      fullPath: '/trending-streetwear'
+      preLoaderRoute: typeof TrendingStreetwearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/aesthetic/$id': {
       id: '/aesthetic/$id'
       path: '/aesthetic/$id'
@@ -305,6 +325,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  TrendingStreetwearRoute: TrendingStreetwearRoute,
   AestheticIdRoute: AestheticIdRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   JournalSlugRoute: JournalSlugRoute,

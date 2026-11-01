@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
     return { rotationMap, dateKey, ...buildDailyBoard(rotationMap, dateKey) };
   },
   staleTime: 0,
-  head: () => pageSeo({ title: "TrendXee — Fits before they go viral", description: "Discover Indian indie fashion: tees, baggy jeans, outerwear, shoes and more. Explore brands, compare hype signals and find pieces that work together.", path: "/" }),
+  head: () => pageSeo({ title: "TrendXee — Discover Fashion Trends & Indian Indie Brands", description: "Discover fashion trends and emerging Indian indie brands on TrendXee. Explore oversized tees, baggy jeans, streetwear and fresh drops from the labels behind them.", path: "/" }),
   component: Home,
 });
 

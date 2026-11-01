@@ -10,7 +10,7 @@ export const Route = createFileRoute("/lanes")({
   loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
   loader: async ({ deps }) => ({ rotationMap: await fetchLaneRotations(deps.audience) }),
   staleTime: LANE_STALE_TIME,
-  head: () => pageSeo({ title: "All nine fashion lanes — TrendXee", description: "Browse tees, outerwear, jeans, bottoms, anime, shoes, sportswear, polos & regular and accessories from Indian fashion brands.", path: "/lanes" }),
+  head: () => pageSeo({ title: "Explore Clothing, Shoes & Accessories — TrendXee", description: "Explore clothing, shoes and accessories with Indian indie labels in focus. Browse tees, jeans, outerwear, sportswear and more across nine fashion categories.", path: "/lanes" }),
   component: LanesPage,
 });
 
@@ -29,8 +29,8 @@ function LanesPage() {
           </h1>
         </div>
         <p className="enter-fade lede max-w-md lg:col-span-4" style={{ "--d": "200ms" } as React.CSSProperties}>
-          Nine worlds, each read from what people are posting right now. Open one to see its drops, why they're
-          climbing, and the small brands making them first.
+          Clothing, shoes and accessories, with Indian indie labels in focus. Pick a lane to explore its
+          products, compare brand details and find a piece for your next fit.
         </p>
       </div>
 

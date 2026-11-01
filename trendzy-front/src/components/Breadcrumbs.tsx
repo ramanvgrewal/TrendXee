@@ -2,7 +2,7 @@ import { useLocation, useRouterState } from "@tanstack/react-router";
 import { breadcrumbSchema, jsonLd, type Crumb } from "@/lib/seo";
 import { laneLabel } from "@/lib/format";
 
-const pageNames: Record<string, string> = { "/lanes": "All lanes", "/about": "About", "/journal": "Journal", "/contact": "Contact", "/privacy": "Privacy", "/terms": "Terms of use", "/archive": "Your archive" };
+const pageNames: Record<string, string> = { "/lanes": "All lanes", "/trending-streetwear": "Discover streetwear", "/about": "About", "/journal": "Journal", "/contact": "Contact", "/privacy": "Privacy", "/terms": "Terms of use", "/archive": "Your archive" };
 
 export function Breadcrumbs() {
   const { pathname } = useLocation();

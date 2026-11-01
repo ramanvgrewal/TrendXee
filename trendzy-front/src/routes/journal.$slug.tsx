@@ -14,7 +14,7 @@ export const Route = createFileRoute("/journal/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) return notFoundSeo();
     const { article } = loaderData;
-    const seo = pageSeo({ title: `${article.title} — TrendXee Journal`, description: article.excerpt, path: `/journal/${article.slug}`, type: "article" });
+    const seo = pageSeo({ title: `${article.seoTitle} — TrendXee Journal`, description: article.excerpt, path: `/journal/${article.slug}`, type: "article" });
     return { ...seo, meta: [...seo.meta, { name: "author", content: article.author }, { property: "article:published_time", content: `${article.publishedAt}T00:00:00+05:30` }] };
   },
   component: JournalArticlePage,

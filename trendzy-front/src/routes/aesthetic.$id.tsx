@@ -15,6 +15,7 @@ import { laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { audienceLabel, normalizeAudienceFilter, type AudienceFilter } from "@/lib/audience";
 import { useAudience } from "@/components/AudienceFilter";
 import { LaneFilters } from "@/components/LaneFilters";
+import { LaneReading } from "@/components/LaneReading";
 import { normalizeLaneFilters, normalizeLanePage, lanePageItems, type LaneFilters as Filters, type StyleOption } from "@/lib/lane-filters";
 import { CatalogRequestError } from "@/lib/api";
 import { cachedStyles, hasCatalogFailure, markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
@@ -92,6 +93,7 @@ function LanePage() {
       <LaneSwitcher activeId={aesthetic.id} />
       {/* Keep the feed mounted so filters retain focus while results change. */}
       <LaneFeed key={aesthetic.id} audience={audience} filters={filters} total={total} styles={styles} aesthetic={aesthetic} initialTrends={trends} page={page} failed={failed} />
+      {page === 1 && <LaneReading laneId={aesthetic.id} />}
     </div>
   );
 }

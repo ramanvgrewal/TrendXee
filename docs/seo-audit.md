@@ -3,9 +3,116 @@
 Audited on 29 October 2026. Results describe the local production build; they do
 not confirm the status of a hosted release.
 The owner confirmed that Google Search Console is already verified. Its account
-and indexing reports were not inspected during this audit.
+and indexing reports were not inspected during the initial 29 October audit.
+
+## Google account and live-site follow-up — 30 October 2026
+
+The verified Search Console domain property is `trendxee.com`.
+`https://www.trendxee.com/sitemap.xml` was submitted successfully on 30 October;
+Google immediately reported **Success** and **19 discovered pages**. URL
+Inspection confirmed that the canonical www homepage is already indexed, with
+crawling and indexing allowed. A fresh homepage indexing request was accepted
+and added to Google's priority crawl queue.
+
+The overview reported 15 indexed URLs and 152 search clicks. The Page Indexing
+report was last updated on 23 October, so its 13 excluded URLs are historical
+evidence rather than a current count of broken public pages: five 404s, five
+redirects, one duplicate without a selected canonical, and two crawled URLs not
+currently indexed. The homepage inspection's older 29 October crawl did not
+record a declared canonical; the current live HTML contains the correct
+`https://www.trendxee.com/` canonical.
+
+The live robots file and sitemap return 200. All 19 sitemap URLs were checked:
+each returned 200, an indexable robots directive, a self canonical, a unique
+title and one H1. The homepage renders its content and Organization/WebSite
+structured data on the server. The HTTPS apex permanently redirects to www.
+
+GA4's stream uses `G-6RWGTJR8LM`, matching the global production tag. Enhanced
+Measurement is enabled. A public browser check sent one page view on initial
+load and one on normal navigation to About, with successful Google collection
+responses and no duplicate page views. The signed-in Realtime report also showed
+one recent active user with `page_view`, `session_start` and `first_visit` events.
+The stream settings' older "no data in 48 hours" warning did not reflect this
+Realtime receipt. This confirms current collection, not historical traffic
+completeness or conversion tracking.
+
+## Search-discovery improvements prepared after the follow-up
+
+These source changes require a frontend release; the Google account actions
+above are already complete.
+
+- Give the homepage a descriptive search title identifying TrendXee as Indian
+  indie fashion discovery while keeping its visible slogan.
+- Describe clothing, shoes and accessories in the lanes index title and intro.
+- Give the three existing Journal articles concise search titles while keeping
+  their editorial headings and original publication dates.
+- Add ordinary crawlable links from relevant clothing lanes to the existing
+  denim and layering guides, on the first page of each lane.
+- Permanently redirect the historical `/aesthetic/upper` lane to
+  `/aesthetic/tees`, retaining query parameters. Repository history confirms
+  this was a rename of the TEES lane. `/aesthetic/accessories` already redirects
+  correctly to `/aesthetic/caps`. Retired streetwear URLs without an equivalent,
+  literal route templates such as `/aesthetic/$id`, and the auth service root
+  are not redirected to unrelated catalog pages.
+
+Validation for this update: all 43 frontend tests, TypeScript checks and the
+production build passed. The built site was checked with isolated API fixtures
+across 11 rendered routes. The redirect returned HTTP 301 and retained its query;
+the new guide links were present in the initial server HTML. Guide navigation
+worked at 1440, 390 and 320 px without horizontal overflow or browser page errors.
+The preview made no production API or database requests. The existing build
+warnings about Vite/Nitro compatibility, client chunk size and dependency
+directives did not prevent the build.
+
+For brand consistency, use **TrendXee** and `https://www.trendxee.com` on owned
+profiles and future launch copy. Older public launch copy used "TrendZee" for
+the website; that name now belongs to the separate local processing pipeline.
+No social profiles or posts were changed by this audit.
+
+Google controls indexing and rankings. A successful sitemap submission or crawl
+request does not guarantee a position for the brand query or other searches.
 
 ## Coverage
+
+### Search visibility follow-up — 1 November 2026
+
+An actual Google results check for `trendxee` with English/India settings showed
+"These are results for trendzee" and offered "Search instead for trendxee".
+The displayed results were for unrelated Trendzee businesses. This spelling
+correction is a concrete brand-discovery obstacle; it does not mean that the
+TrendXee homepage is absent from Google's index. The exact-spelling follow-up
+encountered an unusual-traffic check, which was not bypassed, so an exact-query
+rank was not established.
+
+The live homepage still used the old slogan title, and
+`/trending-streetwear` and `/aesthetic/upper` still returned 404. The changes
+prepared above had not reached production at the time of this check.
+
+The expanded update gives the homepage the title **TrendXee — Discover Fashion
+Trends & Indian Indie Brands**, adds explicit visible TrendXee identity and a
+clear fashion-discovery introduction, and adds `/trending-streetwear` with the
+title **Discover Trending Streetwear Brands in India | TrendXee**. The new page
+contains five relevant clothing/accessory lanes, current catalog imagery when
+available, practical buying guidance, and the existing denim/layering guides.
+It is linked from the homepage, footer, desktop lanes menu and mobile menu, has
+a matching breadcrumb and canonical, and brings the sitemap to 20 public URLs.
+These titles and descriptions express the desired listing; Google can choose
+different wording and rankings.
+
+Target the clear fashion intent in "discover fashion trends in India" and
+"Indian streetwear brands" alongside the unique **TrendXee** brand. Avoid
+creating near-duplicate pages for every variation of "discover trends". Use the
+same TrendXee spelling and canonical website address across owned public profiles.
+
+Expanded-update validation passed: 43 frontend tests, TypeScript, the production
+build, and all 20 sitemap pages checked over HTTP with JavaScript disabled.
+Each page returned 200 with a unique title, one H1, an indexable robots value and
+a matching canonical. The streetwear page's five category links, two guide
+links and breadcrumb render on the server. Desktop navigation and mobile menu
+navigation worked at 1440, 390 and 320 px without page errors or horizontal
+overflow. These checks use isolated API fixtures and do not write to a database.
+
+### Initial 29 October coverage
 
 | # | Item | Result |
 | --- | --- | --- |
