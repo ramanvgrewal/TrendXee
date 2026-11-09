@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, m, useInView } from "framer-motion";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/motion/hooks";
 import { styleSearch, type StyleOption } from "@/lib/lane-filters";
@@ -12,8 +11,7 @@ import { laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { Img } from "@/components/Img";
 import { useAudience } from "@/components/AudienceFilter";
 
-const SLIDE_INTERVAL = 5_000;
-const controlClass = "grid size-10 place-items-center rounded-full text-on-scrim hover:bg-scrim focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-scrim";
+const SLIDE_INTERVAL = 2_000;
 
 type LaneCardProps = {
   aesthetic: Aesthetic;
@@ -43,7 +41,6 @@ function LaneCardSlideshow({
   const inView = useInView(ref, { amount: 0.5 });
   const reduced = usePrefersReducedMotion();
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -61,24 +58,16 @@ function LaneCardSlideshow({
   }, []);
 
   useEffect(() => {
-    if (length < 2 || !inView || !visible || reduced || paused || hovered || focused) return;
+    if (length < 2 || !inView || !visible || reduced || hovered || focused) return;
     const timer = window.setTimeout(() => setCurrent((value) => (value + 1) % length), SLIDE_INTERVAL);
     return () => window.clearTimeout(timer);
-  }, [current, focused, hovered, inView, length, paused, reduced, visible]);
-
-  const step = (direction: number) => {
-    setCurrent((value) => (value + direction + length) % length);
-  };
+  }, [current, focused, hovered, inView, length, reduced, visible]);
 
   return (
     <m.div
       ref={ref}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
-      }}
       className={`group/lane relative min-h-[26rem] ${className}`}
       whileHover={lift.card}
       whileTap={lift.press}
@@ -89,6 +78,8 @@ function LaneCardSlideshow({
         params={{ id: aesthetic.id }}
         search={subcategory ? styleSearch(subcategory) : undefined}
         aria-label={subcategory ? "Explore " + label : undefined}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         viewTransition={!subcategory}
         data-cursor="explore"
         data-cursor-label="Enter"
@@ -153,24 +144,6 @@ function LaneCardSlideshow({
           </div>
         </PointerScope>
       </Link>
-      {length > 1 && (
-        <div role="group" aria-label={label + " featured products"} className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-scrim/75 p-1 text-on-scrim">
-          <button type="button" className={controlClass} aria-label="Previous featured product" onClick={() => step(-1)}>
-            <ChevronLeft size={17} aria-hidden />
-          </button>
-          <span className="min-w-[2.25rem] text-center text-xs tabular-nums">
-            {current + 1}/{length}
-          </span>
-          <button type="button" className={controlClass} aria-label="Next featured product" onClick={() => step(1)}>
-            <ChevronRight size={17} aria-hidden />
-          </button>
-          {!reduced && (
-            <button type="button" className={controlClass} aria-label={paused ? "Play slideshow" : "Pause slideshow"} onClick={() => setPaused((value) => !value)}>
-              {paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
-            </button>
-          )}
-        </div>
-      )}
     </m.div>
   );
 }
