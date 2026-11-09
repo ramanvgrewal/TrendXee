@@ -47,9 +47,9 @@ public final class CatalogStyles {
                     style("overshirts", "Overshirts", "overshirt|shacket"),
                     style("jackets", "Jackets & layers", ".*"));
             case "BOTTOMS" -> List.of(
+                    style("shorts", "Shorts", "\\bshorts\\b"),
                     style("cargo", "Cargo pants", "cargo"),
                     style("sweats", "Joggers & sweats", "jogger|sweat|track"),
-                    style("shorts", "Shorts", "short"),
                     style("skirts", "Skirts & skorts", "skirt|skort"),
                     style("trousers", "Trousers", ".*"));
             case "ANIME" -> List.of(
@@ -125,12 +125,14 @@ public final class CatalogStyles {
         List<String> displayOrder = switch (category.trim().toUpperCase(Locale.ROOT)) {
             case "JEANS" -> List.of("baggy", "straight", "bootcut", "cargo", "mom");
             case "TEES" -> List.of("graphic", "oversized", "washed", "tops", "classic", "polos", "regular");
+            case "BOTTOMS" -> List.of("cargo", "sweats", "shorts", "skirts", "trousers");
             case "ANIME" -> List.of("tees", "hoodies", "sweats", "jackets", "jerseys");
             case "POLOS" -> List.of("polos", "oversized", "performance", "regular");
             default -> groups(category).stream().map(Style::id).toList();
         };
         return groups(category).stream().filter(group -> isRestricted(category) || available.contains(group.id())
                         || ("TEES".equalsIgnoreCase(category.trim()) && List.of("polos", "regular").contains(group.id()))
+                        || ("BOTTOMS".equalsIgnoreCase(category.trim()) && group.id().equals("shorts"))
                         || ("OUTERWEAR".equalsIgnoreCase(category.trim()) && group.id().equals("knitwear")))
                 .sorted(Comparator.comparingInt(group -> displayOrder.indexOf(group.id())))
                 .map(group -> new Option(group.id(), group.label())).toList();

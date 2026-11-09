@@ -45,6 +45,13 @@ class CatalogStylesTest {
                 CatalogStyles.options("CAPS", List.of()).stream().map(CatalogStyles.Option::id).toList());
     }
 
+    @Test void shortsHaveASeparateBottomsLaneBeforeIngestion() {
+        assertEquals(List.of(new CatalogStyles.Option("shorts", "Shorts")), CatalogStyles.options("BOTTOMS", List.of()));
+        assertEquals("shorts", CatalogStyles.classify("BOTTOMS", "Cargo Shorts"));
+        assertEquals("shorts", CatalogStyles.classify("BOTTOMS", "Track Shorts"));
+        assertEquals("sweats", CatalogStyles.classify("BOTTOMS", "Short Inseam Trackpants"));
+    }
+
     @Test void shirtsUseBroadStylesAndCheckTheActualProductBeforePagination() {
         assertEquals("printed", CatalogStyles.classify("SHIRTS", "Ajrakh Printed Shirt"));
         assertEquals("printed", CatalogStyles.classify("SHIRTS", "Block-Printed Shirt"));
