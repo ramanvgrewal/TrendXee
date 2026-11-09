@@ -96,14 +96,12 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
           className="no-scrollbar mt-8 flex snap-x snap-mandatory scroll-px-5 gap-5 overflow-x-auto px-5 pb-6 sm:scroll-px-8 sm:px-8"
         >
           {aesthetics.map((aesthetic, i) => {
-            const first = rotationMap[aesthetic.id]?.[0];
             return (
               <LaneCard
                 key={aesthetic.id}
                 aesthetic={aesthetic}
                 index={i}
-                image={first?.image}
-                brand={first?.brand}
+                products={rotationMap[aesthetic.id]}
                 className="h-[min(68svh,560px)] w-[78vw] shrink-0 snap-start sm:w-[min(46vw,400px)] lg:h-[min(54svh,560px)] lg:w-[min(30vw,420px)]"
               />
             );

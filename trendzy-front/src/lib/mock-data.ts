@@ -32,13 +32,11 @@ export interface ProductMatch {
   audience?: ProductAudience;
 }
 
-export interface ProductTriad {
+export interface BrandProducts {
   underdog?: ProductMatch;
-  amazon?: ProductMatch;
-  flipkart?: ProductMatch;
 }
 
-export interface SignalProduct extends ProductTriad {
+export interface SignalProduct extends BrandProducts {
   signalId: string;
   authorUsername: string;
   queryUsed: string;
@@ -63,7 +61,7 @@ export interface Trend {
   totalSignals: number;
   supportingSignals: string[];
   enrichmentStatus: "PENDING" | "IN_PROGRESS" | "COMPLETED";
-  products: ProductTriad;
+  products: BrandProducts;
   signalProducts: SignalProduct[];
   estimatedPrice: number;
   lastUpdatedAt: string;
@@ -186,7 +184,6 @@ export const trends: Trend[] = [
       "Loose carpenter jeans in dusty mid-wash indigo are eating the fit-check feed this week. Creators are stacking them over chunky sneakers with boxy graphic tees — the silhouette reads skate-shop meets 2003 Y2K, not TikTok-core Y2K. The winning cut sits low on the hips, breaks hard at the ankle, and always shows a hammer loop.",
     whyTrending: [
       "3 top creators posted haul reels in the last 7 days.",
-      "Amazon India search up 68% month-over-month.",
     ],
     indiaRelevant: true,
     totalSignals: 214,
@@ -202,22 +199,6 @@ export const trends: Trend[] = [
         price: 3499,
         currency: "₹",
         imageUrl: "https://images.unsplash.com/photo-1584865288642-42078afe6942?w=800&q=80",
-        shopUrl: "#",
-      },
-      amazon: {
-        brandName: "Levi's",
-        title: "568 Loose Straight Carpenter Jean — Stonewash",
-        price: 2799,
-        currency: "₹",
-        imageUrl: "https://images.unsplash.com/photo-1602293589930-45aad59ba3ab?w=800&q=80",
-        shopUrl: "#",
-      },
-      flipkart: {
-        brandName: "Roadster",
-        title: "Baggy Fit Cotton Carpenter Jeans — Light Blue",
-        price: 1499,
-        currency: "₹",
-        imageUrl: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&q=80",
         shopUrl: "#",
       },
     },
@@ -249,22 +230,6 @@ export const trends: Trend[] = [
         price: 1899,
         currency: "₹",
         imageUrl: "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=80",
-        shopUrl: "#",
-      },
-      amazon: {
-        brandName: "H&M",
-        title: "Boxy Fit Washed Graphic T-Shirt — Vintage Blue",
-        price: 999,
-        currency: "₹",
-        imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
-        shopUrl: "#",
-      },
-      flipkart: {
-        brandName: "Bewakoof",
-        title: "Oversized Acid Wash Printed Tee — Faded Grey",
-        price: 649,
-        currency: "₹",
-        imageUrl: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80",
         shopUrl: "#",
       },
     },

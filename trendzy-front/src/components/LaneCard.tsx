@@ -1,5 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { m } from "framer-motion";
+import { AnimatePresence, m, useInView } from "framer-motion";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { usePrefersReducedMotion } from "@/motion/hooks";
+import type { RotationItem } from "@/lib/lanes";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { lift, spring } from "@/motion/tokens";
 import type { Aesthetic } from "@/lib/mock-data";
@@ -7,36 +11,74 @@ import { laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { Img } from "@/components/Img";
 import { useAudience } from "@/components/AudienceFilter";
 
-/**
- * A lane as a destination: oversized index numeral, the lane's own photo,
- * its name set large. Hover lifts the card, drifts the photo against the
- * pointer and reveals the "enter" affordance. The photo carries a
- * view-transition name so it can travel into the lane page's hero.
- */
-export function LaneCard({
-  aesthetic,
-  index,
-  image,
-  brand,
-  className = "",
-  eager = false,
-}: {
+const SLIDE_INTERVAL = 5_000;
+const controlClass = "grid size-10 place-items-center rounded-full text-on-scrim hover:bg-scrim focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-scrim";
+
+type LaneCardProps = {
   aesthetic: Aesthetic;
   index: number;
-  image?: string;
-  brand?: string;
+  products?: RotationItem[];
   className?: string;
   eager?: boolean;
-}) {
+};
+
+export function LaneCard({ products, ...props }: LaneCardProps) {
+  const slides = products?.slice(0, 5) ?? [];
+  const key = JSON.stringify(slides.map(({ id, image }) => [id, image]));
+  return <LaneCardSlideshow key={key} slides={slides} {...props} />;
+}
+
+function LaneCardSlideshow({
+  aesthetic,
+  index,
+  slides,
+  className = "",
+  eager = false,
+}: Omit<LaneCardProps, "products"> & { slides: RotationItem[] }) {
   const audience = useAudience();
-  const src = image || (audience === "ALL" ? aesthetic.heroImage : "");
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { amount: 0.5 });
+  const reduced = usePrefersReducedMotion();
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const { length } = slides;
+  const slide = slides[current];
+  const brand = slide?.brand;
+  const label = laneLabel(aesthetic.name);
+  const src = slide?.image || (audience === "ALL" ? aesthetic.heroImage : "");
+
+  useEffect(() => {
+    const update = () => setVisible(document.visibilityState === "visible");
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
+
+  useEffect(() => {
+    if (length < 2 || !inView || !visible || reduced || paused || hovered || focused) return;
+    const timer = window.setTimeout(() => setCurrent((value) => (value + 1) % length), SLIDE_INTERVAL);
+    return () => window.clearTimeout(timer);
+  }, [current, focused, hovered, inView, length, paused, reduced, visible]);
+
+  const step = (direction: number) => {
+    setCurrent((value) => (value + direction + length) % length);
+  };
 
   return (
     <m.div
+      ref={ref}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+      }}
       className={`group/lane relative min-h-[26rem] ${className}`}
       whileHover={lift.card}
       whileTap={lift.press}
-      tabIndex={-1}
       transition={spring.soft}
     >
       <Link
@@ -51,13 +93,24 @@ export function LaneCard({
           {/* Photo */}
           <div className="absolute inset-0" style={{ viewTransitionName: `lane-${aesthetic.id}` }}>
             <Parallax depth={isShoeCategory(aesthetic.id) ? 0 : 5} bleed={!isShoeCategory(aesthetic.id)} className="absolute inset-0">
-              {src ? <Img
-                src={src}
-                alt={`${laneLabel(aesthetic.name)} fashion${brand ? ` from ${brand}` : ""}`}
-                eager={eager}
-                fallbackLabel={laneLabel(aesthetic.name)}
-                className={`h-full w-full ${productImageFit(aesthetic.id)} ${isShoeCategory(aesthetic.id) ? "" : "group-hover/lane:scale-[1.03]"}`}
-              /> : <div className="h-full w-full bg-ink" />}
+              <AnimatePresence initial={false}>
+                <m.div
+                  key={src}
+                  className="absolute inset-0"
+                  initial={{ opacity: reduced ? 1 : 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: reduced ? 0 : 0.5 }}
+                >
+                  {src ? <Img
+                    src={src}
+                    alt={slide?.title || label + " fashion"}
+                    eager={eager || current > 0}
+                    fallbackLabel={label}
+                    className={`h-full w-full ${productImageFit(aesthetic.id)} ${isShoeCategory(aesthetic.id) ? "" : "group-hover/lane:scale-[1.03]"}`}
+                  /> : <div className="h-full w-full bg-ink" />}
+                </m.div>
+              </AnimatePresence>
             </Parallax>
           </div>
           {/* Shade only where type sits (bottom copy, top-left numeral) so the photo stays clean. */}
@@ -78,7 +131,7 @@ export function LaneCard({
                 <span className="truncate text-on-scrim/75">
                   {brand ? (
                     <>
-                      Today: <span className="font-display text-[13px] normal-case italic tracking-normal text-on-scrim">{brand}</span>
+                      Featured: <span className="font-display text-[13px] normal-case italic tracking-normal text-on-scrim">{brand}</span>
                     </>
                   ) : (
                     audience === "ALL" ? aesthetic.vibeTags.slice(0, 3).join(" · ") : "New finds soon"
@@ -95,6 +148,24 @@ export function LaneCard({
           </div>
         </PointerScope>
       </Link>
+      {length > 1 && (
+        <div role="group" aria-label={label + " featured products"} className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-scrim/75 p-1 text-on-scrim">
+          <button type="button" className={controlClass} aria-label="Previous featured product" onClick={() => step(-1)}>
+            <ChevronLeft size={17} aria-hidden />
+          </button>
+          <span className="min-w-[2.25rem] text-center text-xs tabular-nums">
+            {current + 1}/{length}
+          </span>
+          <button type="button" className={controlClass} aria-label="Next featured product" onClick={() => step(1)}>
+            <ChevronRight size={17} aria-hidden />
+          </button>
+          {!reduced && (
+            <button type="button" className={controlClass} aria-label={paused ? "Play slideshow" : "Pause slideshow"} onClick={() => setPaused((value) => !value)}>
+              {paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
+            </button>
+          )}
+        </div>
+      )}
     </m.div>
   );
 }

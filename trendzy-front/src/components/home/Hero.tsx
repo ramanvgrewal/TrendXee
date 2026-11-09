@@ -107,7 +107,7 @@ export function Hero({ lead, dateKey }: { lead?: RotationItem; dateKey: string }
                   data-cursor="view"
                   onClick={() => {
                     if (lead?.id && lead?.shopUrl) {
-                      trackProductClick(lead.id, "underdog", lead.shopUrl);
+                      trackProductClick(lead.id, lead.shopUrl);
                     }
                   }}
                   className="group block"

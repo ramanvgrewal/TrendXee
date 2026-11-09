@@ -3,13 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LaneCard } from "@/components/LaneCard";
 import { ScrollReveal } from "@/motion/ScrollReveal";
 import { aesthetics } from "@/lib/mock-data";
-import { fetchLaneRotations, LANE_STALE_TIME } from "@/lib/lanes";
+import { fetchLaneRotations, LANE_COVER_STALE_TIME } from "@/lib/lanes";
 import { normalizeAudienceFilter } from "@/lib/audience";
 
 export const Route = createFileRoute("/lanes")({
   loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
   loader: async ({ deps }) => ({ rotationMap: await fetchLaneRotations(deps.audience) }),
-  staleTime: LANE_STALE_TIME,
+  staleTime: LANE_COVER_STALE_TIME,
   head: () => pageSeo({ title: "Explore Clothing, Shoes & Accessories — TrendXee", description: "Explore clothing, shoes and accessories with Indian indie labels in focus. Browse tees, jeans, outerwear, sportswear and more across nine fashion categories.", path: "/lanes" }),
   component: LanesPage,
 });
@@ -36,14 +36,12 @@ function LanesPage() {
 
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {aesthetics.map((aesthetic, i) => {
-          const first = rotationMap?.[aesthetic.id]?.[0];
           return (
             <ScrollReveal key={aesthetic.id} index={i}>
               <LaneCard
                 aesthetic={aesthetic}
                 index={i}
-                image={first?.image}
-                brand={first?.brand}
+                products={rotationMap[aesthetic.id]}
                 eager={i < 3}
                 className="h-[min(72svh,560px)]"
               />

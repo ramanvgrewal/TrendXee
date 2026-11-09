@@ -10,7 +10,6 @@ function catalog() {
   return Object.fromEntries(['tees', 'jeans', 'shoes'].map(category => [category, Array.from({ length: 15 }, (_, n) => ({
     id: `${category}-${String(n).padStart(2, '0')}`, category, title: `${category} ${n}`,
     image: `https://images.example/${category}-${n}.jpg`, shopUrl: `https://brand.example/products/${category}-${n}`,
-    mainstream: { image: 'https://images.example/lookalike.jpg' },
   }))]));
 }
 
@@ -29,7 +28,7 @@ test('the hero changes on consecutive days while the board stays stable within e
     assert.deepEqual(board, buildDailyBoard(map, key));
     assert.deepEqual(board, buildDailyBoard(Object.fromEntries(Object.entries(map).reverse()), key));
     assert.notEqual(board.lead.id, previous); previous = board.lead.id;
-    const ids = [board.lead, ...board.dailyFive, ...board.story, board.underdog].filter(Boolean).map(item => item.id);
+    const ids = [board.lead, ...board.dailyFive, ...board.story].filter(Boolean).map(item => item.id);
     assert.equal(new Set(ids).size, ids.length);
     assert.equal(board.dailyFive.length, 5);
   }

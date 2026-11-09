@@ -25,7 +25,7 @@ public class ProductClick {
     
     private String userId;    // nullable for anonymous
     private String trendId;
-    private String source;    // "underdog", "amazon", "flipkart"
+    private String source;    // Direct brand product
     private String url;
     
     @Builder.Default

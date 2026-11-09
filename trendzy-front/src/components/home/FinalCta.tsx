@@ -11,7 +11,7 @@ import { laneLabel } from "@/lib/format";
 import { useAudience } from "@/components/AudienceFilter";
 
 /**
- * 07 — The close: one line revealed by scrolling, then the lanes as the way in.
+ * 06 — The close: one line revealed by scrolling, then the lanes as the way in.
  * On desktop, pointing at a lane brings its cover up in the print on the right
  * (the same covers the lane cards already loaded, so no new requests).
  */
@@ -27,7 +27,7 @@ export function FinalCta({ rotationMap }: { rotationMap: Record<string, Rotation
       <div className="section-pad mx-auto grid w-full max-w-[1440px] items-center gap-16 px-5 sm:px-8 lg:grid-cols-12">
         <div className="lg:col-span-7 xl:col-span-8">
           <p className="eyebrow text-ink/70">
-            <span className="text-clay-ink">07</span> · Start somewhere
+            <span className="text-clay-ink">06</span> · Start somewhere
           </p>
           <ScrollTextReveal
             as="h2"

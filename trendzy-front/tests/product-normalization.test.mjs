@@ -13,7 +13,7 @@ const source = (await readFile(new URL('../src/lib/api.ts', import.meta.url), 'u
 const { outputText } = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
 });
-const { normalizeTrend, normalizeProduct, getTrends } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
+const { normalizeTrend, normalizeProduct, getCatalogPage } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
 
 test('uncalculated Instagram hype cannot display a legacy score', () => {
   assert.equal(normalizeTrend({trendScore: 80}).trendScore, 0);
@@ -78,6 +78,16 @@ test('unknown and missing product audiences default to unisex and appear in both
   assert.equal(normalizeProduct({ title: 'Oversized tee' }).audience, 'UNISEX');
 });
 
+test('stored comparison products are omitted from normalized catalog data', () => {
+  const brandProduct = { title: 'Brand sneaker', shopUrl: 'https://brand.example/products/sneaker' };
+  const signal = { signalId: 'signal-1', underdog: brandProduct, comparison: { title: 'Other sneaker' } };
+  const trend = normalizeTrend({ signalProducts: signal });
+  assert.equal(trend.products.underdog.title, brandProduct.title);
+  assert.deepEqual(Object.keys(trend.products), ['underdog']);
+  assert.equal(trend.signalProducts[0].signalId, 'signal-1');
+  assert.equal('comparison' in trend.signalProducts[0], false);
+});
+
 test('audience travels with pagination and an older API cannot mix filtered products', async () => {
   const originalFetch = globalThis.fetch;
   const requests = [];
@@ -86,12 +96,12 @@ test('audience travels with pagination and an older API cannot mix filtered prod
     return { ok: true, json: async () => ['MEN', 'WOMEN', 'UNISEX', undefined].map((audience, index) => ({ id: `${index}`, signalProducts: { underdog: { title: `Fit ${index}`, audience } } })) };
   };
   try {
-    const filtered = await getTrends('jeans', 12, undefined, 2, 'WOMEN');
+    const { trends: filtered } = await getCatalogPage('jeans', 12, 2, 'WOMEN', {}, false);
     assert.deepEqual(filtered.map((trend) => trend.products.underdog.audience), ['WOMEN', 'UNISEX', 'UNISEX']);
     assert.equal(requests[0].searchParams.get('audience'), 'WOMEN');
     assert.equal(requests[0].searchParams.get('page'), '2');
-    assert.equal((await getTrends('jeans')).length, 4);
-    assert.equal(requests[1].searchParams.has('audience'), false);
+    assert.equal((await getCatalogPage('jeans', 12, 0, 'ALL', {}, false)).trends.length, 4);
+    assert.equal(requests[1].searchParams.get('audience'), 'ALL');
   } finally {
     globalThis.fetch = originalFetch;
   }

@@ -12,7 +12,7 @@ export function untilNextIndiaDay(now = new Date()) {
   return DAY_MS - ((now.getTime() + INDIA_OFFSET_MS) % DAY_MS);
 }
 
-function identity(item: RotationItem) {
+export function productIdentity(item: RotationItem) {
   try {
     const url = new URL(item.shopUrl);
     const path = url.pathname.replace(/\/collections\/[^/]+\/products\//, "/products/").replace(/\/$/, "");
@@ -37,19 +37,18 @@ function shuffle(items: RotationItem[], key: string) {
 export function buildDailyBoard(rotationMap: RotationMap, dateKey = indiaDateKey()) {
   const unique = new Map<string, RotationItem>();
   for (const item of Object.values(rotationMap).flat().filter((p) => p.id && p.image && p.shopUrl).sort((a, b) => a.id.localeCompare(b.id))) {
-    if (!unique.has(identity(item))) unique.set(identity(item), item);
+    if (!unique.has(productIdentity(item))) unique.set(productIdentity(item), item);
   }
   const all = [...unique.values()];
-  const covers = new Set(Object.values(rotationMap).flatMap((items) => items[0] ? [identity(items[0])] : []));
-  const alternatives = all.filter((item) => !covers.has(identity(item)));
+  const covers = new Set(Object.values(rotationMap).flatMap((items) => items[0] ? [productIdentity(items[0])] : []));
+  const alternatives = all.filter((item) => !covers.has(productIdentity(item)));
   const leadPool = alternatives.length >= 2 ? alternatives : all;
   const day = Math.floor(Date.parse(`${dateKey}T00:00:00Z`) / DAY_MS);
   const lead = leadPool.length ? leadPool[((day % leadPool.length) + leadPool.length) % leadPool.length] : undefined;
-  const remaining = shuffle(all.filter((item) => !lead || identity(item) !== identity(lead)), dateKey);
+  const remaining = shuffle(all.filter((item) => !lead || productIdentity(item) !== productIdentity(lead)), dateKey);
   const dailyFive = remaining.slice(0, 5);
-  const used = new Set([...(lead ? [identity(lead)] : []), ...dailyFive.map(identity), ...covers]);
-  const rest = remaining.filter((item) => !used.has(identity(item)));
+  const used = new Set([...(lead ? [productIdentity(lead)] : []), ...dailyFive.map(productIdentity), ...covers]);
+  const rest = remaining.filter((item) => !used.has(productIdentity(item)));
   const story = rest.slice(0, 7);
-  const underdog = rest.slice(7).find((item) => item.mainstream?.image);
-  return { lead, dailyFive, story, underdog };
+  return { lead, dailyFive, story };
 }

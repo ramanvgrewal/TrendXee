@@ -1,4 +1,4 @@
-import type { ProductMatch, ProductTriad, SignalProduct, Trend } from "@/lib/mock-data";
+import type { ProductMatch, BrandProducts, SignalProduct, Trend } from "@/lib/mock-data";
 import { matchesAudience, normalizeProductAudience, type AudienceFilter } from "@/lib/audience";
 
 const configuredBaseUrl =
@@ -67,14 +67,14 @@ export function normalizeTrendList(payload: unknown): Trend[] {
 
 export function normalizeTrend(raw: any): Trend {
   const signalProducts = normalizeSignalProducts(raw?.signalProducts);
-  const productTriad = normalizeProductTriad(raw?.products ?? raw?.signalProducts);
+  const products = normalizeBrandProducts(raw?.products ?? raw?.signalProducts);
   const category = String(raw?.aestheticId ?? raw?.category ?? "").trim().toLowerCase();
   const subcategory = raw?.subcategory;
 
   return {
     ...raw,
     id: String(raw?.id ?? ""),
-    name: productTriad.underdog?.title?.trim() || raw?.trendName || raw?.name || "Untitled trend",
+    name: products.underdog?.title?.trim() || raw?.trendName || raw?.name || "Untitled trend",
     aestheticId: category,
     subcategory: subcategory,
     trendScore: Number.isFinite(Number(raw?.brandHypeSignals?.followers)) && Number(raw?.brandHypeSignals?.followers) > 0
@@ -93,7 +93,7 @@ export function normalizeTrend(raw: any): Trend {
         ? raw.supportingSignalIds
         : [],
     enrichmentStatus: raw?.enrichmentStatus ?? "COMPLETED",
-    products: productTriad,
+    products,
     signalProducts,
     estimatedPrice: Number(raw?.estimatedPrice ?? 0),
     lastUpdatedAt: raw?.lastUpdatedAt ?? "",
@@ -159,45 +159,21 @@ export function normalizeProduct(raw: any): ProductMatch | undefined {
   return { ...raw, imageUrl: imageUrls[0] || "", imageUrls, audience: normalizeProductAudience(raw.audience) };
 }
 
-function normalizeProductTriad(raw: any): ProductTriad {
+function normalizeBrandProducts(raw: any): BrandProducts {
   return {
     underdog: normalizeProduct(raw?.underdog),
-    amazon: normalizeProduct(raw?.amazon),
-    flipkart: normalizeProduct(raw?.flipkart),
   };
 }
 
 function normalizeSignalProducts(raw: any): SignalProduct[] {
-  if (Array.isArray(raw)) return raw;
-  if (!raw || typeof raw !== "object") return [];
-  return [raw as SignalProduct];
-}
-
-export async function getTrends(
-  category: string,
-  size = 100,
-  subcategory?: string,
-  page = 0,
-  audience: AudienceFilter = "ALL",
-): Promise<Trend[]> {
-  const queryObj: Record<string, string> = {
-    category,
-    page: String(page),
-    size: String(size),
-    _t: String(Date.now()), // Force bypass of any browser/CDN cache (app caching happens in the router)
-  };
-  
-  if (subcategory) {
-    queryObj.subcategory = subcategory;
-  }
-  if (audience !== "ALL") queryObj.audience = audience;
-  
-  const params = new URLSearchParams(queryObj);
-  const response = await fetchCatalog(`/api/v2/trends?${params.toString()}`);
-
-  // Guard older responses too. Unknown fits are shared as unisex; a model's
-  // appearance in a product photo must not determine the product's audience.
-  return normalizeTrendList(await response.json()).filter((trend) => matchesAudience(trend.products.underdog?.audience, audience));
+  return (Array.isArray(raw) ? raw : [raw])
+    .filter((entry) => entry && typeof entry === "object")
+    .map(({ underdog, signalId, authorUsername, queryUsed }) => ({
+      underdog: normalizeProduct(underdog),
+      signalId,
+      authorUsername,
+      queryUsed,
+    }));
 }
 
 export class CatalogRequestError extends Error {

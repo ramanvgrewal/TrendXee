@@ -28,7 +28,6 @@ Missing optional collections are created when a feature first writes data.
 | `active` | Whether the product is on the public board |
 | `enrichmentStatus` | Pipeline state, independent of stock or hype |
 | `signalProducts.underdog` | Current selected retailer product |
-| `signalProducts.amazon`, `signalProducts.flipkart` | Optional marketplace comparisons |
 | `underdogProductsPool`, `recentUnderdogs`, `underdogPoolIndex` | Worker selection candidates and history |
 | `productSelectionFocus` | Fit, garment or activity constraints retained across refreshes |
 | `productRefreshedAt`, `lastProductRefreshAttemptAt`, `lastProductRefreshStatus` | Product refresh history |

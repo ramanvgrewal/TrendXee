@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ease, spring } from "@/motion/tokens";
-import type { ProductMatch, Trend } from "@/lib/mock-data";
+import type { Trend } from "@/lib/mock-data";
 import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
 import { adminActions, trackProductClick, useSession } from "@/lib/useTrendActions";
 import { TrustBadge } from "./TrustBadge";
@@ -236,13 +236,6 @@ function DetailBody({
   const price = formatPrice(underdog?.price, underdog?.currency);
   const off = discountPercent(underdog?.price, underdog?.originalPrice);
   const score = Math.round(trend.trendScore || 0);
-  const mainstream = (
-    [
-      { source: "amazon" as const, label: "Amazon", product: trend.products?.amazon },
-      { source: "flipkart" as const, label: "Flipkart", product: trend.products?.flipkart },
-    ] as const
-  ).filter((p): p is typeof p & { product: ProductMatch } => !!p.product?.shopUrl);
-
   const stagger = {
     hidden: { opacity: 0, y: 14 },
     show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: 0.12 + i * 0.05, duration: 0.45, ease: ease.drift } }),
@@ -360,7 +353,7 @@ function DetailBody({
                     href={underdog.shopUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => trackProductClick(trend.id, "underdog", underdog.shopUrl)}
+                    onClick={() => trackProductClick(trend.id, underdog.shopUrl)}
                     className={ctaClass("primary")}
                   >
                     Shop the underdog <CtaArrow className="-rotate-45" />
@@ -373,45 +366,10 @@ function DetailBody({
 
           {pairingSection}
 
-          {/* Mainstream lookalikes */}
-          {mainstream.length > 0 && (
-            <m.div custom={5} variants={stagger} initial="hidden" animate="show" className="mt-8">
-              <p className="eyebrow text-ink/70">Mainstream lookalikes</p>
-              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {mainstream.map(({ source, label, product }) => (
-                  <a
-                    key={source}
-                    href={product.shopUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackProductClick(trend.id, source, product.shopUrl)}
-                    data-cursor="view"
-                    data-cursor-label="Compare"
-                    className="group flex gap-3 rounded-xl p-2 ring-1 ring-border transition-colors hover:bg-cream/60"
-                  >
-                    <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-sand/40">
-                      {product.imageUrl && (
-                        <img src={product.imageUrl} alt="" loading="lazy" className="media-zoom h-full w-full object-cover group-hover:scale-[1.04]" />
-                      )}
-                    </div>
-                    <div className="min-w-0 py-0.5">
-                      <p className="eyebrow text-[11px] text-ink/70">{label}</p>
-                      <p className="mt-0.5 line-clamp-2 text-[13px] font-semibold leading-snug text-ink/80">{product.title || product.brandName}</p>
-                      {formatPrice(product.price, product.currency) && (
-                        <p className="mt-0.5 text-[13px] tabular-nums text-ink/70">{formatPrice(product.price, product.currency)}</p>
-                      )}
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </m.div>
-          )}
-
-<ProductRating trend={trend} onChanged={onChanged} /><BrandHypeSection trend={trend} /><BrandReviewsSection brandName={trend.products?.underdog?.brandName || "Indie label"} aiSummary={trend.aiSummary} />{isAdmin && <AdminTools trend={trend} onChanged={onChanged} onDeleted={(id) => (onDeleted?.(id), onClose())} />}
+          <ProductRating trend={trend} onChanged={onChanged} /><BrandHypeSection trend={trend} /><BrandReviewsSection brandName={trend.products?.underdog?.brandName || "Indie label"} aiSummary={trend.aiSummary} />{isAdmin && <AdminTools trend={trend} onChanged={onChanged} onDeleted={(id) => (onDeleted?.(id), onClose())} />}
 
           <p className="mt-10 border-t border-border pt-5 text-[12px] leading-relaxed text-ink/70">
-            TrendXee is a discovery platform. Product links open the brand's or marketplace's own store; TrendXee doesn't
-            sell or fulfil these products.
+            TrendXee is a discovery platform. Product links take you to the brand's own store for ordering and delivery.
           </p>
         </div>
       </m.div>

@@ -15,11 +15,11 @@ const notes = [
   },
   {
     title: "Underdogs first",
-    body: "Small Indian labels usually make a fit before the big names copy it. Every drop leads with that brand, then shows the mainstream lookalikes so the choice is yours.",
+    body: "Every drop puts the Indian indie label behind it in focus, with product details and a link to its own store.",
   },
   {
     title: "Straight to the store",
-    body: "Every product here links to the brand's own official store or verified marketplace listing. Nothing is marked up or resold through us.",
+    body: "Every product here links to the brand's own official store. Nothing is marked up or resold through us.",
   },
   {
     title: "Audited, not guessed",
@@ -30,7 +30,7 @@ const notes = [
 const howTo = [
   "Pick the lane closest to your wardrobe — jeans, bottoms, tees, shirts, outerwear, shoes, sportswear, anime, or caps & accessories.",
   "Check the Brand Hype and 5-Star Trust badges to verify Instagram momentum and verified legitimacy before you buy.",
-  "Open a drop to review community feedback, check Instagram metrics, and compare the indie original against the mainstream lookalike.",
+  "Open a drop to review community feedback, check Instagram metrics, and visit the brand’s own store.",
   "Save the ones you like to your archive, leave your own brand review, or buy directly from the underdog.",
 ];
 

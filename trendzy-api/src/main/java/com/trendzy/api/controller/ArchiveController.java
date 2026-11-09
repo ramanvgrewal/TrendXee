@@ -38,12 +38,6 @@ public class ArchiveController {
         if (trend.getSignalProducts().getUnderdog() != null && trend.getSignalProducts().getUnderdog().getTitle() != null) {
             return trend.getSignalProducts().getUnderdog().getTitle();
         }
-        if (trend.getSignalProducts().getAmazon() != null && trend.getSignalProducts().getAmazon().getTitle() != null) {
-            return trend.getSignalProducts().getAmazon().getTitle();
-        }
-        if (trend.getSignalProducts().getFlipkart() != null && trend.getSignalProducts().getFlipkart().getTitle() != null) {
-            return trend.getSignalProducts().getFlipkart().getTitle();
-        }
         return trend.getTrendName();
     }
 

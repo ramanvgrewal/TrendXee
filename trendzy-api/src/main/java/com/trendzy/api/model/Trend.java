@@ -98,8 +98,6 @@ public class Trend {
         private String authorUsername;
         private String queryUsed;
         private ProductDetail underdog;
-        private ProductDetail amazon;
-        private ProductDetail flipkart;
     }
 
     @Data

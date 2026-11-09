@@ -1,18 +1,9 @@
-import { getTrends, getCatalogPage } from "@/lib/api";
+import { getCatalogPage } from "@/lib/api";
+import { productIdentity } from "@/lib/daily-board";
 import type { LaneFilters } from "@/lib/lane-filters";
 import { cachedStyles, markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
 import { aesthetics, type Trend } from "@/lib/mock-data";
 import type { AudienceFilter, ProductAudience } from "@/lib/audience";
-
-export type MainstreamPick = {
-  source: "amazon" | "flipkart";
-  brand: string;
-  title: string;
-  image: string;
-  shopUrl: string;
-  price?: number;
-  currency?: string;
-};
 
 export type RotationItem = {
   /** Trend id (for click tracking). */
@@ -32,7 +23,6 @@ export type RotationItem = {
   currency?: string;
   subcategory?: string;
   audience?: ProductAudience;
-  mainstream?: MainstreamPick;
 };
 
 function shortSummary(text: string, max = 190) {
@@ -49,11 +39,6 @@ function shortSummary(text: string, max = 190) {
 
 function toRotationItem(t: Trend, laneId: string): RotationItem {
   const u = t.products.underdog!;
-  const ms = t.products.amazon?.imageUrl
-    ? { source: "amazon" as const, p: t.products.amazon }
-    : t.products.flipkart?.imageUrl
-      ? { source: "flipkart" as const, p: t.products.flipkart }
-      : null;
   return {
     id: t.id,
     brand: u.brandName || "",
@@ -70,17 +55,6 @@ function toRotationItem(t: Trend, laneId: string): RotationItem {
     currency: u.currency || undefined,
     subcategory: t.subcategory || undefined,
     audience: u.audience,
-    mainstream: ms
-      ? {
-          source: ms.source,
-          brand: ms.p.brandName || "",
-          title: ms.p.title || "",
-          image: ms.p.imageUrl,
-          shopUrl: ms.p.shopUrl || "",
-          price: ms.p.price || undefined,
-          currency: ms.p.currency || undefined,
-        }
-      : undefined,
   };
 }
 
@@ -116,30 +90,34 @@ export async function fetchLanePage(laneId: string, page: number, audience: Audi
   }
 }
 
-const SSR_ROTATION_TTL = 60_000;
-const BROWSER_ROTATION_TTL = 5 * 60_000;
+export const LANE_COVER_STALE_TIME = 60_000;
 const rotationCache = new Map<AudienceFilter, { at: number; data: Promise<RotationMap> }>();
 
 /**
  * Up to fifteen underdog products per lane, used by the home hero and lane
  * posters. One failing lane no longer blanks the others. Shared in memory
- * for 60s during SSR to prevent per-lane concurrent fan-out per request, and 5m in browser.
+ * for 60s to avoid repeat catalog requests.
  */
 export function fetchLaneRotations(audience: AudienceFilter = "ALL"): Promise<RotationMap> {
-  const inBrowser = typeof window !== "undefined";
-  const ttl = inBrowser ? BROWSER_ROTATION_TTL : SSR_ROTATION_TTL;
   const cached = rotationCache.get(audience);
-  if (cached && Date.now() - cached.at < ttl) {
+  if (cached && Date.now() - cached.at < LANE_COVER_STALE_TIME) {
     return cached.data;
   }
 
   const data = Promise.allSettled(
     aesthetics.map(async (a) => {
-      const trends = await getTrends(a.id, 15, undefined, 0, audience);
+      // The catalog response applies the lane's current style rules on older API deployments too.
+      const { trends } = await getCatalogPage(a.id, 15, 0, audience);
       const items = trends
-        .filter((t) => t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
+        .filter((t) => belongsToLane(t, a.id) && t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
         .map((t) => toRotationItem(t, a.id));
-      return [a.id, items] as const;
+      const seen = new Set<string>();
+      return [a.id, items.filter((item) => {
+        const key = productIdentity(item);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })] as const;
     }),
   ).then((results) => {
     const map: RotationMap = {};
@@ -151,8 +129,10 @@ export function fetchLaneRotations(audience: AudienceFilter = "ALL"): Promise<Ro
         console.error("Failed to fetch lane rotation", result.reason);
       }
     }
-    // A partial outage must not pin missing lanes into the home cache for five minutes.
-    if (results.some((result) => result.status === "rejected")) rotationCache.delete(audience);
+    // A partial outage must not pin missing lanes into the home cache during the next refresh.
+    if (results.some((result) => result.status === "rejected") && rotationCache.get(audience)?.data === data) {
+      rotationCache.delete(audience);
+    }
     return map;
   });
 

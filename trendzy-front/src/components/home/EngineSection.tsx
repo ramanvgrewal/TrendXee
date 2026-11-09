@@ -7,7 +7,7 @@ import { follow } from "@/motion/tokens";
 const STEPS = [
   {
     title: "Discover",
-    body: "We track rising fashion drops across indie storefronts and creators, cutting through marketplace clutter to find who made each fit first.",
+    body: "We track rising fashion drops across indie storefronts and creators to find the labels behind each fit.",
   },
   {
     title: "Audit",
@@ -19,12 +19,12 @@ const STEPS = [
   },
   {
     title: "Back",
-    body: "The community rates and reviews the brand, helping shoppers back authentic underdogs while comparing them with mainstream lookalikes.",
+    body: "The community rates and reviews the brand, helping shoppers learn about the label before buying from its own store.",
   },
 ];
 
 /**
- * 06 — The engine. A deliberately calm section: a single hairline draws
+ * 05 — The engine. A deliberately calm section: a single hairline draws
  * itself across the four steps as you scroll, and each step settles in once.
  */
 export function EngineSection() {
@@ -38,7 +38,7 @@ export function EngineSection() {
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="lg:col-span-6">
           <p className="eyebrow text-ink/70">
-            <span className="text-clay-ink">06</span> · How the engine works
+            <span className="text-clay-ink">05</span> · How the engine works
           </p>
           <RevealHeading
             className="mt-4 h-section"

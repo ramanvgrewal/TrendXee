@@ -2,14 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
 import { LaneCard } from "@/components/LaneCard";
 import { normalizeAudienceFilter } from "@/lib/audience";
-import { fetchLaneRotations, LANE_STALE_TIME } from "@/lib/lanes";
+import { fetchLaneRotations, LANE_COVER_STALE_TIME } from "@/lib/lanes";
 import { aesthetics } from "@/lib/mock-data";
 import { pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/trending-streetwear")({
   loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
   loader: async ({ deps }) => ({ rotationMap: await fetchLaneRotations(deps.audience) }),
-  staleTime: LANE_STALE_TIME,
+  staleTime: LANE_COVER_STALE_TIME,
   head: () => pageSeo({
     title: "Discover Trending Streetwear Brands in India | TrendXee",
     description: "Explore Indian streetwear brands, oversized tees, baggy jeans and fresh drops. Compare brand details and discover your next fit on TrendXee.",
@@ -74,9 +74,7 @@ function StreetwearPage() {
         </div>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {streetwearLanes.map((lane, index) => {
-            const first = rotationMap[lane.id]?.[0];
-            return <LaneCard key={lane.id} aesthetic={lane} index={index} image={first?.image}
-              brand={first?.brand} eager={index < 2} className="h-[min(72svh,520px)]" />;
+            return <LaneCard key={lane.id} aesthetic={lane} index={index} products={rotationMap[lane.id]} eager={index < 2} className="h-[min(72svh,520px)]" />;
           })}
         </div>
       </section>

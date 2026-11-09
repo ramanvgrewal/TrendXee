@@ -60,11 +60,11 @@ export function useToggleArchive(trendId: string, onUnarchived?: () => void) {
   });
 }
 
-export function trackProductClick(trendId: string, source: "underdog" | "amazon" | "flipkart", url: string) {
-  if (source === 'underdog' && typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('trendxee:outfit-action', { detail: { trendId, type: 'SHOP_CLICK' } }));
+export function trackProductClick(trendId: string, url: string) {
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('trendxee:outfit-action', { detail: { trendId, type: 'SHOP_CLICK' } }));
   businessApiFetch("/api/analytics/click", {
     method: "POST",
-    body: JSON.stringify({ trendId, source, url }),
+    body: JSON.stringify({ trendId, source: "underdog", url }),
     keepalive: true,
   }).catch(() => {});
 }

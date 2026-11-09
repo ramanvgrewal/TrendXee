@@ -12,7 +12,7 @@ import { audienceLabel } from "@/lib/audience";
 import { belongsToLane } from "@/lib/lanes";
 
 export function trendImage(trend: Trend) {
-  return trend.products?.underdog?.imageUrl || trend.products?.amazon?.imageUrl || trend.products?.flipkart?.imageUrl || "";
+  return trend.products?.underdog?.imageUrl || "";
 }
 
 export function trendLane(trend: Trend) {
