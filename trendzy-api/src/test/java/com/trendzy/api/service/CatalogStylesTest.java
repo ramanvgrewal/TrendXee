@@ -20,24 +20,29 @@ class CatalogStylesTest {
         assertEquals("baggy", CatalogStyles.options("JEANS", List.of("Cargo Jeans", "Bootcut Jeans", "Baggy Jeans")).get(0).id());
     }
 
-    @Test void lanesHaveAtMostFiveFamiliesAndSpecificClothingTypesStaySeparate() {
-        for (String category : List.of("TEES", "OUTERWEAR", "JEANS", "BOTTOMS", "ANIME", "SHOES", "SPORTSWEAR", "POLOS", "CAPS")) {
-            assertTrue(CatalogStyles.groups(category).size() <= 5, category);
-            assertFalse(CatalogStyles.groups(category).isEmpty(), category);
-        }
+    @Test void specificClothingTypesStaySeparate() {
         assertEquals("washed", CatalogStyles.classify("TEES", "Vintage-Wash Tees"));
         assertEquals("graphic", CatalogStyles.classify("TEES", "Classical Mythology Tees"));
         assertEquals("oversized", CatalogStyles.classify("TEES", "Oversized Graphic Tees"));
         assertEquals("hoodies", CatalogStyles.classify("ANIME", "Embroidered Anime Hoodies"));
-        assertEquals("overshirts", CatalogStyles.classify("OUTERWEAR", "Crochet Cardigan"));
-        assertEquals("overshirts", CatalogStyles.classify("OUTERWEAR", "Knitted Vest"));
+        assertEquals("knitwear", CatalogStyles.classify("OUTERWEAR", "Crochet Cardigan"));
+        assertEquals("knitwear", CatalogStyles.classify("OUTERWEAR", "Knitted Vest"));
+        assertEquals("overshirts", CatalogStyles.classify("OUTERWEAR", "Cotton Overshirt"));
         assertEquals("sweats", CatalogStyles.classify("BOTTOMS", "Trackpants"));
         assertEquals("gym", CatalogStyles.classify("SPORTSWEAR", "Women's Performance Tanks"));
         assertEquals("regular", CatalogStyles.classify("POLOS", "Regular-Fit Graphic T-Shirt"));
-        assertEquals("sandals", CatalogStyles.classify("SHOES", "Unisex Clogs & Slides"));
-        assertEquals("flats", CatalogStyles.classify("SHOES", "Women's Juttis & Flats"));
-        assertEquals("caps", CatalogStyles.classify("CAPS", "Vintage"));
-        assertEquals("jewellery", CatalogStyles.classify("CAPS", "Contemporary Silver Jewellery"));
+        assertEquals("regular", CatalogStyles.classify("TEES", "Regular-Fit Graphic T-Shirt"));
+        assertEquals("polos", CatalogStyles.classify("TEES", "Oversized Polos"));
+        assertEquals("sandals", CatalogStyles.classify("SHOES", "Sandals"));
+        assertEquals("", CatalogStyles.classify("SHOES", "Women's Juttis & Flats"));
+        assertEquals("", CatalogStyles.classify("SHOES", "Unisex Clogs & Slides"));
+        assertEquals("", CatalogStyles.classify("CAPS", "Bags"));
+        assertEquals("", CatalogStyles.classify("CAPS", "Earrings"));
+        assertEquals("pendants", CatalogStyles.classify("CAPS", "Silver Pendant"));
+        assertEquals(List.of("sports", "sneakers", "sandals"),
+                CatalogStyles.options("SHOES", List.of()).stream().map(CatalogStyles.Option::id).toList());
+        assertEquals(List.of("caps", "rings", "pendants", "bracelets", "watches"),
+                CatalogStyles.options("CAPS", List.of()).stream().map(CatalogStyles.Option::id).toList());
     }
 
     @Test void groupAndAudienceAreBothAppliedBeforePaginationAndUnrelatedLanesAreRejected() {

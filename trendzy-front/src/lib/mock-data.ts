@@ -78,7 +78,7 @@ export const aesthetics: Aesthetic[] = [
     {
     id: "tees",
     name: "TEES",
-    description: "Graphic and plain tees, everyday tops, tanks and oversized fits.",
+    description: "Graphic and oversized tees, polos, regular-fit tees, tops and tanks.",
     signalCount: 3200,
     trendScore: 85,
     colorPalette: ["#0f172a", "#334155", "#64748b", "#cbd5e1"],
@@ -89,7 +89,7 @@ export const aesthetics: Aesthetic[] = [
     {
     id: "outerwear",
     name: "OUTERWEAR",
-    description: "Denim, bombers, varsity jackets and overshirts defining the silhouette.",
+    description: "Denim, bombers, varsity jackets, overshirts and knitwear.",
     signalCount: 4500,
     trendScore: 92,
     colorPalette: ["#1c1917", "#44403c", "#78716c", "#d6d3d1"],
@@ -133,12 +133,12 @@ export const aesthetics: Aesthetic[] = [
     {
     id: "sneakers",
     name: "SHOES",
-    description: "Sneakers, sports shoes, juttis, flats, sandals, slides, clogs, mules and loafers.",
+    description: "Sports shoes, sneakers and sandals.",
     signalCount: 5120,
     trendScore: 96,
     colorPalette: ["#7f1d1d", "#dc2626", "#fca5a5", "#fef2f2"],
     heroImage: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=900&q=80",
-    vibeTags: ["sneakers", "flats", "juttis", "everyday"],
+    vibeTags: ["sports shoes", "sneakers", "sandals"],
     underdogRotation: []
   },
     {
@@ -153,20 +153,20 @@ export const aesthetics: Aesthetic[] = [
     underdogRotation: []
   },
     {
-    id: "polos",
-    name: "POLOS & REGULAR",
-    description: "Polos, regular-fit tees, and easy layering essentials for everyday fits.",
-    signalCount: 2200,
-    trendScore: 81,
+    id: "shirts",
+    name: "SHIRTS",
+    description: "Button-down shirts, from crisp everyday basics to relaxed printed styles.",
+    signalCount: 0,
+    trendScore: 0,
     colorPalette: ["#fde047", "#eab308", "#a16207", "#713f12"],
-    heroImage: "https://images.unsplash.com/photo-1618453292459-53424b66bb6a?w=900&q=80",
-    vibeTags: ["polo", "regular-fit", "crew-neck", "layering"],
+    heroImage: "",
+    vibeTags: ["button-down", "linen", "prints"],
     underdogRotation: []
   },
     {
     id: "caps",
     name: "CAPS & ACCESSORIES",
-    description: "Caps, bags, wallets, belts, jewelry and sunglasses that finish the fit.",
+    description: "Caps, rings, pendants, bracelets and watches.",
     signalCount: 2610,
     trendScore: 82,
     colorPalette: ["#e5e7eb", "#9ca3af", "#f59e0b", "#111827"],

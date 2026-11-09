@@ -2,6 +2,8 @@ package com.trendzy.api.controller;
 
 import com.trendzy.api.model.Trend;
 import com.trendzy.api.repository.TrendRepository;
+import com.trendzy.api.service.CatalogFilterQuery;
+import com.trendzy.api.service.CatalogStyles;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -45,22 +47,23 @@ public class TrendController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(defaultValue = "false") boolean includeFilters,
             @RequestParam(required = false) String style) {
-        if (minPrice == null && maxPrice == null && !includeFilters && (style == null || style.isBlank())) {
+        if (minPrice == null && maxPrice == null && !includeFilters && (style == null || style.isBlank())
+                && !CatalogStyles.isRestricted(category) && !"TEES".equalsIgnoreCase(category.trim())) {
             return getTrends(category, subcategory, page, size, audience);
         }
         if (page < 0 || size < 1 || size > 100) {
             throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
                     "page must be non-negative and size must be 1..100");
         }
-        var criteria = com.trendzy.api.service.CatalogFilterQuery.build(category, audience, subcategory, minPrice, maxPrice, style);
+        var criteria = CatalogFilterQuery.build(category, audience, subcategory, minPrice, maxPrice, style);
         var choices = includeFilters
-                ? mongoTemplate.findDistinct(com.trendzy.api.service.CatalogFilterQuery.build(category, "ALL", null, null, null),
+                ? mongoTemplate.findDistinct(CatalogFilterQuery.build(category, "ALL", null, null, null),
                         "subcategory", Trend.class, String.class)
                     .filter(value -> value != null && !value.isBlank()).map(String::trim).distinct()
                     .sort(String.CASE_INSENSITIVE_ORDER).collectList()
                 : Mono.just(List.<String>of());
         return Mono.zip(
-                mongoTemplate.find(com.trendzy.api.service.CatalogFilterQuery.page(criteria, page, size), Trend.class).collectList(),
+                mongoTemplate.find(CatalogFilterQuery.page(criteria, page, size), Trend.class).collectList(),
                 mongoTemplate.count(criteria, Trend.class), choices)
             .map(data -> {
                 Map<String, Object> result = new java.util.HashMap<>();
@@ -69,10 +72,12 @@ public class TrendController {
                 result.put("hasMore", ((long) page + 1) * size < data.getT2());
                 result.put("page", page);
                 result.put("size", size);
+                result.put("category", CatalogFilterQuery.normalizeCategory(category));
+                if (subcategory != null && !subcategory.isBlank()) result.put("subcategory", subcategory.trim());
                 result.put("audience", audience == null ? "ALL" : audience.trim().toUpperCase(java.util.Locale.ROOT));
                 if (includeFilters) {
                     result.put("subcategories", data.getT3());
-                    result.put("styles", com.trendzy.api.service.CatalogStyles.options(category, data.getT3()));
+                    result.put("styles", CatalogStyles.options(category, data.getT3()));
                 }
                 return result;
             });
@@ -94,8 +99,7 @@ public class TrendController {
         log.info("[CTRL] Fetching trends for category: {}, subcategory: {}, page: {}, size: {}",
                 category, subcategory, page, size);
 
-        String requested = category.trim().toUpperCase(java.util.Locale.ROOT);
-        String normalized = List.of("SHOES", "SNEAKER & SPORTS", "SNEAKERS & SPORTS", "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS").contains(requested) ? "SNEAKERS" : requested;
+        String normalized = CatalogFilterQuery.normalizeCategory(category);
         String normalizedAudience = audience == null ? "ALL" : audience.trim().toUpperCase(java.util.Locale.ROOT);
         if (!List.of("ALL", "MEN", "WOMEN", "UNISEX").contains(normalizedAudience)) {
             return Mono.error(new org.springframework.web.server.ResponseStatusException(

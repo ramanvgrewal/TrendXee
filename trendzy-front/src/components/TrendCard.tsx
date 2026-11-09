@@ -9,13 +9,14 @@ import { aesthetics } from "@/lib/mock-data";
 import { discountPercent, formatPrice, laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { TrustBadge } from "./TrustBadge";
 import { audienceLabel } from "@/lib/audience";
+import { belongsToLane } from "@/lib/lanes";
 
 export function trendImage(trend: Trend) {
   return trend.products?.underdog?.imageUrl || trend.products?.amazon?.imageUrl || trend.products?.flipkart?.imageUrl || "";
 }
 
 export function trendLane(trend: Trend) {
-  return aesthetics.find((a) => a.id === trend.aestheticId || (a.id === "caps" && trend.aestheticId === "accessories"));
+  return aesthetics.find((a) => belongsToLane(trend, a.id));
 }
 
 export function firstSentence(text: string, max = 150) {

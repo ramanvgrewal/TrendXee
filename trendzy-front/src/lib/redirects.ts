@@ -2,7 +2,9 @@ import { SITE_ORIGIN } from "./seo";
 
 const aliases: Record<string, string> = {
   "/blog": "/journal", "/aesthetic/shoes": "/aesthetic/sneakers",
-  "/aesthetic/accessories": "/aesthetic/caps", "/aesthetic/polos-and-regular": "/aesthetic/polos",
+  "/aesthetic/accessories": "/aesthetic/caps",
+  "/aesthetic/polos-and-regular": "/aesthetic/tees",
+  "/aesthetic/polos": "/aesthetic/tees",
   // The original TEES lane used "upper" before the category rename.
   "/aesthetic/upper": "/aesthetic/tees",
 };
@@ -14,6 +16,11 @@ export function permanentRedirect(input: string, method = "GET"): string | undef
   const originalPath = url.pathname;
   const path = originalPath.length > 1 ? originalPath.replace(/\/+$/, "") : originalPath;
   url.pathname = aliases[path] ?? (path.startsWith("/blog/") ? path.replace(/^\/blog\//, "/journal/") : path);
+  if (path === "/aesthetic/polos" || path === "/aesthetic/polos-and-regular") {
+    if (["oversized", "performance"].includes(url.searchParams.get("style") ?? "")) {
+      url.searchParams.set("style", "polos");
+    }
+  }
   if (["trendxee.com", "www.trendxee.com"].includes(url.hostname)) {
     const target = new URL(SITE_ORIGIN);
     url.protocol = target.protocol; url.host = target.host;

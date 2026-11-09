@@ -16,7 +16,6 @@ export function discountPercent(price?: number | null, original?: number | null)
 
 /** Display name for a lane id ("tees" → "Tees"). */
 export function laneLabel(name: string) {
-  if (["POLOS", "POLOS & REGULAR"].includes(name.toUpperCase())) return "Polos & Regular";
   return name.charAt(0) + name.slice(1).toLowerCase();
 }
 

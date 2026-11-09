@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 /** Small, ordered style families. Raw scraper labels remain intact for product provenance. */
 public final class CatalogStyles {
     private CatalogStyles() {}
+    private static final String OTHER_ACCESSORIES =
+            "\\b(bags?|totes?|wallets?|belts?|sunglasses|earrings?|earcuffs?|key[ -]?rings?|watch straps?)\\b";
     public record Style(String id, String label, String regex) {}
     public record Option(String id, String label) {}
     private static Style style(String id, String label, String regex) { return new Style(id, label, regex); }
@@ -24,16 +26,19 @@ public final class CatalogStyles {
                     style("mom", "Mom & barrel", "mom|barrel"),
                     style("straight", "Straight & classic", ".*"));
             case "TEES" -> List.of(
+                    style("polos", "Polos", "\\bpolos?\\b"),
+                    style("regular", "Regular", "^regular$|regular.?fit|crew.?neck|fitted|long.?sleeve|turtle.?neck|layering"),
                     style("oversized", "Oversized tees", "oversiz"),
                     style("washed", "Washed & vintage", "wash|vintage|tie.?dye"),
                     style("tops", "Tops & tanks", "tops?|tanks?"),
                     style("graphic", "Graphic tees", "graphic|print|art|slogan|typograph|mytho|illustrat|statement|streetwear|culture"),
                     style("classic", "Classic tees", ".*"));
             case "OUTERWEAR" -> List.of(
+                    style("knitwear", "Knitwear", "knit|crochet|cardigan|sweater|pullover"),
                     style("hoodies", "Hoodies & sweats", "hood|sweat"),
                     style("denim", "Denim jackets", "denim"),
                     style("bomber", "Bomber & varsity", "bomber|varsity"),
-                    style("overshirts", "Knitwear & overshirts", "overshirt|shacket|knit|crochet|cardigan|sweater|pullover"),
+                    style("overshirts", "Overshirts", "overshirt|shacket"),
                     style("jackets", "Jackets & layers", ".*"));
             case "BOTTOMS" -> List.of(
                     style("cargo", "Cargo pants", "cargo"),
@@ -48,11 +53,9 @@ public final class CatalogStyles {
                     style("jerseys", "Jerseys", "jersey"),
                     style("tees", "Tees", ".*"));
             case "SNEAKERS", "SHOES", "SNEAKER & SPORTS", "SNEAKERS & SPORTS", "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS" -> List.of(
+                    style("sports", "Sports shoes", "sport|running|training|football|basketball|badminton|cricket|tennis|court"),
                     style("sneakers", "Sneakers", "sneaker"),
-                    style("sports", "Sports shoes", "sport|running|training|football|badminton|cricket|court"),
-                    style("sandals", "Sandals & slides", "sandal|slide|clog|slipper|flip.?flop"),
-                    style("loafers", "Loafers & mules", "loafer|mule"),
-                    style("flats", "Flats & everyday", ".*"));
+                    style("sandals", "Sandals", "sandal"));
             case "SPORTSWEAR" -> List.of(
                     style("football", "Football jerseys", "football"),
                     style("basketball", "Basketball jerseys", "basketball"),
@@ -64,13 +67,23 @@ public final class CatalogStyles {
                     style("polos", "Classic polos", "polo"),
                     style("regular", "Regular & layering tees", ".*"));
             case "CAPS", "ACCESSORIES", "CAPS_ACCESSORIES", "CAPS & ACCESSORIES", "CAPS_AND_ACCESSORIES" -> List.of(
-                    style("bags", "Bags & wallets", "bag|tote|wallet"),
-                    style("jewellery", "Jewellery", "jewel|necklace|ring|bracelet|earring"),
-                    style("sunglasses", "Sunglasses", "sunglass|eyewear"),
-                    style("belts", "Belts", "belt"),
-                    style("caps", "Caps & hats", ".*"));
+                    style("caps", "Caps", "\\b(caps?|snapbacks?|trucker hats?|baseball hats?)\\b"),
+                    style("rings", "Rings", "\\brings?\\b"),
+                    style("pendants", "Pendants", "\\bpendants?\\b"),
+                    style("bracelets", "Bracelets", "\\bbracelets?\\b"),
+                    style("watches", "Watches", "\\b(watches|watch|timepieces?)\\b"));
             default -> List.of();
         };
+    }
+
+    static boolean isAccessories(String category) {
+        return List.of("CAPS", "ACCESSORIES", "CAPS_ACCESSORIES", "CAPS & ACCESSORIES", "CAPS_AND_ACCESSORIES")
+                .contains(category.trim().toUpperCase(Locale.ROOT));
+    }
+
+    public static boolean isRestricted(String category) {
+        return isAccessories(category) || List.of("SNEAKERS", "SHOES", "SNEAKER & SPORTS", "SNEAKERS & SPORTS",
+                "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS").contains(category.trim().toUpperCase(Locale.ROOT));
     }
 
     public static String classify(String category, String subcategory) {
@@ -84,13 +97,14 @@ public final class CatalogStyles {
         subcategories.forEach(value -> available.add(classify(category, value)));
         List<String> displayOrder = switch (category.trim().toUpperCase(Locale.ROOT)) {
             case "JEANS" -> List.of("baggy", "straight", "bootcut", "cargo", "mom");
-            case "TEES" -> List.of("graphic", "oversized", "washed", "tops", "classic");
+            case "TEES" -> List.of("graphic", "oversized", "washed", "tops", "classic", "polos", "regular");
             case "ANIME" -> List.of("tees", "hoodies", "sweats", "jackets", "jerseys");
             case "POLOS" -> List.of("polos", "oversized", "performance", "regular");
-            case "CAPS", "ACCESSORIES", "CAPS_ACCESSORIES", "CAPS & ACCESSORIES", "CAPS_AND_ACCESSORIES" -> List.of("caps", "bags", "jewellery", "belts", "sunglasses");
             default -> groups(category).stream().map(Style::id).toList();
         };
-        return groups(category).stream().filter(group -> available.contains(group.id()))
+        return groups(category).stream().filter(group -> isRestricted(category) || available.contains(group.id())
+                        || ("TEES".equalsIgnoreCase(category.trim()) && List.of("polos", "regular").contains(group.id()))
+                        || ("OUTERWEAR".equalsIgnoreCase(category.trim()) && group.id().equals("knitwear")))
                 .sorted(Comparator.comparingInt(group -> displayOrder.indexOf(group.id())))
                 .map(group -> new Option(group.id(), group.label())).toList();
     }
@@ -100,11 +114,43 @@ public final class CatalogStyles {
         if (groups.stream().noneMatch(group -> group.id().equals(style))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown style for this category");
         }
-        Document input = new Document("$convert", new Document("input", "$subcategory").append("to", "string").append("onError", "").append("onNull", ""));
-        List<Document> branches = groups.subList(0, groups.size() - 1).stream().map(group ->
-                new Document("case", new Document("$regexMatch", new Document("input", input).append("regex", group.regex()).append("options", "i")))
-                        .append("then", group.id())).toList();
-        Document family = new Document("$switch", new Document("branches", branches).append("default", groups.get(groups.size() - 1).id()));
-        return new Document("$eq", List.of(family, style));
+        return new Document("$eq", List.of(family(category), style));
+    }
+
+    static Document allowed(String category) {
+        return new Document("$ne", List.of(family(category), ""));
+    }
+
+    private static Document family(String category) {
+        Document subcategory = text("$subcategory");
+        List<Document> branches = new ArrayList<>();
+        for (Style group : groups(category)) {
+            Object condition = regex(subcategory, group.regex());
+            if ("TEES".equalsIgnoreCase(category.trim()) && group.id().equals("regular")) {
+                // Legacy POLOS rows without a polo label are the regular-fit side of that lane.
+                condition = new Document("$or", List.of(condition, new Document("$eq", List.of("$category", "POLOS"))));
+            }
+            branches.add(new Document("case", condition).append("then", group.id()));
+        }
+        if (isAccessories(category)) {
+            // Older accessory records often carry a brand-level label instead of a garment type.
+            Document title = text("$signalProducts.underdog.title");
+            Document eligible = new Document("$not", List.of(new Document("$or", List.of(
+                    regex(subcategory, OTHER_ACCESSORIES), regex(title, OTHER_ACCESSORIES)))));
+            for (Style group : groups(category)) {
+                branches.add(new Document("case", new Document("$and", List.of(eligible, regex(title, group.regex()))))
+                        .append("then", group.id()));
+            }
+        }
+        return new Document("$switch", new Document("branches", branches).append("default", ""));
+    }
+
+    private static Document text(String field) {
+        return new Document("$convert", new Document("input", field).append("to", "string")
+                .append("onError", "").append("onNull", ""));
+    }
+
+    private static Document regex(Document input, String pattern) {
+        return new Document("$regexMatch", new Document("input", input).append("regex", pattern).append("options", "i"));
     }
 }

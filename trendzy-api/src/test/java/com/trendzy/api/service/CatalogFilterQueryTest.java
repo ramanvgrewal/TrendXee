@@ -39,9 +39,11 @@ class CatalogFilterQueryTest {
 
     @Test void categoryAliasesAndUnfilteredMissingPricesStayCompatible() {
         var caps = CatalogFilterQuery.build("Caps & Accessories", "ALL", null, null, null).getQueryObject();
-        assertEquals(List.of("CAPS", "ACCESSORIES"), caps.get("category", Document.class).get("$in"));
+        assertEquals(List.of("CAPS", "ACCESSORIES", "WATCHES"), caps.get("category", Document.class).get("$in"));
         assertFalse(caps.containsKey("signalProducts.underdog.price"));
-        assertFalse(caps.containsKey("$expr"));
+        assertTrue(caps.get("$expr", Document.class).containsKey("$ne"));
+        assertEquals(List.of("TEES", "POLOS"), CatalogFilterQuery.build("Tees", "ALL", null, null, null)
+                .getQueryObject().get("category", Document.class).get("$in"));
         assertEquals(List.of("SNEAKERS"), CatalogFilterQuery.build("Shoes", "ALL", null, null, null)
                 .getQueryObject().get("category", Document.class).get("$in"));
     }

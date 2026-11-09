@@ -30,10 +30,10 @@ public final class CatalogFilterQuery {
         if (!List.of("ALL", "MEN", "WOMEN", "UNISEX").contains(normalizedAudience)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "audience must be ALL, MEN, WOMEN or UNISEX");
         }
-        String normalized = category.trim().toUpperCase(Locale.ROOT);
-        if (List.of("SHOES", "SNEAKER & SPORTS", "SNEAKERS & SPORTS", "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS").contains(normalized)) normalized = "SNEAKERS";
-        List<String> categories = List.of("CAPS", "ACCESSORIES", "CAPS_ACCESSORIES", "CAPS & ACCESSORIES", "CAPS_AND_ACCESSORIES").contains(normalized)
-                ? List.of("CAPS", "ACCESSORIES") : List.of(normalized);
+        String normalized = normalizeCategory(category);
+        List<String> categories = CatalogStyles.isAccessories(normalized)
+                ? List.of("CAPS", "ACCESSORIES", "WATCHES") : "TEES".equals(normalized)
+                ? List.of("TEES", "POLOS") : List.of(normalized);
         Document criteria = Document.parse("{" + TrendRepository.VISIBLE + "}");
         criteria.put("category", new Document("$in", categories));
         if (!"ALL".equals(normalizedAudience)) {
@@ -43,8 +43,9 @@ public final class CatalogFilterQuery {
         if (subcategory != null && !subcategory.isBlank()) {
             criteria.put("subcategory", new Document("$regex", "^" + Pattern.quote(subcategory.trim()) + "$").append("$options", "i"));
         }
-        if (style != null && !style.isBlank()) {
-            Document family = CatalogStyles.match(category, style.trim());
+        boolean hasStyle = style != null && !style.isBlank();
+        if (hasStyle || CatalogStyles.isRestricted(category)) {
+            Document family = hasStyle ? CatalogStyles.match(category, style.trim()) : CatalogStyles.allowed(category);
             Object audienceExpression = criteria.get("$expr");
             criteria.put("$expr", audienceExpression == null ? family : new Document("$and", List.of(audienceExpression, family)));
         }
@@ -59,6 +60,12 @@ public final class CatalogFilterQuery {
                     null, "", "INR", "inr", "Rs", "Rs.", "RS", "RS.", "₹", "RUPEES", "rupees")));
         }
         return new BasicQuery(criteria);
+    }
+
+    public static String normalizeCategory(String category) {
+        String normalized = category.trim().toUpperCase(Locale.ROOT);
+        return List.of("SHOES", "SNEAKER & SPORTS", "SNEAKERS & SPORTS", "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS")
+                .contains(normalized) ? "SNEAKERS" : normalized;
     }
 
     public static Query page(Query criteria, int page, int size) {

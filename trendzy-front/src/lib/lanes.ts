@@ -92,12 +92,10 @@ export const LANE_PAGE_SIZE = 12;
 /** Loader data on lane routes stays fresh this long; hover-prefetch reuses it. */
 export const LANE_STALE_TIME = 5 * 60_000;
 
-/**
- * Backend categories each lane is allowed to show. The API widens CAPS to
- * CAPS + ACCESSORIES, so the lane must accept both or accessories vanish.
- */
+/** Match the public API's lane aliases without changing stored product categories. */
 const LANE_CATEGORIES: Record<string, string[]> = {
-  caps: ["caps", "accessories"],
+  caps: ["caps", "accessories", "watches"],
+  tees: ["tees", "polos"],
 };
 
 export function belongsToLane(trend: Trend, laneId: string) {

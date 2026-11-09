@@ -41,7 +41,7 @@ export const journalArticles: JournalArticle[] = [
         id: "start-with-a-lane",
         title: "Start with what your wardrobe needs",
         paragraphs: [
-          "Instead of opening another endless feed, pick a lane: tees, outerwear, jeans, bottoms, anime, shoes, sportswear, polos & regular, or caps & accessories. Each gives you a smaller place to explore.",
+          "Instead of opening another endless feed, pick a lane: tees, shirts, outerwear, jeans, bottoms, anime, shoes, sportswear, or caps & accessories. Each gives you a smaller place to explore.",
           "Open a product to see its gallery, brand information and a link to the retailer. You buy from that store; TrendXee is a discovery site and does not take your order or handle delivery.",
         ],
       },
@@ -164,13 +164,13 @@ export const journalArticles: JournalArticle[] = [
         title: "Match the fabric to the day",
         paragraphs: [
           "Fabric weight, texture and your local weather matter more than a label such as essential. A lighter base can feel easier under a substantial jacket; a heavier tee can hold its shape when you take that jacket off.",
-          "Browse Polos & Regular for everyday base layers and Outerwear for jackets and overshirts. Compare fabric details and measurements at the store, then use Pair up with to explore alternatives around the piece you like.",
+          "Browse the Polos and Regular filters in Tees for everyday base layers, and Outerwear for jackets and overshirts. Compare fabric details and measurements at the store, then use Pair up with to explore alternatives around the piece you like.",
         ],
       },
     ],
-    lane: "polos",
+    lane: "tees",
     laneLabel: "Explore everyday layers",
-    relatedLanes: ["tees", "outerwear", "polos"],
+    relatedLanes: ["tees", "outerwear"],
   },
 ];
 
