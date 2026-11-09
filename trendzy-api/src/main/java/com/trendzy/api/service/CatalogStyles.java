@@ -18,6 +18,9 @@ public final class CatalogStyles {
     private static final String OTHER_GARMENT =
             "\\b(?:vests?|blouses?|tunics?|jumpsuits?|jackets?|pants?|trousers?|shorts|jeans)\\b";
 
+    private static final String JOGGERS = "\\b(?:joggers?|track[ -]?pants?)\\b";
+    private static final String SWEATPANTS = "\\b(?:sweat[ -]?pants?|sweats)\\b";
+
     public record Style(String id, String label, String regex) {}
     public record Option(String id, String label) {}
     private static Style style(String id, String label, String regex) { return new Style(id, label, regex); }
@@ -49,7 +52,8 @@ public final class CatalogStyles {
             case "BOTTOMS" -> List.of(
                     style("shorts", "Shorts", "\\bshorts\\b"),
                     style("cargo", "Cargo pants", "cargo"),
-                    style("sweats", "Joggers & sweats", "jogger|sweat|track"),
+                    style("sweatpants", "Sweatpants", SWEATPANTS),
+                    style("joggers", "Joggers", JOGGERS),
                     style("skirts", "Skirts & skorts", "skirt|skort"),
                     style("trousers", "Trousers", ".*"));
             case "ANIME" -> List.of(
@@ -125,14 +129,14 @@ public final class CatalogStyles {
         List<String> displayOrder = switch (category.trim().toUpperCase(Locale.ROOT)) {
             case "JEANS" -> List.of("baggy", "straight", "bootcut", "cargo", "mom");
             case "TEES" -> List.of("graphic", "oversized", "washed", "tops", "classic", "polos", "regular");
-            case "BOTTOMS" -> List.of("cargo", "sweats", "shorts", "skirts", "trousers");
+            case "BOTTOMS" -> List.of("cargo", "joggers", "sweatpants", "shorts", "skirts", "trousers");
             case "ANIME" -> List.of("tees", "hoodies", "sweats", "jackets", "jerseys");
             case "POLOS" -> List.of("polos", "oversized", "performance", "regular");
             default -> groups(category).stream().map(Style::id).toList();
         };
         return groups(category).stream().filter(group -> isRestricted(category) || available.contains(group.id())
                         || ("TEES".equalsIgnoreCase(category.trim()) && List.of("polos", "regular").contains(group.id()))
-                        || ("BOTTOMS".equalsIgnoreCase(category.trim()) && group.id().equals("shorts"))
+                        || ("BOTTOMS".equalsIgnoreCase(category.trim()) && List.of("joggers", "sweatpants", "shorts").contains(group.id()))
                         || ("OUTERWEAR".equalsIgnoreCase(category.trim()) && group.id().equals("knitwear")))
                 .sorted(Comparator.comparingInt(group -> displayOrder.indexOf(group.id())))
                 .map(group -> new Option(group.id(), group.label())).toList();
@@ -153,8 +157,18 @@ public final class CatalogStyles {
     private static Document family(String category) {
         Document subcategory = text("$subcategory");
         List<Document> branches = new ArrayList<>();
+        Document trackOrSweatStyle = subcategory;
+        if ("BOTTOMS".equalsIgnoreCase(category.trim())) {
+            String pattern = JOGGERS + "|" + SWEATPANTS;
+            Document title = text("$signalProducts.underdog.title");
+            // Older trackpants and sweatpants slots include products sold as joggers.
+            trackOrSweatStyle = new Document("$cond", List.of(
+                    new Document("$and", List.of(regex(subcategory, pattern), regex(title, pattern))),
+                    title, subcategory));
+        }
         for (Style group : groups(category)) {
-            Object condition = regex(subcategory, group.regex());
+            Object condition = regex(List.of("joggers", "sweatpants").contains(group.id()) ? trackOrSweatStyle : subcategory,
+                    group.regex());
             if ("TEES".equalsIgnoreCase(category.trim()) && group.id().equals("regular")) {
                 // Legacy POLOS rows without a polo label are the regular-fit side of that lane.
                 condition = new Document("$or", List.of(condition, new Document("$eq", List.of("$category", "POLOS"))));

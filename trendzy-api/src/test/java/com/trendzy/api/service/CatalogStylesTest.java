@@ -28,7 +28,8 @@ class CatalogStylesTest {
         assertEquals("knitwear", CatalogStyles.classify("OUTERWEAR", "Crochet Cardigan"));
         assertEquals("knitwear", CatalogStyles.classify("OUTERWEAR", "Knitted Vest"));
         assertEquals("overshirts", CatalogStyles.classify("OUTERWEAR", "Cotton Overshirt"));
-        assertEquals("sweats", CatalogStyles.classify("BOTTOMS", "Trackpants"));
+        assertEquals("joggers", CatalogStyles.classify("BOTTOMS", "Trackpants"));
+        assertEquals("sweatpants", CatalogStyles.classify("BOTTOMS", "Sweatpants"));
         assertEquals("gym", CatalogStyles.classify("SPORTSWEAR", "Women's Performance Tanks"));
         assertEquals("regular", CatalogStyles.classify("POLOS", "Regular-Fit Graphic T-Shirt"));
         assertEquals("regular", CatalogStyles.classify("TEES", "Regular-Fit Graphic T-Shirt"));
@@ -46,10 +47,12 @@ class CatalogStylesTest {
     }
 
     @Test void shortsHaveASeparateBottomsLaneBeforeIngestion() {
-        assertEquals(List.of(new CatalogStyles.Option("shorts", "Shorts")), CatalogStyles.options("BOTTOMS", List.of()));
+        assertEquals(List.of(new CatalogStyles.Option("joggers", "Joggers"),
+                new CatalogStyles.Option("sweatpants", "Sweatpants"), new CatalogStyles.Option("shorts", "Shorts")),
+                CatalogStyles.options("BOTTOMS", List.of()));
         assertEquals("shorts", CatalogStyles.classify("BOTTOMS", "Cargo Shorts"));
         assertEquals("shorts", CatalogStyles.classify("BOTTOMS", "Track Shorts"));
-        assertEquals("sweats", CatalogStyles.classify("BOTTOMS", "Short Inseam Trackpants"));
+        assertEquals("joggers", CatalogStyles.classify("BOTTOMS", "Short Inseam Trackpants"));
     }
 
     @Test void shirtsUseBroadStylesAndCheckTheActualProductBeforePagination() {

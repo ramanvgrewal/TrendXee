@@ -109,7 +109,7 @@ export const aesthetics: Aesthetic[] = [
   {
     id: "bottoms",
     name: "BOTTOMS",
-    description: "Cargo, trackpants, sweatpants and shorts for everyday fits.",
+    description: "Cargo pants, joggers, sweatpants and shorts for everyday fits.",
     signalCount: 3980,
     trendScore: 88,
     colorPalette: ["#a3a3a3", "#525252", "#f5f5f4", "#0f172a"],
