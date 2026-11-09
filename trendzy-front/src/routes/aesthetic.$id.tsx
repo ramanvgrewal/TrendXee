@@ -3,6 +3,7 @@ import { usePrefersReducedMotion as useReducedMotion } from "@/motion/hooks";
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, notFound, redirect, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, m, useScroll, useTransform } from "framer-motion";
+import { LaneCard } from "@/components/LaneCard";
 import { TrendBoard } from "@/components/TrendBoard";
 import { trendImage } from "@/components/TrendCard";
 import { CtaArrow, ctaClass } from "@/components/Cta";
@@ -10,7 +11,7 @@ import { ease, spring } from "@/motion/tokens";
 import { Img } from "@/components/Img";
 import type { Aesthetic, Trend } from "@/lib/mock-data";
 import { aesthetics } from "@/lib/mock-data";
-import { fetchLanePage, LANE_PAGE_SIZE, LANE_STALE_TIME } from "@/lib/lanes";
+import { fetchLanePage, fetchStyleCovers, LANE_PAGE_SIZE, LANE_STALE_TIME, type RotationMap } from "@/lib/lanes";
 import { laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { audienceLabel, normalizeAudienceFilter, type AudienceFilter } from "@/lib/audience";
 import { useAudience } from "@/components/AudienceFilter";
@@ -20,7 +21,7 @@ import { normalizeLaneFilters, normalizeLanePage, lanePageItems, type LaneFilter
 import { CatalogRequestError } from "@/lib/api";
 import { cachedStyles, hasCatalogFailure, markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
 
-type LaneData = { aesthetic: Aesthetic; trends: Trend[]; hasMore: boolean; failed: boolean; total?: number; styles: StyleOption[] };
+type LaneData = { aesthetic: Aesthetic; trends: Trend[]; failed: boolean; total?: number; styles: StyleOption[]; covers?: RotationMap };
 
 export const Route = createFileRoute("/aesthetic/$id")({
   validateSearch: (search: Record<string, unknown>): Filters & { trend?: string; page?: number } => ({
@@ -34,23 +35,33 @@ export const Route = createFileRoute("/aesthetic/$id")({
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
+    const filtered = !!(deps.style || deps.collection);
+    const linkedTrend = (location.search as Record<string, unknown>).trend;
+    const chooser = () => redirect({ to: "/aesthetic/$id", params, search: {
+      audience: deps.audience === "ALL" ? undefined : deps.audience,
+      trend: typeof linkedTrend === "string" ? linkedTrend : undefined,
+    }, replace: true });
+    if ((!filtered && deps.page > 1) || (deps.collection && params.id !== "shirts")) throw chooser();
+
     let result;
     try {
       result = await fetchLanePage(params.id, deps.page - 1, deps.audience, deps);
-    } catch (e) {
-      if (e instanceof CatalogRequestError && e.status === 400 && deps.style) {
-        const linkedTrend = (location.search as Record<string, unknown>).trend;
-        // Old or cross-lane style links are a filter reset, not an engine outage.
-        throw redirect({ to: "/aesthetic/$id", params, search: {
-          audience: deps.audience === "ALL" ? undefined : deps.audience,
-          trend: typeof linkedTrend === "string" ? linkedTrend : undefined,
-        }, replace: true });
-      }
-      console.error(e);
-      return { aesthetic, trends: [], hasMore: false, styles: cachedStyles(params.id), failed: true };
+    } catch (error) {
+      if (error instanceof CatalogRequestError && error.status === 400 && deps.style) throw chooser();
+      console.error(error);
+      return { aesthetic, trends: [], styles: cachedStyles(params.id), failed: true };
     }
-    const lastPage = Math.max(1, Math.ceil(result.total / LANE_PAGE_SIZE));
-    if (deps.page > lastPage) {
+
+    if (!filtered) {
+      const covers = await fetchStyleCovers(params.id, result.styles, deps.audience);
+      return { aesthetic, trends: [], styles: result.styles, covers, failed: false };
+    }
+    if (deps.collection && !result.styles.some((option) =>
+      option.collection && option.id.toLowerCase() === deps.collection?.toLowerCase()
+    )) throw chooser();
+
+    const lastPage = Math.max(1, Math.ceil((result.total ?? 0) / LANE_PAGE_SIZE));
+    if (result.total !== undefined && deps.page > lastPage) {
       throw redirect({ to: "/aesthetic/$id", params, search: {
         ...location.search, page: lastPage > 1 ? lastPage : undefined,
       }, replace: true });
@@ -58,7 +69,7 @@ export const Route = createFileRoute("/aesthetic/$id")({
     return { aesthetic, ...result, failed: false };
   },
   staleTime: LANE_STALE_TIME,
-  // Keep the current grid and filter trigger visible during refinement, even on slow connections.
+  // Keep the current content visible during navigation on slow connections.
   pendingMs: Infinity,
   pendingComponent: LanePending,
   head: ({ loaderData, match }) => loaderData?.aesthetic
@@ -79,21 +90,82 @@ export const Route = createFileRoute("/aesthetic/$id")({
 
 function LanePage() {
   const audience = useAudience();
-  const { aesthetic, trends, failed, total, styles } = Route.useLoaderData();
+  const { aesthetic, trends, failed, total, styles, covers } = Route.useLoaderData();
   const search = Route.useSearch();
+  const router = useRouter();
+  const navigate = useNavigate({ from: Route.fullPath });
   const filters = normalizeLaneFilters(search);
+  const subcategory = filters.style || filters.collection;
   const page = normalizeLanePage(search.page);
-  const index = aesthetics.findIndex((a) => a.id === aesthetic.id);
+  const categoryName = laneLabel(aesthetic.name);
+  const index = styles.findIndex((option) => option.id.toLowerCase() === subcategory?.toLowerCase());
+  const selected = styles[index];
+  const name = selected?.label ?? (subcategory ? laneLabel(subcategory.replaceAll("-", " ")) : categoryName);
   const firstDrop = trends.find((trend) => trend.products?.underdog && trendImage(trend));
-  const heroImage = (firstDrop && trendImage(firstDrop)) || (audience === "ALL" ? aesthetic.heroImage : "");
+  const heroImage = firstDrop ? trendImage(firstDrop) : "";
+  const retries = useRef(0);
+
+  useEffect(() => { rememberStyles(aesthetic.id, styles); }, [aesthetic.id, styles]);
+  useEffect(() => { retries.current = 0; }, [aesthetic.id, audience, page, subcategory]);
+  useEffect(() => {
+    markCatalogFailure(aesthetic.id, audience, { ...filters, page }, failed);
+    if (!failed) {
+      retries.current = 0;
+      return;
+    }
+    const retry = () => { void router.invalidate({ filter: (match) => match.routeId === Route.id }); };
+    window.addEventListener("online", retry);
+    window.addEventListener("focus", retry);
+    const timer = retries.current < 2 ? window.setTimeout(() => {
+      retries.current++;
+      retry();
+    }, 1500 * (retries.current + 1)) : undefined;
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("online", retry);
+      window.removeEventListener("focus", retry);
+    };
+  }, [failed, styles, aesthetic.id, audience, filters.style, filters.collection, page, router]);
 
   return (
     <div className="pb-24">
-      <LaneHero key={`hero-${aesthetic.id}-${audience}`} aesthetic={aesthetic} index={index} image={heroImage} firstDrop={firstDrop} />
+      {subcategory ? (
+        <LaneHero key={aesthetic.id + subcategory + audience} aesthetic={aesthetic} index={index} image={heroImage} firstDrop={firstDrop} name={name} />
+      ) : (
+        <header className="mx-auto w-full max-w-[1440px] px-5 pt-10 sm:px-8 lg:pt-14">
+          <Link to="/lanes" className="hit inline-flex items-center gap-2 eyebrow text-ink/70 hover:text-clay">
+            <span aria-hidden>←</span> All lanes
+          </Link>
+          <h1 className="h-page mt-3">{categoryName}</h1>
+          <p className="lede mt-4 max-w-xl">{aesthetic.description}</p>
+        </header>
+      )}
       <LaneSwitcher activeId={aesthetic.id} />
-      {/* Keep the feed mounted so filters retain focus while results change. */}
-      <LaneFeed key={aesthetic.id} audience={audience} filters={filters} total={total} styles={styles} aesthetic={aesthetic} initialTrends={trends} page={page} failed={failed} />
-      {page === 1 && <LaneReading laneId={aesthetic.id} />}
+      {subcategory ? (
+        <LaneFeed key={aesthetic.id + subcategory} audience={audience} filters={filters} total={total} name={name} aesthetic={aesthetic} initialTrends={trends} page={page} failed={failed} />
+      ) : (
+        <>
+          <section className="mx-auto w-full max-w-[1440px] px-5 pt-9 sm:px-8 lg:pt-12" aria-labelledby="subcategory-heading">
+            <h2 id="subcategory-heading" className="font-display text-3xl tracking-tight sm:text-4xl">Choose a subcategory</h2>
+            {styles.length > 0 && <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {styles.map((option, index) => (
+                <LaneCard key={option.id} aesthetic={aesthetic} index={index} subcategory={option} products={covers?.[option.id]}
+                  eager={index < 3} className="h-[min(65svh,490px)]" />
+              ))}
+            </div>}
+            {failed ? (
+              <p className="mt-5 text-ink/70" role="status">
+                Subcategories are temporarily unavailable.{" "}
+                <button type="button" className="underline" onClick={() => router.invalidate()}>Try again</button>
+              </p>
+            ) : styles.length === 0 && <p className="mt-5 text-ink/70">Subcategories will appear here as brands add products.</p>}
+          </section>
+          {search.trend && <TrendBoard trends={trends} openId={search.trend} onOpenChange={() => {
+            void navigate({ search: (previous) => ({ ...previous, trend: undefined }), replace: true, resetScroll: false, viewTransition: false });
+          }} />}
+          <LaneReading laneId={aesthetic.id} />
+        </>
+      )}
     </div>
   );
 }
@@ -102,15 +174,14 @@ function LanePage() {
  * The lane's cover. Phones get the photo full-bleed (a portrait frame suits a
  * portrait product shot); wide screens get a cream section opener with the
  * photo as a pinned portrait print, so it is never blown up into a soft crop.
- * The photo shares a view-transition name with the lane card it came from.
+ * The cover uses the first product from the selected subcategory.
  */
-function LaneHero({ aesthetic, index, image, firstDrop }: { aesthetic: Aesthetic; index: number; image: string; firstDrop?: Trend }) {
+function LaneHero({ aesthetic, index, image, firstDrop, name }: { aesthetic: Aesthetic; index: number; image: string; firstDrop?: Trend; name: string }) {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
-  const vt = { viewTransitionName: `lane-${aesthetic.id}` } as React.CSSProperties;
 
   const cover = (
     // Switching lanes cross-dissolves the cover instead of hard-swapping it.
@@ -137,7 +208,7 @@ function LaneHero({ aesthetic, index, image, firstDrop }: { aesthetic: Aesthetic
       <div className="mx-auto w-full max-w-[1440px] px-5 pt-4 sm:px-8">
         <div className="relative grid min-h-[min(64svh,620px)] overflow-hidden rounded-[28px] bg-sand/40 shadow-lift lg:min-h-[clamp(460px,62svh,580px)] lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:items-center lg:fibre lg:bg-cream lg:shadow-none lg:ring-1 lg:ring-border">
           {/* Phones and tablets: full-bleed photo under a scrim */}
-          <div className="absolute inset-0 lg:hidden" style={vt}>
+          <div className="absolute inset-0 lg:hidden">
             <m.div className="absolute inset-0" style={reduced || isShoeCategory(aesthetic.id) ? undefined : { y, scale }}>
               {cover}
             </m.div>
@@ -148,22 +219,24 @@ function LaneHero({ aesthetic, index, image, firstDrop }: { aesthetic: Aesthetic
           <div className="relative flex min-w-0 flex-col justify-end p-6 text-on-scrim sm:p-10 lg:justify-center lg:p-12 lg:text-ink xl:p-14">
             <div className="flex items-center justify-between gap-4 lg:flex-col lg:items-start lg:gap-3">
             <Link
-              to="/lanes"
+              to="/aesthetic/$id"
+              params={{ id: aesthetic.id }}
+              search={{}}
               className="hit enter-fade inline-flex items-center gap-2 eyebrow text-on-scrim/70 transition-colors hover:text-on-scrim lg:text-ink/70 lg:hover:text-clay"
             >
-              <span aria-hidden>←</span> All lanes
+              <span aria-hidden>←</span> Back to {laneLabel(aesthetic.name)}
             </Link>
-              <span aria-hidden className="pointer-events-none shrink-0 font-display text-5xl leading-none tracking-[-0.06em] text-on-scrim/40 lg:order-first lg:numeral-outline lg:text-[6rem] lg:leading-[0.85]">
+              {index >= 0 && <span aria-hidden className="pointer-events-none shrink-0 font-display text-5xl leading-none tracking-[-0.06em] text-on-scrim/40 lg:order-first lg:numeral-outline lg:text-[6rem] lg:leading-[0.85]">
                 {String(index + 1).padStart(2, "0")}
-              </span>
+              </span>}
             </div>
             <h1 className="mt-6 text-balance pb-[0.12em] font-display text-[clamp(2.5rem,8.5vw,6rem)] leading-[0.98] tracking-[-0.04em] [overflow-wrap:anywhere] lg:mt-5 lg:text-[clamp(3.5rem,7.6vw,7.5rem)]">
               <span key={aesthetic.id} className="enter-fade block">
-                {laneLabel(aesthetic.name)}
+                {name}
               </span>
             </h1>
             <p key={aesthetic.id} className="enter-fade mt-4 max-w-xl text-pretty text-[16px] leading-relaxed text-on-scrim/85 sm:text-lg lg:text-ink/75" style={{ "--d": "220ms" } as React.CSSProperties}>
-              {aesthetic.description}
+              Explore {name.toLowerCase()} from independent brands.
             </p>
             <ul key={`${aesthetic.id}-tags`} className="enter-fade mt-5 flex flex-wrap gap-2" style={{ "--d": "300ms" } as React.CSSProperties}>
               {aesthetic.vibeTags.map((t) => (
@@ -178,7 +251,7 @@ function LaneHero({ aesthetic, index, image, firstDrop }: { aesthetic: Aesthetic
           ) : (
           <div className="relative mx-auto my-10 hidden aspect-[4/5] w-[78%] max-w-[360px] lg:block">
             <div className="h-full rotate-[1.5deg] rounded-[24px] bg-paper p-2 shadow-print ring-1 ring-border">
-              <div className="relative h-full overflow-hidden rounded-[18px] bg-sand/50" style={vt}>
+              <div className="relative h-full overflow-hidden rounded-[18px] bg-sand/50">
                 {cover}
               </div>
             </div>
@@ -262,6 +335,7 @@ function LaneSwitcher({ activeId }: { activeId: string }) {
               key={a.id}
               to="/aesthetic/$id"
               params={{ id: a.id }}
+              search={{}}
               viewTransition={false}
               resetScroll={false}
               aria-current={active ? "page" : undefined}
@@ -291,7 +365,7 @@ function LaneFeed({
   audience,
   filters,
   total,
-  styles,
+  name,
 }: {
   aesthetic: Aesthetic;
   initialTrends: Trend[];
@@ -300,7 +374,7 @@ function LaneFeed({
   audience: AudienceFilter;
   filters: Filters;
   total?: number;
-  styles: StyleOption[];
+  name: string;
 }) {
   const navigate = useNavigate({ from: Route.fullPath });
   const router = useRouter();
@@ -308,26 +382,8 @@ function LaneFeed({
   const { trend: openId } = Route.useSearch();
   const [trends, setTrends] = useState(initialTrends);
   const feedRef = useRef<HTMLElement>(null);
-  const pageKey = `${aesthetic.id}:${audience}:${filters.style || ""}:${page}`;
+  const pageKey = `${aesthetic.id}:${audience}:${filters.style || filters.collection || ""}:${page}`;
   const previousPageRef = useRef(pageKey);
-  const retriesRef = useRef({ key: "", count: 0 });
-  useEffect(() => { rememberStyles(aesthetic.id, styles); }, [aesthetic.id, styles]);
-  useEffect(() => {
-    markCatalogFailure(aesthetic.id, audience, { ...filters, page }, failed);
-    const key = pageKey;
-    if (retriesRef.current.key !== key || !failed) retriesRef.current = { key, count: 0 };
-    if (!failed) return;
-    const retry = () => { void router.invalidate({ filter: (match) => match.routeId === Route.id }); };
-    const onFocus = () => { if (document.visibilityState === "visible") retry(); };
-    window.addEventListener("online", retry);
-    window.addEventListener("focus", onFocus);
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    if (retriesRef.current.count < 2) {
-      retriesRef.current.count++;
-      timer = setTimeout(retry, 1500 * retriesRef.current.count);
-    }
-    return () => { clearTimeout(timer); window.removeEventListener("online", retry); window.removeEventListener("focus", onFocus); };
-  }, [failed, initialTrends, aesthetic.id, audience, filters.style, page, pageKey, router]);
   useEffect(() => { setTrends(initialTrends); }, [initialTrends]);
   useEffect(() => {
     if (previousPageRef.current === pageKey) return;
@@ -364,7 +420,7 @@ function LaneFeed({
   };
 
   const resetFilters = () => navigate({
-    search: (previous) => ({ ...previous, audience: undefined, style: undefined, page: undefined, trend: undefined }),
+    search: (previous) => ({ ...previous, audience: undefined, page: undefined, trend: undefined }),
     resetScroll: false,
     viewTransition: false,
   });
@@ -381,13 +437,13 @@ function LaneFeed({
       />
     ) : trends.length === 0 ? (
       <EmptyState
-        title={filters.style || audience !== "ALL" ? "No drops match these filters." : `Nothing pinned in ${laneLabel(aesthetic.name)} yet.`}
-        body="Try another style or fit, or clear the filters to see every drop in this lane."
+        title={audience !== "ALL" ? "No drops for this fit yet." : "Nothing pinned in " + name + " yet."}
+        body="Try a different fit or browse another subcategory."
         action={
           <div className="flex flex-wrap justify-center gap-3">
-            {(audience !== "ALL" || filters.style) && <button type="button" onClick={resetFilters} className={ctaClass("primary")}>Clear filters</button>}
-            <Link to="/lanes" className={ctaClass(audience === "ALL" ? "primary" : "outline")}>
-              Browse other lanes <CtaArrow />
+            {audience !== "ALL" && <button type="button" onClick={resetFilters} className={ctaClass("primary")}>Show all fits</button>}
+            <Link to="/aesthetic/$id" params={{ id: aesthetic.id }} search={{}} className={ctaClass(audience === "ALL" ? "primary" : "outline")}>
+              Browse subcategories <CtaArrow />
             </Link>
           </div>
         }
@@ -406,25 +462,25 @@ function LaneFeed({
       <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
         <h2 tabIndex={-1} className="font-display text-3xl tracking-tight outline-none sm:text-4xl">
-          Rising in <em className="italic text-clay">{laneLabel(aesthetic.name)}</em>
+          Rising in <em className="italic text-clay">{name}</em>
         </h2>
         <p className="meta mt-2" role="status" aria-live="polite" aria-atomic="true">
           {pending ? "Finding your fits…" : failed ? "Drops temporarily unavailable" : `${total ?? trends.length} ${(total ?? trends.length) === 1 ? "drop" : "drops"}${audience !== "ALL" ? ` · ${audienceLabel(audience)} + unisex` : ""} · highest hype score first`}
         </p>
-        {filters.style && <p className="mt-1 text-xs text-clay-ink">{styles.find((style) => style.id === filters.style)?.label}</p>}
         </div>
 
-      <LaneFilters audience={audience} filters={filters} styles={styles} laneName={laneLabel(aesthetic.name)} pending={pending} unavailable={failed && styles.length === 0}
-        onApply={(change) => {
+      <LaneFilters audience={audience} laneName={name} pending={pending}
+        onApply={(nextAudience) => {
           void navigate({
-            search: (previous) => ({ ...previous, ...change, ...(change.audience === "ALL" ? { audience: undefined } : {}), page: undefined, trend: undefined }),
+            search: (previous) => ({ ...previous, audience: nextAudience === "ALL" ? undefined : nextAudience, page: undefined, trend: undefined }),
             resetScroll: false,
             viewTransition: false,
           });
         }} />
       </div>
 
-      {emptyContent || <TrendBoard
+      {emptyContent}
+      {(!emptyContent || openId) && <TrendBoard
         trends={trends}
         openId={openId}
         onOpenChange={setOpen}

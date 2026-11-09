@@ -2,7 +2,7 @@ import type { LaneFilters, StyleOption } from "@/lib/lane-filters";
 
 const styles = new Map<string, StyleOption[]>();
 const failures = new Set<string>();
-function key(lane: string, audience: string, filters: LaneFilters & { page?: number }) { return `${lane}:${audience}:${filters.style || ""}:${filters.page || 1}`; }
+function key(lane: string, audience: string, filters: LaneFilters & { page?: number }) { return `${lane}:${audience}:${filters.style || filters.collection || ""}:${filters.page || 1}`; }
 
 export function cachedStyles(lane: string) { return styles.get(lane) || []; }
 export function rememberStyles(lane: string, options: StyleOption[]) { if (options.length) styles.set(lane, options); }

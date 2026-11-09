@@ -1,7 +1,7 @@
 import { getCatalogPage } from "@/lib/api";
 import { productIdentity } from "@/lib/daily-board";
-import type { LaneFilters } from "@/lib/lane-filters";
-import { cachedStyles, markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
+import { styleSearch, type LaneFilters, type StyleOption } from "@/lib/lane-filters";
+import { markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
 import { aesthetics, type Trend } from "@/lib/mock-data";
 import type { AudienceFilter, ProductAudience } from "@/lib/audience";
 
@@ -80,14 +80,37 @@ export function belongsToLane(trend: Trend, laneId: string) {
 /** One page of a lane's trends, plus whether another page is worth asking for. */
 export async function fetchLanePage(laneId: string, page: number, audience: AudienceFilter = "ALL", filters: LaneFilters = {}) {
   try {
-    const result = await getCatalogPage(laneId, LANE_PAGE_SIZE, page, audience, { style: filters.style });
+    const size = filters.style || filters.collection ? LANE_PAGE_SIZE : 1;
+    const result = await getCatalogPage(laneId, size, page, audience, { style: filters.style, subcategory: filters.collection });
     rememberStyles(laneId, result.styles);
     markCatalogFailure(laneId, audience, { ...filters, page: page + 1 }, false);
-    return { ...result, styles: result.styles.length ? result.styles : cachedStyles(laneId), trends: result.trends.filter((t) => belongsToLane(t, laneId)) };
+    return { ...result, trends: result.trends.filter((t) => belongsToLane(t, laneId)) };
   } catch (error) {
     markCatalogFailure(laneId, audience, { ...filters, page: page + 1 }, true);
     throw error;
   }
+}
+
+function rotationItems(trends: Trend[], laneId: string) {
+  const items = trends
+    .filter((t) => belongsToLane(t, laneId) && t.products?.underdog?.imageUrl && t.products.underdog.shopUrl)
+    .map((t) => toRotationItem(t, laneId));
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = productIdentity(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export async function fetchStyleCovers(laneId: string, styles: StyleOption[], audience: AudienceFilter): Promise<RotationMap> {
+  const results = await Promise.allSettled(styles.map(async (option) => {
+    const { style, collection } = styleSearch(option);
+    const { trends } = await getCatalogPage(laneId, 5, 0, audience, { style, subcategory: collection }, false);
+    return [option.id, rotationItems(trends, laneId)] as const;
+  }));
+  return Object.fromEntries(results.flatMap((result) => result.status === "fulfilled" ? [result.value] : []));
 }
 
 export const LANE_COVER_STALE_TIME = 60_000;
@@ -108,16 +131,7 @@ export function fetchLaneRotations(audience: AudienceFilter = "ALL"): Promise<Ro
     aesthetics.map(async (a) => {
       // The catalog response applies the lane's current style rules on older API deployments too.
       const { trends } = await getCatalogPage(a.id, 15, 0, audience);
-      const items = trends
-        .filter((t) => belongsToLane(t, a.id) && t.products?.underdog?.imageUrl && t.products?.underdog?.shopUrl)
-        .map((t) => toRotationItem(t, a.id));
-      const seen = new Set<string>();
-      return [a.id, items.filter((item) => {
-        const key = productIdentity(item);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })] as const;
+      return [a.id, rotationItems(trends, a.id)] as const;
     }),
   ).then((results) => {
     const map: RotationMap = {};

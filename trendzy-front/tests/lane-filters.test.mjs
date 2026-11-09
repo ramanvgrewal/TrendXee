@@ -9,7 +9,7 @@ async function loadModule(path, replacements = {}) {
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
   return `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
 }
-const { normalizeLaneFilters, normalizeLanePage, lanePageItems } = await import(await loadModule('../src/lib/lane-filters.ts'));
+const { normalizeLaneFilters, normalizeLanePage, lanePageItems, styleSearch } = await import(await loadModule('../src/lib/lane-filters.ts'));
 const audienceUrl = await loadModule('../src/lib/audience.ts');
 const { getCatalogPage } = await import(await loadModule('../src/lib/api.ts', { '"@/lib/audience"': JSON.stringify(audienceUrl) }));
 const state = await import(await loadModule('../src/lib/catalog-state.ts'));
@@ -71,5 +71,18 @@ test('grouped style and fit stay on subsequent pages without a price filter', as
     assert.equal(page.total, 25);
     assert.equal(page.hasMore, false);
     assert.deepEqual(page.styles, [{ id: 'baggy', label: 'Baggy & wide-leg' }]);
+  } finally { globalThis.fetch = previousFetch; }
+});
+
+test('shirt subcategory labels become exact collection links', async () => {
+  const previousFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    content: [], styles: [], subcategories: ['Printed Shirts', 'Printed Shirts', '', 'Linen Shirts'],
+  }));
+  try {
+    const { styles } = await getCatalogPage('shirts', 1, 0, 'ALL');
+    assert.deepEqual(styles.map(styleSearch), [{ collection: 'Printed Shirts' }, { collection: 'Linen Shirts' }]);
+    assert.deepEqual(normalizeLaneFilters({ collection: ' Printed Shirts ' }), styleSearch(styles[0]));
+    assert.deepEqual(normalizeLaneFilters({ style: 'oversized', collection: 'Printed Shirts' }), { style: 'oversized' });
   } finally { globalThis.fetch = previousFetch; }
 });

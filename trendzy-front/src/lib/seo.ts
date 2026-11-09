@@ -60,10 +60,10 @@ export function breadcrumbSchema(items: Crumb[]) {
 }
 
 /** Only pagination changes the canonical list page. Filters and open dialogs are not landing pages. */
-export function laneSeo(id: string, name: string, description: string, search: { page?: number; audience?: string; style?: string; trend?: string }) {
+export function laneSeo(id: string, name: string, description: string, search: { page?: number; audience?: string; style?: string; collection?: string; trend?: string }) {
   const page = Math.max(1, search.page ?? 1);
-  const filtered = !!search.style || (!!search.audience && search.audience !== "ALL");
-  const context = [search.audience && search.audience !== "ALL" ? search.audience === "MEN" ? "Men" : "Women" : "", search.style ?? "", page > 1 ? `Page ${page}` : ""].filter(Boolean);
+  const filtered = !!(search.style || search.collection) || (!!search.audience && search.audience !== "ALL");
+  const context = [search.audience && search.audience !== "ALL" ? search.audience === "MEN" ? "Men" : "Women" : "", search.style ?? search.collection ?? "", page > 1 ? `Page ${page}` : ""].filter(Boolean);
   return pageSeo({ title: `${name}${context.length ? ` · ${context.join(" · ")}` : ""} — TrendXee`,
     description: `${description}${page > 1 ? ` Browse page ${page} of the current ${name.toLowerCase()} collection.` : ""}`,
     path: `/aesthetic/${id}${!filtered && page > 1 ? `?page=${page}` : ""}`, noindex: filtered || !!search.trend });

@@ -1,3 +1,4 @@
+import type { StyleOption } from "@/lib/lane-filters";
 import type { ProductMatch, BrandProducts, SignalProduct, Trend } from "@/lib/mock-data";
 import { matchesAudience, normalizeProductAudience, type AudienceFilter } from "@/lib/audience";
 
@@ -219,11 +220,23 @@ export async function getCatalogPage(
   const response = await fetchCatalog(`/api/v2/trends?${params}`);
   const data = await response.json();
   const trends = normalizeTrendList(data).filter((trend) => matchesAudience(trend.products.underdog?.audience, audience));
+  const styles: StyleOption[] = Array.isArray(data.styles)
+    ? data.styles.filter((value: any) => typeof value?.id === "string" && typeof value?.label === "string")
+    : [];
+  // Shirts accepts the subcategory labels supplied by brand ingestion.
+  if (category === "shirts" && styles.length === 0 && Array.isArray(data.subcategories)) {
+    const labels = new Map<string, string>();
+    for (const value of data.subcategories) {
+      const label = typeof value === "string" ? value.trim() : "";
+      if (label && label.length <= 160) labels.set(label.toLowerCase(), label);
+    }
+    for (const label of labels.values()) styles.push({ id: label, label, collection: true });
+  }
   return {
     trends,
     total: typeof data.totalElements === "number" ? data.totalElements : undefined,
     hasMore: typeof data.hasMore === "boolean" ? data.hasMore : trends.length === size,
-    styles: (Array.isArray(data.styles) ? data.styles.filter((value: any) => typeof value?.id === "string" && typeof value?.label === "string") : []) as { id: string; label: string }[],
+    styles,
   };
 }
 

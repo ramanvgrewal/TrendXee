@@ -1,6 +1,10 @@
-/** Category URLs store only the broad style family. Retired price/raw-style links cannot hide results. */
-export type LaneFilters = { style?: string };
-export type StyleOption = { id: string; label: string };
+/** Use the catalog style family, or the stored label for a collection without style groups. */
+export type LaneFilters = { style?: string; collection?: string };
+export type StyleOption = { id: string; label: string; collection?: true };
+
+export function styleSearch(option: StyleOption): LaneFilters {
+  return option.collection ? { collection: option.id } : { style: option.id };
+}
 
 /** URLs are one-based. Invalid, fractional and unbounded page values start at page one. */
 export function normalizeLanePage(value: unknown): number {
@@ -28,5 +32,7 @@ export function lanePageItems(page: number, total: number): (number | "gap")[] {
 
 export function normalizeLaneFilters(search: Record<string, unknown>): LaneFilters {
   const style = typeof search.style === "string" ? search.style.trim() : "";
-  return /^[a-z][a-z-]{0,39}$/.test(style) ? { style } : {};
+  if (/^[a-z][a-z-]{0,39}$/.test(style)) return { style };
+  const collection = typeof search.collection === "string" ? search.collection.trim() : "";
+  return collection && collection.length <= 160 ? { collection } : {};
 }

@@ -3,6 +3,7 @@ import { AnimatePresence, m, useInView } from "framer-motion";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/motion/hooks";
+import { styleSearch, type StyleOption } from "@/lib/lane-filters";
 import type { RotationItem } from "@/lib/lanes";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { lift, spring } from "@/motion/tokens";
@@ -18,6 +19,7 @@ type LaneCardProps = {
   aesthetic: Aesthetic;
   index: number;
   products?: RotationItem[];
+  subcategory?: StyleOption;
   className?: string;
   eager?: boolean;
 };
@@ -32,6 +34,7 @@ function LaneCardSlideshow({
   aesthetic,
   index,
   slides,
+  subcategory,
   className = "",
   eager = false,
 }: Omit<LaneCardProps, "products"> & { slides: RotationItem[] }) {
@@ -47,8 +50,8 @@ function LaneCardSlideshow({
   const { length } = slides;
   const slide = slides[current];
   const brand = slide?.brand;
-  const label = laneLabel(aesthetic.name);
-  const src = slide?.image || (audience === "ALL" ? aesthetic.heroImage : "");
+  const label = subcategory?.label ?? laneLabel(aesthetic.name);
+  const src = slide?.image || (!subcategory && audience === "ALL" ? aesthetic.heroImage : "");
 
   useEffect(() => {
     const update = () => setVisible(document.visibilityState === "visible");
@@ -84,14 +87,16 @@ function LaneCardSlideshow({
       <Link
         to="/aesthetic/$id"
         params={{ id: aesthetic.id }}
-        viewTransition
+        search={subcategory ? styleSearch(subcategory) : undefined}
+        aria-label={subcategory ? "Explore " + label : undefined}
+        viewTransition={!subcategory}
         data-cursor="explore"
         data-cursor-label="Enter"
         className="block h-full rounded-[20px] outline-offset-4"
       >
         <PointerScope className="relative h-full overflow-hidden rounded-[20px] bg-cream shadow-print transition-shadow duration-[350ms] group-hover/lane:shadow-lift group-active/lane:shadow-press">
           {/* Photo */}
-          <div className="absolute inset-0" style={{ viewTransitionName: `lane-${aesthetic.id}` }}>
+          <div className="absolute inset-0" style={subcategory ? undefined : { viewTransitionName: `lane-${aesthetic.id}` }}>
             <Parallax depth={isShoeCategory(aesthetic.id) ? 0 : 5} bleed={!isShoeCategory(aesthetic.id)} className="absolute inset-0">
               <AnimatePresence initial={false}>
                 <m.div
@@ -125,8 +130,8 @@ function LaneCardSlideshow({
           {/* Copy */}
           <div className="absolute inset-x-0 bottom-0 p-6 text-on-scrim sm:p-7">
             <Parallax depth={1.5} follow>
-              <h3 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere]">{laneLabel(aesthetic.name)}</h3>
-              <p className="mt-3 line-clamp-2 max-w-[22rem] text-[14px] leading-relaxed text-on-scrim/75">{aesthetic.description}</p>
+              <h3 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere]">{label}</h3>
+              {!subcategory && <p className="mt-3 line-clamp-2 max-w-[22rem] text-[14px] leading-relaxed text-on-scrim/75">{aesthetic.description}</p>}
               <div className="mt-5 flex items-center justify-between gap-4 border-t border-on-scrim/20 pt-4 eyebrow">
                 <span className="truncate text-on-scrim/75">
                   {brand ? (
@@ -134,7 +139,7 @@ function LaneCardSlideshow({
                       Featured: <span className="font-display text-[13px] normal-case italic tracking-normal text-on-scrim">{brand}</span>
                     </>
                   ) : (
-                    audience === "ALL" ? aesthetic.vibeTags.slice(0, 3).join(" · ") : "New finds soon"
+                    subcategory ? "Explore collection" : audience === "ALL" ? aesthetic.vibeTags.slice(0, 3).join(" · ") : "New finds soon"
                   )}
                 </span>
                 <span className="flex shrink-0 items-center gap-2 text-on-scrim transition-transform duration-300 group-hover/lane:translate-x-0.5">
