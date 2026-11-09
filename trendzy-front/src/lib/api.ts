@@ -223,15 +223,6 @@ export async function getCatalogPage(
   const styles: StyleOption[] = Array.isArray(data.styles)
     ? data.styles.filter((value: any) => typeof value?.id === "string" && typeof value?.label === "string")
     : [];
-  // Shirts accepts the subcategory labels supplied by brand ingestion.
-  if (category === "shirts" && styles.length === 0 && Array.isArray(data.subcategories)) {
-    const labels = new Map<string, string>();
-    for (const value of data.subcategories) {
-      const label = typeof value === "string" ? value.trim() : "";
-      if (label && label.length <= 160) labels.set(label.toLowerCase(), label);
-    }
-    for (const label of labels.values()) styles.push({ id: label, label, collection: true });
-  }
   return {
     trends,
     total: typeof data.totalElements === "number" ? data.totalElements : undefined,

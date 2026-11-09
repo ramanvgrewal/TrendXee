@@ -46,8 +46,10 @@ public final class CatalogFilterQuery {
         boolean hasStyle = style != null && !style.isBlank();
         if (hasStyle || CatalogStyles.isRestricted(category)) {
             Document family = hasStyle ? CatalogStyles.match(category, style.trim()) : CatalogStyles.allowed(category);
-            Object audienceExpression = criteria.get("$expr");
-            criteria.put("$expr", audienceExpression == null ? family : new Document("$and", List.of(audienceExpression, family)));
+            andExpression(criteria, family);
+        }
+        if (CatalogStyles.isShirts(normalized)) {
+            andExpression(criteria, CatalogStyles.shirtEligibility());
         }
         if (minPrice != null || maxPrice != null) {
             // Filter the selected product's selling price, never its MRP or the trend estimate.
@@ -60,6 +62,11 @@ public final class CatalogFilterQuery {
                     null, "", "INR", "inr", "Rs", "Rs.", "RS", "RS.", "₹", "RUPEES", "rupees")));
         }
         return new BasicQuery(criteria);
+    }
+
+    private static void andExpression(Document criteria, Document expression) {
+        Object existing = criteria.get("$expr");
+        criteria.put("$expr", existing == null ? expression : new Document("$and", List.of(existing, expression)));
     }
 
     public static String normalizeCategory(String category) {

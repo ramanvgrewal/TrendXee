@@ -9,7 +9,7 @@ async function loadModule(path, replacements = {}) {
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
   return `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
 }
-const { normalizeLaneFilters, normalizeLanePage, lanePageItems, styleSearch } = await import(await loadModule('../src/lib/lane-filters.ts'));
+const { normalizeLaneFilters, normalizeLanePage, lanePageItems, shirtStyleId } = await import(await loadModule('../src/lib/lane-filters.ts'));
 const audienceUrl = await loadModule('../src/lib/audience.ts');
 const { getCatalogPage } = await import(await loadModule('../src/lib/api.ts', { '"@/lib/audience"': JSON.stringify(audienceUrl) }));
 const state = await import(await loadModule('../src/lib/catalog-state.ts'));
@@ -74,15 +74,13 @@ test('grouped style and fit stay on subsequent pages without a price filter', as
   } finally { globalThis.fetch = previousFetch; }
 });
 
-test('shirt subcategory labels become exact collection links', async () => {
-  const previousFetch = globalThis.fetch;
-  globalThis.fetch = async () => new Response(JSON.stringify({
-    content: [], styles: [], subcategories: ['Printed Shirts', 'Printed Shirts', '', 'Linen Shirts'],
-  }));
-  try {
-    const { styles } = await getCatalogPage('shirts', 1, 0, 'ALL');
-    assert.deepEqual(styles.map(styleSearch), [{ collection: 'Printed Shirts' }, { collection: 'Linen Shirts' }]);
-    assert.deepEqual(normalizeLaneFilters({ collection: ' Printed Shirts ' }), styleSearch(styles[0]));
-    assert.deepEqual(normalizeLaneFilters({ style: 'oversized', collection: 'Printed Shirts' }), { style: 'oversized' });
-  } finally { globalThis.fetch = previousFetch; }
+test('older shirt collection URLs map to grouped styles', () => {
+  assert.deepEqual(normalizeLaneFilters({ collection: ' Ajrakh Printed Shirt ' }), { collection: 'Ajrakh Printed Shirt' });
+  for (const label of ['Ajrakh Printed Shirt', 'Block-Printed Shirt', 'Printed Resort Shirt']) {
+    assert.equal(shirtStyleId(label), 'printed');
+  }
+  assert.equal(shirtStyleId('Hand-Embroidered Shirt'), 'embroidered');
+  assert.equal(shirtStyleId('Chikankari Shirt'), 'embroidered');
+  assert.equal(shirtStyleId('Linen Shirt'), 'linen');
+  assert.equal(shirtStyleId('Khadi Shirt'), 'other');
 });

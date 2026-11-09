@@ -45,6 +45,22 @@ class CatalogStylesTest {
                 CatalogStyles.options("CAPS", List.of()).stream().map(CatalogStyles.Option::id).toList());
     }
 
+    @Test void shirtsUseBroadStylesAndCheckTheActualProductBeforePagination() {
+        assertEquals("printed", CatalogStyles.classify("SHIRTS", "Ajrakh Printed Shirt"));
+        assertEquals("printed", CatalogStyles.classify("SHIRTS", "Block-Printed Shirt"));
+        assertEquals("embroidered", CatalogStyles.classify("SHIRTS", "Hand-Embroidered Shirt"));
+        assertEquals("embroidered", CatalogStyles.classify("SHIRTS", "Chikankari Shirt"));
+        assertEquals(List.of("printed", "embroidered"),
+                CatalogStyles.options("SHIRTS", List.of("Ajrakh Printed Shirt", "Block-Printed Shirt", "Chikankari Shirt"))
+                        .stream().map(CatalogStyles.Option::id).toList());
+        var unfiltered = CatalogFilterQuery.build("SHIRTS", "ALL", null, null, null).getQueryObject();
+        assertEquals(CatalogStyles.shirtEligibility(), unfiltered.get("$expr"));
+        var filtered = CatalogFilterQuery.build("SHIRTS", "WOMEN", null, null, null, "printed").getQueryObject();
+        assertTrue(filtered.toJson().contains("signalProducts.underdog.productType"));
+        assertTrue(filtered.toJson().contains("UNISEX"));
+        assertTrue(filtered.toJson().contains("printed"));
+    }
+
     @Test void groupAndAudienceAreBothAppliedBeforePaginationAndUnrelatedLanesAreRejected() {
         var query = CatalogFilterQuery.build("JEANS", "WOMEN", null, null, null, "baggy");
         var expression = query.getQueryObject().get("$expr", Document.class);

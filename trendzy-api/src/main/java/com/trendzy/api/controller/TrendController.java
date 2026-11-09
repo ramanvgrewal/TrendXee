@@ -48,7 +48,7 @@ public class TrendController {
             @RequestParam(defaultValue = "false") boolean includeFilters,
             @RequestParam(required = false) String style) {
         if (minPrice == null && maxPrice == null && !includeFilters && (style == null || style.isBlank())
-                && !CatalogStyles.isRestricted(category) && !"TEES".equalsIgnoreCase(category.trim())) {
+                && !CatalogStyles.isRestricted(category) && !CatalogStyles.isShirts(category) && !"TEES".equalsIgnoreCase(category.trim())) {
             return getTrends(category, subcategory, page, size, audience);
         }
         if (page < 0 || size < 1 || size > 100) {

@@ -1,6 +1,6 @@
 import { getCatalogPage } from "@/lib/api";
 import { productIdentity } from "@/lib/daily-board";
-import { styleSearch, type LaneFilters, type StyleOption } from "@/lib/lane-filters";
+import type { LaneFilters, StyleOption } from "@/lib/lane-filters";
 import { markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
 import { aesthetics, type Trend } from "@/lib/mock-data";
 import type { AudienceFilter, ProductAudience } from "@/lib/audience";
@@ -80,8 +80,8 @@ export function belongsToLane(trend: Trend, laneId: string) {
 /** One page of a lane's trends, plus whether another page is worth asking for. */
 export async function fetchLanePage(laneId: string, page: number, audience: AudienceFilter = "ALL", filters: LaneFilters = {}) {
   try {
-    const size = filters.style || filters.collection ? LANE_PAGE_SIZE : 1;
-    const result = await getCatalogPage(laneId, size, page, audience, { style: filters.style, subcategory: filters.collection });
+    const size = filters.style ? LANE_PAGE_SIZE : 1;
+    const result = await getCatalogPage(laneId, size, page, audience, { style: filters.style });
     rememberStyles(laneId, result.styles);
     markCatalogFailure(laneId, audience, { ...filters, page: page + 1 }, false);
     return { ...result, trends: result.trends.filter((t) => belongsToLane(t, laneId)) };
@@ -106,8 +106,7 @@ function rotationItems(trends: Trend[], laneId: string) {
 
 export async function fetchStyleCovers(laneId: string, styles: StyleOption[], audience: AudienceFilter): Promise<RotationMap> {
   const results = await Promise.allSettled(styles.map(async (option) => {
-    const { style, collection } = styleSearch(option);
-    const { trends } = await getCatalogPage(laneId, 5, 0, audience, { style, subcategory: collection }, false);
+    const { trends } = await getCatalogPage(laneId, 5, 0, audience, { style: option.id }, false);
     return [option.id, rotationItems(trends, laneId)] as const;
   }));
   return Object.fromEntries(results.flatMap((result) => result.status === "fulfilled" ? [result.value] : []));

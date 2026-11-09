@@ -17,7 +17,7 @@ import { audienceLabel, normalizeAudienceFilter, type AudienceFilter } from "@/l
 import { useAudience } from "@/components/AudienceFilter";
 import { LaneFilters } from "@/components/LaneFilters";
 import { LaneReading } from "@/components/LaneReading";
-import { normalizeLaneFilters, normalizeLanePage, lanePageItems, type LaneFilters as Filters, type StyleOption } from "@/lib/lane-filters";
+import { normalizeLaneFilters, normalizeLanePage, lanePageItems, shirtStyleId, type LaneFilters as Filters, type StyleOption } from "@/lib/lane-filters";
 import { CatalogRequestError } from "@/lib/api";
 import { cachedStyles, hasCatalogFailure, markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
 
@@ -35,19 +35,21 @@ export const Route = createFileRoute("/aesthetic/$id")({
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
-    const filtered = !!(deps.style || deps.collection);
+    const filtered = !!deps.style;
     const linkedTrend = (location.search as Record<string, unknown>).trend;
-    const chooser = () => redirect({ to: "/aesthetic/$id", params, search: {
+    const destination = (style?: string) => redirect({ to: "/aesthetic/$id", params, search: {
+      style,
       audience: deps.audience === "ALL" ? undefined : deps.audience,
       trend: typeof linkedTrend === "string" ? linkedTrend : undefined,
     }, replace: true });
-    if ((!filtered && deps.page > 1) || (deps.collection && params.id !== "shirts")) throw chooser();
+    if (deps.collection) throw destination(params.id === "shirts" ? shirtStyleId(deps.collection) : undefined);
+    if (!filtered && deps.page > 1) throw destination();
 
     let result;
     try {
       result = await fetchLanePage(params.id, deps.page - 1, deps.audience, deps);
     } catch (error) {
-      if (error instanceof CatalogRequestError && error.status === 400 && deps.style) throw chooser();
+      if (error instanceof CatalogRequestError && error.status === 400 && deps.style) throw destination();
       console.error(error);
       return { aesthetic, trends: [], styles: cachedStyles(params.id), failed: true };
     }
@@ -56,10 +58,6 @@ export const Route = createFileRoute("/aesthetic/$id")({
       const covers = await fetchStyleCovers(params.id, result.styles, deps.audience);
       return { aesthetic, trends: [], styles: result.styles, covers, failed: false };
     }
-    if (deps.collection && !result.styles.some((option) =>
-      option.collection && option.id.toLowerCase() === deps.collection?.toLowerCase()
-    )) throw chooser();
-
     const lastPage = Math.max(1, Math.ceil((result.total ?? 0) / LANE_PAGE_SIZE));
     if (result.total !== undefined && deps.page > lastPage) {
       throw redirect({ to: "/aesthetic/$id", params, search: {

@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { AnimatePresence, m, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/motion/hooks";
-import { styleSearch, type StyleOption } from "@/lib/lane-filters";
+import type { StyleOption } from "@/lib/lane-filters";
 import type { RotationItem } from "@/lib/lanes";
 import { Parallax, PointerScope } from "@/motion/Parallax";
 import { lift, spring } from "@/motion/tokens";
@@ -76,7 +76,7 @@ function LaneCardSlideshow({
       <Link
         to="/aesthetic/$id"
         params={{ id: aesthetic.id }}
-        search={subcategory ? styleSearch(subcategory) : undefined}
+        search={subcategory ? { style: subcategory.id } : undefined}
         aria-label={subcategory ? "Explore " + label : undefined}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}

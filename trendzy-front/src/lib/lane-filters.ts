@@ -1,9 +1,12 @@
-/** Use the catalog style family, or the stored label for a collection without style groups. */
+/** Collection labels are accepted on old Shirts URLs so they can be redirected. */
 export type LaneFilters = { style?: string; collection?: string };
-export type StyleOption = { id: string; label: string; collection?: true };
+export type StyleOption = { id: string; label: string };
 
-export function styleSearch(option: StyleOption): LaneFilters {
-  return option.collection ? { collection: option.id } : { style: option.id };
+export function shirtStyleId(label: string) {
+  if (/print|ajrakh/i.test(label)) return "printed";
+  if (/embroider|chikankari/i.test(label)) return "embroidered";
+  if (/linen/i.test(label)) return "linen";
+  return "other";
 }
 
 /** URLs are one-based. Invalid, fractional and unbounded page values start at page one. */

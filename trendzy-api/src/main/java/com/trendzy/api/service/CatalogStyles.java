@@ -12,6 +12,12 @@ public final class CatalogStyles {
     private CatalogStyles() {}
     private static final String OTHER_ACCESSORIES =
             "\\b(bags?|totes?|wallets?|belts?|sunglasses|earrings?|earcuffs?|key[ -]?rings?|watch straps?)\\b";
+    private static final String SHIRT = "\\bshirts?\\b";
+    private static final String NON_SHIRT = "\\b(?:t[ -]?shirts?|tees?|polos?|overshirts?|shackets?|sweatshirts?|"
+            + "shirts?[ -]dresses?|suits?|kurtas?|kurtis?|co[ -]?ords?|sets?|blazers?)\\b";
+    private static final String OTHER_GARMENT =
+            "\\b(?:vests?|blouses?|tunics?|jumpsuits?|jackets?|pants?|trousers?|shorts|jeans)\\b";
+
     public record Style(String id, String label, String regex) {}
     public record Option(String id, String label) {}
     private static Style style(String id, String label, String regex) { return new Style(id, label, regex); }
@@ -61,6 +67,11 @@ public final class CatalogStyles {
                     style("basketball", "Basketball jerseys", "basketball"),
                     style("cricket", "Cricket jerseys", "cricket"),
                     style("gym", "Gym & training", ".*"));
+            case "SHIRTS" -> List.of(
+                    style("printed", "Printed shirts", "print|ajrakh"),
+                    style("embroidered", "Embroidered shirts", "embroider|chikankari"),
+                    style("linen", "Linen shirts", "linen"),
+                    style("other", "Other shirts", ".*"));
             case "POLOS" -> List.of(
                     style("oversized", "Oversized polos", "oversiz.*polo"),
                     style("performance", "Performance polos", "(performance|sporty|sport).*polo"),
@@ -79,6 +90,22 @@ public final class CatalogStyles {
     static boolean isAccessories(String category) {
         return List.of("CAPS", "ACCESSORIES", "CAPS_ACCESSORIES", "CAPS & ACCESSORIES", "CAPS_AND_ACCESSORIES")
                 .contains(category.trim().toUpperCase(Locale.ROOT));
+    }
+
+    public static boolean isShirts(String category) {
+        return "SHIRTS".equalsIgnoreCase(category.trim());
+    }
+
+    static Document shirtEligibility() {
+        Document title = text("$signalProducts.underdog.title");
+        Document type = text("$signalProducts.underdog.productType");
+        Document identity = new Document("$concat", List.of(title, " ", type));
+        Document shirtType = new Document("$and", List.of(regex(type, SHIRT),
+                new Document("$not", List.of(regex(type, "\\btops?\\b")))));
+        return new Document("$and", List.of(
+                new Document("$or", List.of(regex(title, SHIRT), shirtType)),
+                new Document("$not", List.of(new Document("$or", List.of(
+                        regex(identity, NON_SHIRT), regex(title, OTHER_GARMENT)))))));
     }
 
     public static boolean isRestricted(String category) {
