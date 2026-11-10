@@ -60,7 +60,7 @@ public class TrendController {
         var choices = includeFilters
                 ? mongoTemplate.findDistinct(CatalogFilterQuery.build(category, "ALL", null, null, null),
                         "subcategory", Trend.class, String.class)
-                    .filter(value -> value != null && !value.isBlank())
+                    .filter(value -> value != null && !value.isBlank()).distinct()
                     .sort(String.CASE_INSENSITIVE_ORDER).collectList()
                 : Mono.just(List.<String>of());
         return Mono.zip(
