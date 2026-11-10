@@ -96,6 +96,22 @@ public final class CatalogStyles {
                 .contains(category.trim().toUpperCase(Locale.ROOT));
     }
 
+    private static final Map<String, String> OUTERWEAR_ALIASES = Map.of(
+            "Denim Jackets", "Denim Jacket", "Hoodies", "Hoodie");
+
+    public static String canonicalSubcategory(String category, String label) {
+        return "OUTERWEAR".equalsIgnoreCase(category.trim()) ? OUTERWEAR_ALIASES.getOrDefault(label, label) : label;
+    }
+
+    static List<String> subcategoryAliases(String category, String label) {
+        String canonical = canonicalSubcategory(category, label);
+        if (!"OUTERWEAR".equalsIgnoreCase(category.trim())) return List.of(canonical);
+        List<String> labels = new ArrayList<>();
+        labels.add(canonical);
+        OUTERWEAR_ALIASES.forEach((alias, name) -> { if (name.equals(canonical)) labels.add(alias); });
+        return labels;
+    }
+
     public static boolean isShirts(String category) {
         return "SHIRTS".equalsIgnoreCase(category.trim());
     }

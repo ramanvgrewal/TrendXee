@@ -40,7 +40,8 @@ public final class CatalogFilterQuery {
             criteria.put("$expr", new Document("$in", List.of(Document.parse(TrendRepository.EFFECTIVE_AUDIENCE), audiences)));
         }
         if (subcategory != null && !subcategory.isBlank()) {
-            criteria.put("subcategory", subcategory);
+            var labels = CatalogStyles.subcategoryAliases(normalized, subcategory);
+            criteria.put("subcategory", labels.size() == 1 ? subcategory : new Document("$in", labels));
         }
         boolean hasStyle = style != null && !style.isBlank();
         if (hasStyle || CatalogStyles.isRestricted(category)) {
