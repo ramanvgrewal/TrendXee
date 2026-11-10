@@ -35,7 +35,7 @@ public interface TrendRepository extends ReactiveMongoRepository<Trend, String> 
     Flux<Trend> findByCategoryAndSubcategoryAndAudience(List<String> categories, String subcategory, List<String> audiences, Pageable pageable);
 
     /** Never hydrate large scraper pools/marketplace stories to revalidate an outfit. */
-    @Query(value = "{ '_id': { '$in': ?0 } }", fields = "{ 'category': 1, 'subcategory': 1, 'indianUnderdogBrand': 1, 'taxonomyReview': 1, 'active': 1, 'enrichmentStatus': 1, 'signalProducts.underdog': 1 }")
+    @Query(value = "{ '_id': { '$in': ?0 } }", fields = "{ 'category': 1, 'subcategory': 1, 'indianUnderdogBrand': 1, 'taxonomyReview': 1, 'taxonomyDuplicateOf': 1, 'active': 1, 'enrichmentStatus': 1, 'signalProducts.underdog': 1 }")
     Flux<Trend> findCurrentOutfitMembers(List<String> ids);
 
 }

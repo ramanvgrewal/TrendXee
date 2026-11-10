@@ -79,7 +79,7 @@ class PairingServiceTest {
     @Test void unknownAndSharedSourcesUseSharedOrRequestedAudience() {
         var visual = missingReview();
         for (String gender : new String[]{null, "UNKNOWN", "UNISEX"}) {
-            var source = item("source", "Sweatshirt", "ANIME", gender);
+            var source = item("source", "Linen Shirt", "SHIRTS", gender);
             assertEquals("UNISEX", query(source, "ALL").audience());
             for (String requested : List.of("MEN", "WOMEN")) {
                 assertEquals(requested, query(source, requested).audience());

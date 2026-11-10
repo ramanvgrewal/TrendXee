@@ -33,6 +33,7 @@ public class Trend {
     private String subcategory;
     private boolean indianUnderdogBrand;
     private boolean taxonomyReview;
+    private String taxonomyDuplicateOf;
     private String productSelectionFocus;
     private Object productRefreshedAt;
     private Object lastProductRefreshAttemptAt;
