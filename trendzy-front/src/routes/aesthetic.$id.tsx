@@ -18,7 +18,6 @@ import { useAudience } from "@/components/AudienceFilter";
 import { LaneFilters } from "@/components/LaneFilters";
 import { LaneReading } from "@/components/LaneReading";
 import { normalizeLaneFilters, normalizeLanePage, lanePageItems, type LaneFilters as Filters, type StyleOption } from "@/lib/lane-filters";
-import { CatalogRequestError } from "@/lib/api";
 import { cachedStyles, hasCatalogFailure, markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
 
 type LaneData = { aesthetic: Aesthetic; trends: Trend[]; failed: boolean; total?: number; styles: StyleOption[]; covers?: RotationMap };
@@ -35,20 +34,18 @@ export const Route = createFileRoute("/aesthetic/$id")({
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
-    const filtered = !!(deps.style || deps.collection);
+    const filtered = !!deps.collection;
     const linkedTrend = (location.search as Record<string, unknown>).trend;
-    const destination = (style?: string) => redirect({ to: "/aesthetic/$id", params, search: {
-      style,
+    const destination = () => redirect({ to: "/aesthetic/$id", params, search: {
       audience: deps.audience === "ALL" ? undefined : deps.audience,
       trend: typeof linkedTrend === "string" ? linkedTrend : undefined,
     }, replace: true });
-    if (!filtered && deps.page > 1) throw destination();
+    if (deps.style || (!filtered && deps.page > 1)) throw destination();
 
     let result;
     try {
       result = await fetchLanePage(params.id, deps.page - 1, deps.audience, deps);
     } catch (error) {
-      if (error instanceof CatalogRequestError && error.status === 400 && deps.style) throw destination();
       console.error(error);
       return { aesthetic, trends: [], styles: cachedStyles(params.id), failed: true };
     }
