@@ -47,23 +47,14 @@ public class TrendController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(defaultValue = "false") boolean includeFilters,
             @RequestParam(required = false) String style) {
-        if (minPrice == null && maxPrice == null && !includeFilters && (style == null || style.isBlank())
-                && (subcategory == null || subcategory.isBlank())
-                && !CatalogStyles.isRestricted(category) && !CatalogStyles.isShirts(category) && !"TEES".equalsIgnoreCase(category.trim())) {
-            return getTrends(category, subcategory, page, size, audience);
-        }
         if (page < 0 || size < 1 || size > 100) {
             throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
                     "page must be non-negative and size must be 1..100");
         }
         var criteria = CatalogFilterQuery.build(category, audience, subcategory, minPrice, maxPrice, style);
-        var choices = includeFilters
-                ? mongoTemplate.findDistinct(CatalogFilterQuery.build(category, "ALL", null, null, null),
-                        "subcategory", Trend.class, String.class)
-                    .filter(value -> value != null && !value.isBlank())
-                    .map(label -> CatalogStyles.canonicalSubcategory(category, label)).distinct()
-                    .sort(String.CASE_INSENSITIVE_ORDER).collectList()
-                : Mono.just(List.<String>of());
+        var choices = Mono.just(includeFilters
+                ? com.trendzy.api.model.ApprovedTaxonomy.labels(CatalogFilterQuery.normalizeCategory(category))
+                : List.<String>of());
         return Mono.zip(
                 mongoTemplate.find(CatalogFilterQuery.page(criteria, page, size), Trend.class).collectList(),
                 mongoTemplate.count(criteria, Trend.class), choices)
@@ -79,7 +70,9 @@ public class TrendController {
                 result.put("audience", audience == null ? "ALL" : audience.trim().toUpperCase(java.util.Locale.ROOT));
                 if (includeFilters) {
                     result.put("subcategories", data.getT3());
-                    result.put("styles", CatalogStyles.options(category, data.getT3()));
+                    result.put("styles", data.getT3().stream()
+                            .map(label -> new CatalogStyles.Option(com.trendzy.api.model.ApprovedTaxonomy.styleId(label), label))
+                            .toList());
                 }
                 return result;
             });

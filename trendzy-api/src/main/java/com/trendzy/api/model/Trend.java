@@ -31,6 +31,8 @@ public class Trend {
 
     private String category;
     private String subcategory;
+    private boolean indianUnderdogBrand;
+    private boolean taxonomyReview;
     private String productSelectionFocus;
     private Object productRefreshedAt;
     private Object lastProductRefreshAttemptAt;
@@ -106,6 +108,7 @@ public class Trend {
     @Builder
     public static class ProductDetail {
         private String brandName;
+        private java.util.Map<String, String> taxonomyAttributes;
         private String title;
         /** Discovery audience: MEN, WOMEN or UNISEX; legacy unknown values are shared. */
         private String audience;

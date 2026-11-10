@@ -41,7 +41,7 @@ export const journalArticles: JournalArticle[] = [
         id: "start-with-a-lane",
         title: "Start with what your wardrobe needs",
         paragraphs: [
-          "Instead of opening another endless feed, pick a lane: tees, shirts, outerwear, jeans, bottoms, anime, shoes, sportswear, or caps & accessories. Each gives you a smaller place to explore.",
+          "Instead of opening another endless feed, pick a lane: tees, shirts, outerwear, jeans, bottoms, anime, sneakers, sportswear, or caps & accessories. Each gives you a smaller place to explore.",
           "Open a product to see its gallery, brand information and a link to the retailer. You buy from that store; TrendXee is a discovery site and does not take your order or handle delivery.",
         ],
       },

@@ -59,7 +59,7 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
             <RevealHeading
               className="mt-4 h-section"
               lines={[
-                "Nine lanes.",
+                "Eight lanes.",
                 <em key="w" className="italic text-clay">
                   Pick a world.
                 </em>,

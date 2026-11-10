@@ -2,6 +2,7 @@ import { SITE_ORIGIN } from "./seo";
 
 const aliases: Record<string, string> = {
   "/blog": "/journal", "/aesthetic/shoes": "/aesthetic/sneakers",
+  "/aesthetic/footwear": "/aesthetic/sneakers",
   "/aesthetic/accessories": "/aesthetic/caps",
   "/aesthetic/polos-and-regular": "/aesthetic/tees",
   "/aesthetic/polos": "/aesthetic/tees",

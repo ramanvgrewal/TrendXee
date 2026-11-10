@@ -28,7 +28,7 @@ const notes = [
 ];
 
 const howTo = [
-  "Pick the lane closest to your wardrobe — jeans, bottoms, tees, shirts, outerwear, shoes, sportswear, anime, or caps & accessories.",
+  "Pick the lane closest to your wardrobe — jeans, bottoms, tees, shirts, outerwear, sneakers, sportswear, anime, or caps & accessories.",
   "Check the Brand Hype and 5-Star Trust badges to verify Instagram momentum and verified legitimacy before you buy.",
   "Open a drop to review community feedback, check Instagram metrics, and visit the brand’s own store.",
   "Save the ones you like to your archive, leave your own brand review, or buy directly from the underdog.",

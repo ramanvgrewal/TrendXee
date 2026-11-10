@@ -8,12 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CatalogFilterQueryTest {
     @Test void combinedFiltersPreserveVisibilityAndUseSelectedSellingPrice() {
-        var query = CatalogFilterQuery.build("jeans", "women", "Baggy.*", 1000.0, 1999.99);
+        var query = CatalogFilterQuery.build("jeans", "women", "Baggy Jeans", 1000.0, 1999.99);
         var criteria = query.getQueryObject();
-        assertEquals(List.of("JEANS"), criteria.get("category", Document.class).get("$in"));
+        assertEquals("JEANS", criteria.getString("category"));
         assertEquals(false, criteria.get("active", Document.class).get("$ne"));
         assertNotNull(criteria.get("$or"));
-        assertEquals("Baggy.*", criteria.getString("subcategory"));
+        assertEquals("Baggy Jeans", criteria.getString("subcategory"));
         var price = criteria.get("signalProducts.underdog.price", Document.class);
         assertEquals(1000.0, price.get("$gte"));
         assertEquals(1999.99, price.get("$lte"));
@@ -39,13 +39,14 @@ class CatalogFilterQueryTest {
 
     @Test void categoryAliasesAndUnfilteredMissingPricesStayCompatible() {
         var caps = CatalogFilterQuery.build("Caps & Accessories", "ALL", null, null, null).getQueryObject();
-        assertEquals(List.of("CAPS", "ACCESSORIES", "WATCHES"), caps.get("category", Document.class).get("$in"));
+        assertEquals("CAPS", caps.getString("category"));
         assertFalse(caps.containsKey("signalProducts.underdog.price"));
-        assertTrue(caps.get("$expr", Document.class).containsKey("$ne"));
-        assertEquals(List.of("TEES", "POLOS"), CatalogFilterQuery.build("Tees", "ALL", null, null, null)
-                .getQueryObject().get("category", Document.class).get("$in"));
-        assertEquals(List.of("SNEAKERS"), CatalogFilterQuery.build("Shoes", "ALL", null, null, null)
-                .getQueryObject().get("category", Document.class).get("$in"));
+        assertEquals(List.of("Caps & Snapbacks", "Beanies & Headwear", "Jewellery", "Sunglasses & Eyewear"),
+                caps.get("subcategory", Document.class).getList("$in", String.class));
+        assertEquals("TEES", CatalogFilterQuery.build("T-Shirts", "ALL", null, null, null)
+                .getQueryObject().getString("category"));
+        assertEquals("SNEAKERS", CatalogFilterQuery.build("Footwear", "ALL", null, null, null)
+                .getQueryObject().getString("category"));
     }
 
     @Test void invalidBudgetsAndAudienceAreRejected() {
@@ -55,5 +56,14 @@ class CatalogFilterQueryTest {
         }
         assertThrows(ResponseStatusException.class, () -> CatalogFilterQuery.build("TEES", "ALL", null, 2000.0, 1000.0));
         assertThrows(ResponseStatusException.class, () -> CatalogFilterQuery.build("TEES", "other", null, null, null));
+    }
+
+    @Test void sneakersRequiresCuratedBrandAndHasNoSubcategories() {
+        var query = CatalogFilterQuery.build("SNEAKERS", "MEN", null, null, null).getQueryObject();
+        assertEquals(true, query.getBoolean("indianUnderdogBrand"));
+        assertEquals(java.util.Arrays.asList(null, ""), query.get("subcategory", Document.class).get("$in"));
+        assertEquals(List.of(), com.trendzy.api.model.ApprovedTaxonomy.labels("SNEAKERS"));
+        assertEquals(List.of(), CatalogFilterQuery.build("SNEAKERS", "ALL", "Sandals", null, null)
+                .getQueryObject().get("subcategory", Document.class).get("$in"));
     }
 }

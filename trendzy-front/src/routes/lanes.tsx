@@ -10,7 +10,7 @@ export const Route = createFileRoute("/lanes")({
   loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
   loader: async ({ deps }) => ({ rotationMap: await fetchLaneRotations(deps.audience) }),
   staleTime: LANE_COVER_STALE_TIME,
-  head: () => pageSeo({ title: "Explore Clothing, Shoes & Accessories — TrendXee", description: "Explore clothing, shoes and accessories with Indian indie labels in focus. Browse tees, jeans, outerwear, sportswear and more across nine fashion categories.", path: "/lanes" }),
+  head: () => pageSeo({ title: "Explore Clothing, Sneakers & Accessories — TrendXee", description: "Explore clothing, sneakers and accessories with Indian indie labels in focus. Browse tees, jeans, outerwear, sportswear and more across eight fashion categories.", path: "/lanes" }),
   component: LanesPage,
 });
 
@@ -29,7 +29,7 @@ function LanesPage() {
           </h1>
         </div>
         <p className="enter-fade lede max-w-md lg:col-span-4" style={{ "--d": "200ms" } as React.CSSProperties}>
-          Clothing, shoes and accessories, with Indian indie labels in focus. Pick a lane to explore its
+          Clothing, sneakers and accessories, with Indian indie labels in focus. Pick a lane to explore its
           products, compare brand details and find a piece for your next fit.
         </p>
       </div>

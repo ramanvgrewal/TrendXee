@@ -16,7 +16,7 @@ export function discountPercent(price?: number | null, original?: number | null)
 
 /** Display name for a lane id ("tees" → "Tees"). */
 export function laneLabel(name: string) {
-  return name.charAt(0) + name.slice(1).toLowerCase();
+  return name === name.toUpperCase() ? name.charAt(0) + name.slice(1).toLowerCase() : name;
 }
 
 /** "Sun, 4 Oct" for the India date — same on server and browser. */

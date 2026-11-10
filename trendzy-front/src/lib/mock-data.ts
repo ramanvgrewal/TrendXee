@@ -1,3 +1,4 @@
+import taxonomy from "./taxonomy.json";
 import type { ProductAudience } from "@/lib/audience";
 
 export interface Aesthetic {
@@ -72,11 +73,11 @@ export interface Trend {
   userRatingCount?: number;
   subcategory?: string;
 }
-export const aesthetics: Aesthetic[] = [
+const laneArtwork: Aesthetic[] = [
     {
     id: "tees",
     name: "TEES",
-    description: "Graphic and oversized tees, polos, regular-fit tees, tops and tanks.",
+    description: "Graphic, anime, basic, polo and acid-wash T-shirts.",
     signalCount: 3200,
     trendScore: 85,
     colorPalette: ["#0f172a", "#334155", "#64748b", "#cbd5e1"],
@@ -130,13 +131,13 @@ export const aesthetics: Aesthetic[] = [
   },
     {
     id: "sneakers",
-    name: "SHOES",
-    description: "Sports shoes, sneakers and sandals.",
+    name: "Sneakers",
+    description: "Sneakers from independent Indian brands.",
     signalCount: 5120,
     trendScore: 96,
     colorPalette: ["#7f1d1d", "#dc2626", "#fca5a5", "#fef2f2"],
-    heroImage: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=900&q=80",
-    vibeTags: ["sports shoes", "sneakers", "sandals"],
+    heroImage: "",
+    vibeTags: ["sneakers", "Indian brands"],
     underdogRotation: []
   },
     {
@@ -173,6 +174,10 @@ export const aesthetics: Aesthetic[] = [
     underdogRotation: []
   },
   ];
+export const aesthetics = Object.entries(taxonomy).map(([key, [name]]) => ({
+  ...laneArtwork.find((lane) => lane.id === key.toLowerCase())!,
+  name: name as string,
+}));
 export const trends: Trend[] = [
   {
     id: "trend_sw_001",

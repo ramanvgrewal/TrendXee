@@ -110,6 +110,7 @@ class PairingServiceTest {
     }
     @Test void refreshUnderSameIdInvalidatesSourceAndOpeningCandidate() {
         var updated = item("same-id", "New Sneakers", "SNEAKERS", "MEN");
+        updated.setIndianUnderdogBrand(true);
         updated.getSignalProducts().getUnderdog().setShopUrl("https://store.example/products/new");
         when(repository.findById("same-id")).thenReturn(Mono.just(updated));
         assertEquals(409, assertThrows(ResponseStatusException.class, () -> service.pairings("same-id", "ALL", "https://store.example/products/old").block()).getStatusCode().value());

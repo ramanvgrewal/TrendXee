@@ -30,26 +30,30 @@ public final class CatalogFilterQuery {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "audience must be ALL, MEN, WOMEN or UNISEX");
         }
         String normalized = normalizeCategory(category);
-        List<String> categories = CatalogStyles.isAccessories(normalized)
-                ? List.of("CAPS", "ACCESSORIES", "WATCHES") : "TEES".equals(normalized)
-                ? List.of("TEES", "POLOS") : List.of(normalized);
+        var labels = com.trendzy.api.model.ApprovedTaxonomy.labels(normalized);
         Document criteria = Document.parse("{" + TrendRepository.VISIBLE + "}");
-        criteria.put("category", new Document("$in", categories));
+        criteria.put("category", normalized);
+        if ("SNEAKERS".equals(normalized)) {
+            criteria.put("indianUnderdogBrand", true);
+            criteria.put("subcategory", new Document("$in", java.util.Arrays.asList(null, "")));
+        } else {
+            criteria.put("subcategory", new Document("$in", labels));
+        }
         if (!"ALL".equals(normalizedAudience)) {
             List<String> audiences = "UNISEX".equals(normalizedAudience) ? List.of("UNISEX") : List.of(normalizedAudience, "UNISEX");
             criteria.put("$expr", new Document("$in", List.of(Document.parse(TrendRepository.EFFECTIVE_AUDIENCE), audiences)));
         }
         if (subcategory != null && !subcategory.isBlank()) {
-            var labels = CatalogStyles.subcategoryAliases(normalized, subcategory);
-            criteria.put("subcategory", labels.size() == 1 ? subcategory : new Document("$in", labels));
+            criteria.put("subcategory", labels.contains(subcategory) ? subcategory : new Document("$in", List.of()));
         }
-        boolean hasStyle = style != null && !style.isBlank();
-        if (hasStyle || CatalogStyles.isRestricted(category)) {
-            Document family = hasStyle ? CatalogStyles.match(category, style.trim()) : CatalogStyles.allowed(category);
-            andExpression(criteria, family);
-        }
-        if (CatalogStyles.isShirts(normalized)) {
-            andExpression(criteria, CatalogStyles.shirtEligibility());
+        if (style != null && !style.isBlank()) {
+            var approved = labels.stream().filter(label ->
+                    com.trendzy.api.model.ApprovedTaxonomy.styleId(label).equals(style.trim())).findFirst();
+            if (approved.isEmpty() || (subcategory != null && !subcategory.isBlank() && !subcategory.equals(approved.get()))) {
+                criteria.put("subcategory", new Document("$in", List.of()));
+            } else {
+                criteria.put("subcategory", approved.get());
+            }
         }
         if (minPrice != null || maxPrice != null) {
             // Filter the selected product's selling price, never its MRP or the trend estimate.
@@ -71,7 +75,9 @@ public final class CatalogFilterQuery {
 
     public static String normalizeCategory(String category) {
         String normalized = category.trim().toUpperCase(Locale.ROOT);
-        return List.of("SHOES", "SNEAKER & SPORTS", "SNEAKERS & SPORTS", "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS")
+        if (List.of("CAPS & ACCESSORIES", "CAPS_ACCESSORIES", "ACCESSORIES").contains(normalized)) return "CAPS";
+        if (List.of("T-SHIRTS", "TSHIRTS").contains(normalized)) return "TEES";
+        return List.of("FOOTWEAR", "SHOES", "SNEAKER & SPORTS", "SNEAKERS & SPORTS", "SNEAKER_SPORTS", "SNEAKERS_AND_SPORTS")
                 .contains(normalized) ? "SNEAKERS" : normalized;
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface TrendRepository extends ReactiveMongoRepository<Trend, String> {
 
-    String VISIBLE = "'active': { '$ne': false }, '$or': [ { 'enrichmentStatus': 'COMPLETED' }, { 'enrichmentStatus': { '$in': ['PARTIAL', 'AWAITING_UNDERDOG', 'PENDING', 'IN_PROGRESS', 'PROCESSING', 'FAILED'] }, 'signalProducts.underdog.shopUrl': { '$type': 'string', '$ne': '' }, 'signalProducts.underdog.imageUrl': { '$type': 'string', '$ne': '' } } ]";
+    String VISIBLE = "'taxonomyReview': { '$ne': true }, 'taxonomyDuplicateOf': null, 'active': { '$ne': false }, '$or': [ { 'enrichmentStatus': 'COMPLETED' }, { 'enrichmentStatus': { '$in': ['PARTIAL', 'AWAITING_UNDERDOG', 'PENDING', 'IN_PROGRESS', 'PROCESSING', 'FAILED'] }, 'signalProducts.underdog.shopUrl': { '$type': 'string', '$ne': '' }, 'signalProducts.underdog.imageUrl': { '$type': 'string', '$ne': '' } } ]";
     String FEED_SORT = "{ 'trendScore': -1, 'jeansFitPriority': -1, 'lastUpdatedAt': -1, '_id': 1 }";
     // Normalize in Mongo before pagination, including older documents without audience.
     String AUDIENCE_VALUE = "{ '$toUpper': { '$trim': { 'input': { '$convert': { 'input': '$signalProducts.underdog.audience', 'to': 'string', 'onError': '', 'onNull': '' } } } } }";
@@ -35,7 +35,7 @@ public interface TrendRepository extends ReactiveMongoRepository<Trend, String> 
     Flux<Trend> findByCategoryAndSubcategoryAndAudience(List<String> categories, String subcategory, List<String> audiences, Pageable pageable);
 
     /** Never hydrate large scraper pools/marketplace stories to revalidate an outfit. */
-    @Query(value = "{ '_id': { '$in': ?0 } }", fields = "{ 'category': 1, 'subcategory': 1, 'active': 1, 'enrichmentStatus': 1, 'signalProducts.underdog': 1 }")
+    @Query(value = "{ '_id': { '$in': ?0 } }", fields = "{ 'category': 1, 'subcategory': 1, 'indianUnderdogBrand': 1, 'taxonomyReview': 1, 'active': 1, 'enrichmentStatus': 1, 'signalProducts.underdog': 1 }")
     Flux<Trend> findCurrentOutfitMembers(List<String> ids);
 
 }

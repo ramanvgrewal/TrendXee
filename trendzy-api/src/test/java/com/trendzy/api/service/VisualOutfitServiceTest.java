@@ -26,6 +26,8 @@ class VisualOutfitServiceTest {
     @Test void liveEligibilityAndContentChangesInvalidateAnOtherwiseCachedLook() {
         var source=item("a","White tee"); var bottom=item("b","Baggy jeans"); var shoes=item("c","White sneakers");
         var row=look("look",source,bottom,shoes); var current=new HashMap<>(Map.of("a",source,"b",bottom,"c",shoes));
+        assertFalse(VisualOutfitService.valid(row,source,Set.of("UNISEX"),current));
+        shoes.setIndianUnderdogBrand(true);
         assertTrue(VisualOutfitService.valid(row,source,Set.of("UNISEX"),current));
         bottom.getSignalProducts().getUnderdog().setTitle("Blue baggy jeans");
         assertFalse(VisualOutfitService.valid(row,source,Set.of("UNISEX"),current));

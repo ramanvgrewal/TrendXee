@@ -1,0 +1,74 @@
+{
+  "TEES": [
+    "T-Shirts",
+    [
+      "Graphic Tees",
+      "Anime & Pop-Culture Tees",
+      "Basic Tees",
+      "Polo Tees",
+      "Acid-Wash Tees"
+    ]
+  ],
+  "OUTERWEAR": [
+    "Outerwear",
+    [
+      "Varsity Jackets",
+      "Bomber Jackets",
+      "Denim Jackets",
+      "Racing & Biker Jackets",
+      "Hoodies & Winter Jackets"
+    ]
+  ],
+  "JEANS": [
+    "Jeans",
+    [
+      "Baggy Jeans",
+      "Straight-Fit Jeans",
+      "Wide-Leg Jeans",
+      "Bootcut & Flared Jeans",
+      "Cargo & Utility Jeans"
+    ]
+  ],
+  "BOTTOMS": [
+    "Bottoms",
+    [
+      "Cargo Pants",
+      "Joggers",
+      "Sweatpants",
+      "Parachute Pants",
+      "Shorts"
+    ]
+  ],
+  "SPORTSWEAR": [
+    "Sportswear",
+    [
+      "Sports Jerseys",
+      "Gym & Training Wear",
+      "Tracksuits & Track Pants",
+      "Sports Shorts",
+      "Athleisure"
+    ]
+  ],
+  "CAPS": [
+    "Caps & Accessories",
+    [
+      "Caps & Snapbacks",
+      "Beanies & Headwear",
+      "Jewellery",
+      "Sunglasses & Eyewear"
+    ]
+  ],
+  "SHIRTS": [
+    "Shirts",
+    [
+      "Linen Shirts",
+      "Printed Shirts",
+      "Flannel & Check Shirts",
+      "Overshirts",
+      "Casual & Cuban Collar Shirts"
+    ]
+  ],
+  "SNEAKERS": [
+    "Sneakers", []
+  ]
+}

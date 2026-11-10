@@ -108,6 +108,8 @@ public class PairingService {
     static boolean eligible(Trend trend) {
         if (trend == null || !trend.isActive() || !LANES.contains(upper(trend.getCategory()))
                 || !PUBLIC_STATUSES.contains(upper(trend.getEnrichmentStatus()))) return false;
+        if ("SNEAKERS".equals(upper(trend.getCategory())) && (!trend.isIndianUnderdogBrand()
+                || trend.isTaxonomyReview() || !blank(trend.getSubcategory()))) return false;
         ProductDetail p = product(trend);
         if (p == null || blank(p.getTitle()) || !ProductIdentity.isProductUrl(p.getShopUrl())
                 || ProductIdentity.canonical(p.getImageUrl()).isEmpty() || p.getPrice() == null

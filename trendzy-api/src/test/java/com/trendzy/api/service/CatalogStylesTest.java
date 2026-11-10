@@ -63,24 +63,17 @@ class CatalogStylesTest {
         assertEquals(List.of("printed", "embroidered"),
                 CatalogStyles.options("SHIRTS", List.of("Ajrakh Printed Shirt", "Block-Printed Shirt", "Chikankari Shirt"))
                         .stream().map(CatalogStyles.Option::id).toList());
-        var unfiltered = CatalogFilterQuery.build("SHIRTS", "ALL", null, null, null).getQueryObject();
-        assertEquals(CatalogStyles.shirtEligibility(), unfiltered.get("$expr"));
-        var filtered = CatalogFilterQuery.build("SHIRTS", "WOMEN", null, null, null, "printed").getQueryObject();
-        assertTrue(filtered.toJson().contains("signalProducts.underdog.productType"));
+        var filtered = CatalogFilterQuery.build("SHIRTS", "WOMEN", "Printed Shirts", null, null).getQueryObject();
+        assertEquals("Printed Shirts", filtered.getString("subcategory"));
         assertTrue(filtered.toJson().contains("UNISEX"));
-        assertTrue(filtered.toJson().contains("printed"));
     }
 
     @Test void groupAndAudienceAreBothAppliedBeforePaginationAndUnrelatedLanesAreRejected() {
-        var query = CatalogFilterQuery.build("JEANS", "WOMEN", null, null, null, "baggy");
-        var expression = query.getQueryObject().get("$expr", Document.class);
-        assertEquals(2, expression.getList("$and", Document.class).size());
-        assertTrue(expression.toJson().contains("$switch"));
-        assertTrue(expression.toJson().contains("$regexMatch"));
-        assertTrue(expression.toJson().contains("UNISEX"));
-        assertFalse(query.getQueryObject().containsKey("subcategory"));
+        var query = CatalogFilterQuery.build("JEANS", "WOMEN", null, null, null, "baggy-jeans");
+        assertEquals("Baggy Jeans", query.getQueryObject().getString("subcategory"));
+        assertTrue(query.getQueryObject().toJson().contains("UNISEX"));
         assertEquals(12, CatalogFilterQuery.page(query, 1, 12).getSkip());
-        assertThrows(ResponseStatusException.class, () -> CatalogFilterQuery.build("TEES", "ALL", null, null, null, "baggy"));
-        assertThrows(ResponseStatusException.class, () -> CatalogStyles.match("JEANS", "anything.*"));
+        assertEquals(List.of(), CatalogFilterQuery.build("TEES", "ALL", "Baggy Jeans", null, null)
+                .getQueryObject().get("subcategory", Document.class).getList("$in", String.class));
     }
 }

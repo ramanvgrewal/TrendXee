@@ -34,13 +34,14 @@ export const Route = createFileRoute("/aesthetic/$id")({
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
-    const filtered = !!deps.collection;
+    const directFeed = params.id === "sneakers";
+    const showProducts = directFeed || !!deps.collection;
     const linkedTrend = (location.search as Record<string, unknown>).trend;
     const destination = () => redirect({ to: "/aesthetic/$id", params, search: {
       audience: deps.audience === "ALL" ? undefined : deps.audience,
       trend: typeof linkedTrend === "string" ? linkedTrend : undefined,
     }, replace: true });
-    if (deps.style || (!filtered && deps.page > 1)) throw destination();
+    if (deps.style || (directFeed && deps.collection) || (!showProducts && deps.page > 1)) throw destination();
 
     let result;
     try {
@@ -50,7 +51,7 @@ export const Route = createFileRoute("/aesthetic/$id")({
       return { aesthetic, trends: [], styles: cachedStyles(params.id), failed: true };
     }
 
-    if (!filtered) {
+    if (!showProducts) {
       const covers = await fetchStyleCovers(params.id, result.styles, deps.audience);
       return { aesthetic, trends: [], styles: result.styles, covers, failed: false };
     }
@@ -90,6 +91,7 @@ function LanePage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const filters = normalizeLaneFilters(search);
   const subcategory = filters.style || filters.collection;
+  const showProducts = aesthetic.id === "sneakers" || !!subcategory;
   const page = normalizeLanePage(search.page);
   const categoryName = laneLabel(aesthetic.name);
   const index = styles.findIndex((option) => option.id === subcategory);
@@ -135,8 +137,8 @@ function LanePage() {
         </header>
       )}
       <LaneSwitcher activeId={aesthetic.id} />
-      {subcategory ? (
-        <LaneFeed key={aesthetic.id + subcategory} audience={audience} filters={filters} total={total} name={name} aesthetic={aesthetic} initialTrends={trends} page={page} failed={failed} />
+      {showProducts ? (
+        <LaneFeed key={aesthetic.id + (subcategory ?? "")} audience={audience} filters={filters} total={total} name={name} aesthetic={aesthetic} initialTrends={trends} page={page} failed={failed} />
       ) : (
         <>
           <section className="mx-auto w-full max-w-[1440px] px-5 pt-9 sm:px-8 lg:pt-12" aria-labelledby="subcategory-heading">
@@ -432,13 +434,17 @@ function LaneFeed({
     ) : trends.length === 0 ? (
       <EmptyState
         title={audience !== "ALL" ? "No drops for this fit yet." : "Nothing pinned in " + name + " yet."}
-        body="Try a different fit or browse another subcategory."
+        body={aesthetic.id === "sneakers" ? "Explore more independent Indian brands in the other lanes." : "Try a different fit or browse another subcategory."}
         action={
           <div className="flex flex-wrap justify-center gap-3">
             {audience !== "ALL" && <button type="button" onClick={resetFilters} className={ctaClass("primary")}>Show all fits</button>}
-            <Link to="/aesthetic/$id" params={{ id: aesthetic.id }} search={{}} className={ctaClass(audience === "ALL" ? "primary" : "outline")}>
-              Browse subcategories <CtaArrow />
-            </Link>
+            {aesthetic.id === "sneakers" ? (
+              <Link to="/lanes" className={ctaClass(audience === "ALL" ? "primary" : "outline")}>Browse all lanes <CtaArrow /></Link>
+            ) : (
+              <Link to="/aesthetic/$id" params={{ id: aesthetic.id }} search={{}} className={ctaClass(audience === "ALL" ? "primary" : "outline")}>
+                Browse subcategories <CtaArrow />
+              </Link>
+            )}
           </div>
         }
       />
