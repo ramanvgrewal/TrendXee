@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 /** Shared catalog visibility and audience rules, applied before pagination. */
 public final class CatalogFilterQuery {
@@ -41,7 +40,7 @@ public final class CatalogFilterQuery {
             criteria.put("$expr", new Document("$in", List.of(Document.parse(TrendRepository.EFFECTIVE_AUDIENCE), audiences)));
         }
         if (subcategory != null && !subcategory.isBlank()) {
-            criteria.put("subcategory", new Document("$regex", "^" + Pattern.quote(subcategory.trim()) + "$").append("$options", "i"));
+            criteria.put("subcategory", subcategory);
         }
         boolean hasStyle = style != null && !style.isBlank();
         if (hasStyle || CatalogStyles.isRestricted(category)) {

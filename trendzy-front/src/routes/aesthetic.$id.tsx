@@ -17,7 +17,7 @@ import { audienceLabel, normalizeAudienceFilter, type AudienceFilter } from "@/l
 import { useAudience } from "@/components/AudienceFilter";
 import { LaneFilters } from "@/components/LaneFilters";
 import { LaneReading } from "@/components/LaneReading";
-import { normalizeLaneFilters, normalizeLanePage, lanePageItems, shirtStyleId, type LaneFilters as Filters, type StyleOption } from "@/lib/lane-filters";
+import { normalizeLaneFilters, normalizeLanePage, lanePageItems, type LaneFilters as Filters, type StyleOption } from "@/lib/lane-filters";
 import { CatalogRequestError } from "@/lib/api";
 import { cachedStyles, hasCatalogFailure, markCatalogFailure, rememberStyles } from "@/lib/catalog-state";
 
@@ -35,14 +35,13 @@ export const Route = createFileRoute("/aesthetic/$id")({
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
-    const filtered = !!deps.style;
+    const filtered = !!(deps.style || deps.collection);
     const linkedTrend = (location.search as Record<string, unknown>).trend;
     const destination = (style?: string) => redirect({ to: "/aesthetic/$id", params, search: {
       style,
       audience: deps.audience === "ALL" ? undefined : deps.audience,
       trend: typeof linkedTrend === "string" ? linkedTrend : undefined,
     }, replace: true });
-    if (deps.collection) throw destination(params.id === "shirts" ? shirtStyleId(deps.collection) : undefined);
     if (!filtered && deps.page > 1) throw destination();
 
     let result;
@@ -96,9 +95,9 @@ function LanePage() {
   const subcategory = filters.style || filters.collection;
   const page = normalizeLanePage(search.page);
   const categoryName = laneLabel(aesthetic.name);
-  const index = styles.findIndex((option) => option.id.toLowerCase() === subcategory?.toLowerCase());
+  const index = styles.findIndex((option) => option.id === subcategory);
   const selected = styles[index];
-  const name = selected?.label ?? (subcategory ? laneLabel(subcategory.replaceAll("-", " ")) : categoryName);
+  const name = selected?.label ?? filters.collection ?? (subcategory ? laneLabel(subcategory.replaceAll("-", " ")) : categoryName);
   const firstDrop = trends.find((trend) => trend.products?.underdog && trendImage(trend));
   const heroImage = firstDrop ? trendImage(firstDrop) : "";
   const retries = useRef(0);

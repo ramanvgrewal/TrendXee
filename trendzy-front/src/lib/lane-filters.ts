@@ -1,13 +1,6 @@
-/** Collection labels are accepted on old Shirts URLs so they can be redirected. */
+/** Collection links carry the exact stored subcategory label. */
 export type LaneFilters = { style?: string; collection?: string };
 export type StyleOption = { id: string; label: string };
-
-export function shirtStyleId(label: string) {
-  if (/print|ajrakh/i.test(label)) return "printed";
-  if (/embroider|chikankari/i.test(label)) return "embroidered";
-  if (/linen/i.test(label)) return "linen";
-  return "other";
-}
 
 /** URLs are one-based. Invalid, fractional and unbounded page values start at page one. */
 export function normalizeLanePage(value: unknown): number {
@@ -36,6 +29,6 @@ export function lanePageItems(page: number, total: number): (number | "gap")[] {
 export function normalizeLaneFilters(search: Record<string, unknown>): LaneFilters {
   const style = typeof search.style === "string" ? search.style.trim() : "";
   if (/^[a-z][a-z-]{0,39}$/.test(style)) return { style };
-  const collection = typeof search.collection === "string" ? search.collection.trim() : "";
-  return collection && collection.length <= 160 ? { collection } : {};
+  const collection = typeof search.collection === "string" ? search.collection : "";
+  return collection.trim() ? { collection } : {};
 }

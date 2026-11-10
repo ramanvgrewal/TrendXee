@@ -80,8 +80,8 @@ export function belongsToLane(trend: Trend, laneId: string) {
 /** One page of a lane's trends, plus whether another page is worth asking for. */
 export async function fetchLanePage(laneId: string, page: number, audience: AudienceFilter = "ALL", filters: LaneFilters = {}) {
   try {
-    const size = filters.style ? LANE_PAGE_SIZE : 1;
-    const result = await getCatalogPage(laneId, size, page, audience, { style: filters.style });
+    const size = filters.style || filters.collection ? LANE_PAGE_SIZE : 1;
+    const result = await getCatalogPage(laneId, size, page, audience, { style: filters.style, subcategory: filters.collection });
     rememberStyles(laneId, result.styles);
     markCatalogFailure(laneId, audience, { ...filters, page: page + 1 }, false);
     return { ...result, trends: result.trends.filter((t) => belongsToLane(t, laneId)) };
@@ -105,11 +105,17 @@ function rotationItems(trends: Trend[], laneId: string) {
 }
 
 export async function fetchStyleCovers(laneId: string, styles: StyleOption[], audience: AudienceFilter): Promise<RotationMap> {
-  const results = await Promise.allSettled(styles.map(async (option) => {
-    const { trends } = await getCatalogPage(laneId, 5, 0, audience, { style: option.id }, false);
-    return [option.id, rotationItems(trends, laneId)] as const;
-  }));
-  return Object.fromEntries(results.flatMap((result) => result.status === "fulfilled" ? [result.value] : []));
+  const covers: RotationMap = Object.create(null);
+  for (let start = 0; start < styles.length; start += 6) {
+    const results = await Promise.allSettled(styles.slice(start, start + 6).map(async (option) => {
+      const { trends } = await getCatalogPage(laneId, 5, 0, audience, { subcategory: option.id }, false);
+      return [option.id, rotationItems(trends, laneId)] as const;
+    }));
+    for (const result of results) {
+      if (result.status === "fulfilled") covers[result.value[0]] = result.value[1];
+    }
+  }
+  return { ...covers };
 }
 
 export const LANE_COVER_STALE_TIME = 60_000;

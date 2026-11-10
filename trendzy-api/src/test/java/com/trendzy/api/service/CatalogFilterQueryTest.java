@@ -13,7 +13,7 @@ class CatalogFilterQueryTest {
         assertEquals(List.of("JEANS"), criteria.get("category", Document.class).get("$in"));
         assertEquals(false, criteria.get("active", Document.class).get("$ne"));
         assertNotNull(criteria.get("$or"));
-        assertEquals("^\\QBaggy.*\\E$", criteria.get("subcategory", Document.class).get("$regex"));
+        assertEquals("Baggy.*", criteria.getString("subcategory"));
         var price = criteria.get("signalProducts.underdog.price", Document.class);
         assertEquals(1000.0, price.get("$gte"));
         assertEquals(1999.99, price.get("$lte"));

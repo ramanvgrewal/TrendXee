@@ -220,8 +220,9 @@ export async function getCatalogPage(
   const response = await fetchCatalog(`/api/v2/trends?${params}`);
   const data = await response.json();
   const trends = normalizeTrendList(data).filter((trend) => matchesAudience(trend.products.underdog?.audience, audience));
-  const styles: StyleOption[] = Array.isArray(data.styles)
-    ? data.styles.filter((value: any) => typeof value?.id === "string" && typeof value?.label === "string")
+  const styles: StyleOption[] = Array.isArray(data.subcategories)
+    ? data.subcategories.filter((label: unknown): label is string => typeof label === "string" && !!label.trim())
+        .map((label: string) => ({ id: label, label }))
     : [];
   return {
     trends,

@@ -9,7 +9,7 @@ async function loadModule(path, replacements = {}) {
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
   return `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
 }
-const { normalizeLaneFilters, normalizeLanePage, lanePageItems, shirtStyleId } = await import(await loadModule('../src/lib/lane-filters.ts'));
+const { normalizeLaneFilters, normalizeLanePage, lanePageItems } = await import(await loadModule('../src/lib/lane-filters.ts'));
 const audienceUrl = await loadModule('../src/lib/audience.ts');
 const { getCatalogPage } = await import(await loadModule('../src/lib/api.ts', { '"@/lib/audience"': JSON.stringify(audienceUrl) }));
 const state = await import(await loadModule('../src/lib/catalog-state.ts'));
@@ -63,24 +63,18 @@ test('grouped style and fit stay on subsequent pages without a price filter', as
     const params = new URL(url, 'http://localhost').searchParams;
     for (const [key, value] of Object.entries({ category: 'jeans', page: '2', size: '12', audience: 'WOMEN', style: 'baggy', includeFilters: 'true' })) assert.equal(params.get(key), value);
     for (const key of ['subcategory', 'minPrice', 'maxPrice']) assert.equal(params.has(key), false);
-    return new Response(JSON.stringify({ content: [{ id: 'unisex', category: 'JEANS', signalProducts: { underdog: { audience: 'UNKNOWN' } } }], totalElements: 25, hasMore: false, styles: [{ id: 'baggy', label: 'Baggy & wide-leg' }, null] }));
+    return new Response(JSON.stringify({ content: [{ id: 'unisex', category: 'JEANS', signalProducts: { underdog: { audience: 'UNKNOWN' } } }], totalElements: 25, hasMore: false, subcategories: ['Baggy Jeans', 'Wide Leg Jeans'], styles: [{ id: 'baggy', label: 'Baggy & wide-leg' }] }));
   };
   try {
     const page = await getCatalogPage('jeans', 12, 2, 'WOMEN', { style: 'baggy' });
     assert.equal(page.trends.length, 1);
     assert.equal(page.total, 25);
     assert.equal(page.hasMore, false);
-    assert.deepEqual(page.styles, [{ id: 'baggy', label: 'Baggy & wide-leg' }]);
+    assert.deepEqual(page.styles, ['Baggy Jeans', 'Wide Leg Jeans'].map(label => ({ id: label, label })));
   } finally { globalThis.fetch = previousFetch; }
 });
 
-test('older shirt collection URLs map to grouped styles', () => {
-  assert.deepEqual(normalizeLaneFilters({ collection: ' Ajrakh Printed Shirt ' }), { collection: 'Ajrakh Printed Shirt' });
-  for (const label of ['Ajrakh Printed Shirt', 'Block-Printed Shirt', 'Printed Resort Shirt']) {
-    assert.equal(shirtStyleId(label), 'printed');
-  }
-  assert.equal(shirtStyleId('Hand-Embroidered Shirt'), 'embroidered');
-  assert.equal(shirtStyleId('Chikankari Shirt'), 'embroidered');
-  assert.equal(shirtStyleId('Linen Shirt'), 'linen');
-  assert.equal(shirtStyleId('Khadi Shirt'), 'other');
+test('collection URLs retain the exact catalog label', () => {
+  assert.deepEqual(normalizeLaneFilters({ collection: 'Graphic Hoodies' }), { collection: 'Graphic Hoodies' });
+  assert.deepEqual(normalizeLaneFilters({ collection: 'Hoodies & Sweatshirts' }), { collection: 'Hoodies & Sweatshirts' });
 });

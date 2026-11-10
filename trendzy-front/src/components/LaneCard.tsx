@@ -76,7 +76,7 @@ function LaneCardSlideshow({
       <Link
         to="/aesthetic/$id"
         params={{ id: aesthetic.id }}
-        search={subcategory ? { style: subcategory.id } : undefined}
+        search={subcategory ? { collection: subcategory.id } : undefined}
         aria-label={subcategory ? "Explore " + label : undefined}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}

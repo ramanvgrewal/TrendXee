@@ -48,6 +48,7 @@ public class TrendController {
             @RequestParam(defaultValue = "false") boolean includeFilters,
             @RequestParam(required = false) String style) {
         if (minPrice == null && maxPrice == null && !includeFilters && (style == null || style.isBlank())
+                && (subcategory == null || subcategory.isBlank())
                 && !CatalogStyles.isRestricted(category) && !CatalogStyles.isShirts(category) && !"TEES".equalsIgnoreCase(category.trim())) {
             return getTrends(category, subcategory, page, size, audience);
         }
@@ -59,7 +60,7 @@ public class TrendController {
         var choices = includeFilters
                 ? mongoTemplate.findDistinct(CatalogFilterQuery.build(category, "ALL", null, null, null),
                         "subcategory", Trend.class, String.class)
-                    .filter(value -> value != null && !value.isBlank()).map(String::trim).distinct()
+                    .filter(value -> value != null && !value.isBlank())
                     .sort(String.CASE_INSENSITIVE_ORDER).collectList()
                 : Mono.just(List.<String>of());
         return Mono.zip(
