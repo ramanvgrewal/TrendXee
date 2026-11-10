@@ -81,8 +81,15 @@ public class PairingService {
                     ? Mono.error(error(HttpStatus.CONFLICT, "This outfit changed. Reload its pairings."))
                     : Mono.just(new Pairings(identity, effective, false, List.of()));
             if (visualOutfits == null) return unavailable;
-            return visualOutfits.recommend(source, effective, audiences, lookId, swapRole, excluded, session)
-                    .switchIfEmpty(unavailable);
+            var reviewed = visualOutfits.recommend(source, effective, audiences, lookId, swapRole, excluded, session);
+            if (effective.equals("UNISEX") && lookId == null && swapRole == null) {
+                reviewed = reviewed
+                        .switchIfEmpty(Mono.defer(() -> visualOutfits.recommend(
+                                source, "MEN", Set.of("MEN", "UNISEX"), null, null, excluded, session)))
+                        .switchIfEmpty(Mono.defer(() -> visualOutfits.recommend(
+                                source, "WOMEN", Set.of("WOMEN", "UNISEX"), null, null, excluded, session)));
+            }
+            return reviewed.switchIfEmpty(unavailable);
         });
     }
 

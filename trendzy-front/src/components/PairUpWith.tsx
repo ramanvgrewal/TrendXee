@@ -32,7 +32,7 @@ export function PairUpWith({ source, audience, setAudience, choices, setChoices,
   const sourceAudience = normalizeProductAudience(source.products.underdog?.audience);
   const canChooseAudience = sourceAudience === "UNISEX";
   const effectiveAudience = canChooseAudience ? audience : sourceAudience as "MEN" | "WOMEN";
-  const reviewedOutfit = outfit?.engine === 'vision-v2' && outfit.audience === (effectiveAudience === 'ALL' ? 'UNISEX' : effectiveAudience) ? outfit : null;
+  const reviewedOutfit = outfit?.engine === 'vision-v2' && (effectiveAudience === 'ALL' || outfit.audience === effectiveAudience) ? outfit : null;
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -93,7 +93,7 @@ export function PairUpWith({ source, audience, setAudience, choices, setChoices,
     const seen = [...new Set([...(choices[role]?.seen ?? []), previous.identity])];
     setSwapping(role); setOpenError(null);
     try {
-      const next = await getOutfitSwap(source, effectiveAudience, data, role, seen, request.signal);
+      const next = await getOutfitSwap(source, data.audience === 'UNISEX' ? 'ALL' : data.audience, data, role, seen, request.signal);
       if (request.signal.aborted) return;
       trackOutfit(data, 'SWAP', previous.trend.id); setOutfit(next); setExhausted([]);
       const replacement = next.slots.find(s => s.role === role)!.items[0];
@@ -127,7 +127,7 @@ export function PairUpWith({ source, audience, setAudience, choices, setChoices,
         {(['ALL', 'MEN', 'WOMEN'] as const).map((option) => <button
           key={option} type="button" disabled={!!opening || !!swapping} aria-pressed={audience === option} onClick={() => { setAudience(option); setChoices({}); setOutfit(null); setExhausted([]); setOpenError(null); setSwapAnnouncement(''); }}
           className={`min-h-11 rounded-full border px-3 text-xs font-semibold ${audience === option ? "border-ink bg-ink text-paper" : "border-border text-ink/70 hover:border-clay"}`}
-        >{option === 'ALL' ? 'Shared fits' : audienceLabel(option)}</button>)}
+        >{option === 'ALL' ? 'Any fit' : audienceLabel(option)}</button>)}
       </div>}
 
       {!reviewedOutfit && query.isError ? <div className="mt-5 rounded-xl bg-cream/60 p-4 text-sm text-ink/75" role="status">

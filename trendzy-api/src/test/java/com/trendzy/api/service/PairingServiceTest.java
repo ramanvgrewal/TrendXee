@@ -81,12 +81,24 @@ class PairingServiceTest {
         for (String gender : new String[]{null, "UNKNOWN", "UNISEX"}) {
             var source = item("source", "Linen Shirt", "SHIRTS", gender);
             assertEquals("UNISEX", query(source, "ALL").audience());
+            verify(visual).recommend(eq(source), eq("UNISEX"), eq(Set.of("UNISEX")), isNull(), isNull(), eq(List.of()), isNull());
+            clearInvocations(visual);
             for (String requested : List.of("MEN", "WOMEN")) {
                 assertEquals(requested, query(source, requested).audience());
                 verify(visual).recommend(eq(source), eq(requested), eq(Set.of(requested, "UNISEX")), isNull(), isNull(), eq(List.of()), isNull());
             }
             clearInvocations(visual);
         }
+    }
+    @Test void anyFitCanShowAnAudienceSpecificReviewedLookWithoutCrossingExplicitFilters() {
+        var source = item("source", "Linen Shirt", "SHIRTS", "UNISEX");
+        var visual = missingReview();
+        var women = new PairingService.Pairings("identity", "WOMEN", false, List.of());
+        when(visual.recommend(source, "WOMEN", Set.of("WOMEN", "UNISEX"), null, null, List.of(), null))
+                .thenReturn(Mono.just(women));
+        assertSame(women, query(source, "ALL"));
+        assertEquals("curation-pending", query(source, "MEN").engine());
+        verify(visual, times(1)).recommend(source, "WOMEN", Set.of("WOMEN", "UNISEX"), null, null, List.of(), null);
     }
     @Test void pairingCardsAvoidSendingFullStoriesUntilOpened() {
         var candidate = item("candidate", "Jeans", "JEANS", "WOMEN");
