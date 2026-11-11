@@ -255,6 +255,11 @@
     text-wrap: pretty;
   }
 
+  /* The Lucentwear cutout has a white edge baked into its transparent PNG. */
+  img[src*="1_e3a475f5-5e9a-44e0-8b49-b8b43dec5ab8.png"] {
+    background-color: white;
+  }
+
   ::selection {
     background-color: color-mix(in oklab, var(--clay) 25%, transparent);
   }
