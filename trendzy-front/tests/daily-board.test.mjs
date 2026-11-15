@@ -49,3 +49,30 @@ test('empty and small catalogs stay valid and duplicate product aliases never re
   const board = buildDailyBoard({ tees: [item, alias] }, '2026-10-26');
   assert.ok(board.lead); assert.equal(board.dailyFive.length, 0);
 });
+
+test('rising today takes the best unfeatured drop from every lane, best first, without repeats', () => {
+  const map = catalog();
+  for (const [lane, items] of Object.entries(map)) items.forEach((item, n) => { item.score = 50 + n + lane.length; });
+  const board = buildDailyBoard(map, '2026-10-26');
+  const featured = new Set([board.lead, ...board.dailyFive].map(item => item.id));
+  assert.equal(board.rising.length, 8);
+  assert.ok(board.rising.every(item => !featured.has(item.id)));
+  assert.equal(new Set(board.rising.map(item => item.id)).size, 8);
+  assert.deepEqual(board.rising.map(item => item.score), board.rising.map(item => item.score).sort((a, b) => b - a));
+  for (const lane of Object.keys(map)) {
+    const best = map[lane].filter(item => !featured.has(item.id)).sort((a, b) => b.score - a.score)[0];
+    assert.ok(board.rising.some(item => item.id === best.id));
+  }
+  assert.ok(board.story.every(item => !board.rising.some(pick => pick.id === item.id)));
+  assert.deepEqual(buildDailyBoard({}, '2026-10-26').rising, []);
+});
+
+test('rising today prefers a label that is not on the row yet', () => {
+  const item = (lane, n, brand, score) => ({ id: `${lane}-${n}`, category: lane, brand, score, title: `${lane} ${n}`,
+    image: `https://images.example/${lane}-${n}.jpg`, shopUrl: `https://${lane}.example/products/${n}` });
+  const map = Object.fromEntries(['a', 'b', 'c', 'd'].map(lane => [lane, [item(lane, 0, 'Big Label', 99), item(lane, 1, `${lane} studio`, 90), item(lane, 2, 'Big Label', 80)]]));
+  const { rising } = buildDailyBoard(map, '2026-10-26');
+  const first = rising.filter(pick => pick.score >= 90);
+  assert.equal(first.filter(pick => pick.brand === 'Big Label').length <= 1, true);
+  assert.equal(new Set(rising.map(pick => pick.id)).size, rising.length);
+});

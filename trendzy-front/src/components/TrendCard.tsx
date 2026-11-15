@@ -93,34 +93,35 @@ export function TrendCard({
           {/* Only a light top veil, so the chips stay legible on bright photos. */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-scrim/25 to-transparent" />
           {off && (
-            <span className="absolute left-4 top-4 rounded-full bg-stamp-clay px-2.5 py-1 text-[11px] font-bold text-paper">
+            <span className="absolute left-2.5 top-2.5 rounded-full bg-stamp-clay px-2 py-0.5 text-[11px] font-bold text-paper sm:left-4 sm:top-4 sm:px-2.5 sm:py-1">
               −{off}%
             </span>
           )}
         </m.div>
 
         {/* Copy */}
-        <div className="relative flex flex-1 flex-col p-5 pt-6">
+        {/* Phones show two cards per row: brand, title, price and score only. */}
+        <div className="relative flex flex-1 flex-col p-3 pt-4 sm:p-5 sm:pt-6">
           {score > 0 && (
-            <div className="absolute -top-7 right-5 z-10">
+            <div className="absolute -top-5 right-2.5 z-10 sm:-top-7 sm:right-5">
               <Parallax depth={4} follow>
                 <Stamp
                   score={score}
                   size="md"
                   tone={trend.name.length % 2 === 0 ? "clay" : "olive"}
-                  className="shadow-print transition-transform duration-500 group-hover/card:-rotate-6"
+                  className="shadow-print transition-transform duration-500 group-hover/card:-rotate-6 max-sm:size-9 max-sm:text-[15px]"
                 />
               </Parallax>
             </div>
           )}
 
-          <p className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 pr-12 sm:flex-nowrap sm:pr-14">
+          <p className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 sm:flex-nowrap sm:pr-14">
             {underdog?.brandName ? (
               <>
-                <span className="eyebrow shrink-0 text-[11px] text-clay-ink">Underdog</span>
-                <span className="min-w-0 basis-full font-display text-[15px] italic text-ink/80 flex items-center gap-2 sm:basis-auto">
-                  <span className="truncate">{underdog.brandName}</span>
-                  <TrustBadge rating={trend.underdogRating} signals={trend.ratingSignals} />
+                <span className="eyebrow shrink-0 text-[11px] text-clay-ink max-sm:hidden">Underdog</span>
+                <span className="flex min-w-0 basis-full flex-wrap items-center gap-x-2 gap-y-1 font-display text-[14px] italic text-ink/80 sm:basis-auto sm:text-[15px]">
+                  <span className="max-w-full truncate">{underdog.brandName}</span>
+                  <TrustBadge ratingAverage={trend.userRatingAverage} ratingCount={trend.userRatingCount} signals={trend.ratingSignals} />
                 </span>
               </>
             ) : (
@@ -131,22 +132,22 @@ export function TrendCard({
           <m.h3
             layoutId={activeLayout ? `trend-title-${trend.id}` : undefined}
             transition={spring.layout}
-            className="mt-2 line-clamp-2 text-balance font-display text-[1.4rem] leading-[1.15] tracking-[-0.01em]"
+            className="mt-1.5 line-clamp-2 font-display text-[15px] leading-[1.25] tracking-[-0.01em] sm:mt-2 sm:text-balance sm:text-[1.4rem] sm:leading-[1.15]"
           >
             {trend.name}
           </m.h3>
 
-          {audienceLabel(underdog?.audience) && <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/60">{audienceLabel(underdog?.audience)}</p>}
+          {audienceLabel(underdog?.audience) && <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/60 max-sm:hidden">{audienceLabel(underdog?.audience)}</p>}
 
           {trend.aiSummary && (
-            <p className="mt-2.5 line-clamp-2 text-pretty text-[14.5px] leading-relaxed text-ink/70">{firstSentence(trend.aiSummary)}</p>
+            <p className="mt-2.5 line-clamp-2 text-pretty text-[14.5px] leading-relaxed text-ink/70 max-sm:hidden">{firstSentence(trend.aiSummary)}</p>
           )}
 
-          <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-5">
-            <div className="flex flex-wrap items-baseline gap-2">
+          <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-3 sm:pt-5">
+            <div className="flex flex-wrap items-baseline gap-x-2">
               {price ? (
                 <>
-                  <span className="font-display text-xl tabular-nums">{price}</span>
+                  <span className="font-display text-base tabular-nums sm:text-xl">{price}</span>
                   {off && (
                     <span className="text-[13px] text-ink/70 line-through">{formatPrice(underdog?.originalPrice, underdog?.currency)}</span>
                   )}
@@ -155,7 +156,7 @@ export function TrendCard({
                 <span className="meta">Price at the store</span>
               )}
             </div>
-            <span className="flex items-center gap-1.5 text-[13px] font-semibold text-clay-ink transition-all duration-300 md:-translate-x-1 md:opacity-0 md:group-hover/card:translate-x-0 md:group-hover/card:opacity-100 md:group-focus-within/card:translate-x-0 md:group-focus-within/card:opacity-100">
+            <span className="flex items-center gap-1.5 text-[13px] font-semibold text-clay-ink transition-all duration-300 max-sm:hidden md:-translate-x-1 md:opacity-0 md:group-hover/card:translate-x-0 md:group-hover/card:opacity-100 md:group-focus-within/card:translate-x-0 md:group-focus-within/card:opacity-100">
               Open story
               <svg viewBox="0 0 20 20" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
                 <path d="M3.5 10h12.5M11.5 5l5 5-5 5" />
@@ -172,7 +173,7 @@ export function TrendCard({
           className="absolute inset-0 z-[5] rounded-[20px] focus-visible:outline-offset-[-4px]"
         />
 
-        <div className="absolute right-3 top-3 z-20">
+        <div className="absolute right-1.5 top-1.5 z-20 sm:right-3 sm:top-3">
           <BookmarkButton trendId={trend.id} trendName={trend.name} knownArchived={archivedContext} onUnarchived={onUnarchived} />
         </div>
       </PointerScope>

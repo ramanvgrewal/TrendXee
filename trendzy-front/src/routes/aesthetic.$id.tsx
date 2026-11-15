@@ -562,7 +562,7 @@ function LanePending() {
       <div className="mx-auto w-full max-w-[1440px] px-5 pt-4 sm:px-8">
         <div className="h-[min(64svh,620px)] skeleton rounded-[28px]" />
       </div>
-      <div className="mx-auto mt-24 grid w-full max-w-[1440px] gap-6 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-3">
+      <div className="mx-auto mt-24 grid w-full max-w-[1440px] grid-cols-2 gap-x-3 gap-y-5 px-5 sm:gap-6 sm:px-8 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="overflow-hidden rounded-[20px] bg-raised shadow-card">
             <div className="skeleton aspect-[4/5]" />

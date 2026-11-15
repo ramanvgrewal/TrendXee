@@ -2,6 +2,7 @@ import { pageSeo } from "@/lib/seo";
 import { useEffect } from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Hero } from "@/components/home/Hero";
+import { RisingToday } from "@/components/home/RisingToday";
 import { StoryScene } from "@/components/home/StoryScene";
 import { DailyFive } from "@/components/home/DailyFive";
 import { LaneUniverse } from "@/components/home/LaneUniverse";
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { audience = "ALL" } = Route.useSearch();
-  const { rotationMap, dateKey, dailyFive, lead, story, loadedAt } = Route.useLoaderData();
+  const { rotationMap, dateKey, dailyFive, rising, lead, story, loadedAt } = Route.useLoaderData();
   const router = useRouter();
   useEffect(() => {
     let refreshing = false;
@@ -49,6 +50,8 @@ function Home() {
       <ScrollProgress />
       <div data-chapter="01" data-chapter-title="The board" className="tone-hero -mt-16 pt-16">
         <Hero key={dateKey} lead={lead} dateKey={dateKey} />
+        {/* Products first: same chapter as the cover, before any storytelling. */}
+        <RisingToday key={rising.map((item) => item.id).join("-")} items={rising} />
       </div>
       {story.length >= 5 && (
         <div data-chapter="02" data-chapter-title="The story" className="tone-deep">

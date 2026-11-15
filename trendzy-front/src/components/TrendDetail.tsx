@@ -337,7 +337,7 @@ function DetailBody({
               <p className="eyebrow text-[11px] text-clay-ink">The underdog</p>
               <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="font-display text-2xl italic flex flex-wrap items-center gap-2"><span className="truncate">{underdog.brandName || "Indie label"}</span><TrustBadge rating={trend.underdogRating} signals={trend.ratingSignals} /></p>
+                  <p className="font-display text-2xl italic flex flex-wrap items-center gap-2"><span className="truncate">{underdog.brandName || "Indie label"}</span><TrustBadge ratingAverage={trend.userRatingAverage} ratingCount={trend.userRatingCount} signals={trend.ratingSignals} showEmpty /></p>
                   <p className="mt-0.5 line-clamp-2 text-[14px] text-ink/70">{underdog.title}</p>
                 </div>
                 {price && (

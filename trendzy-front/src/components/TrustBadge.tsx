@@ -1,34 +1,66 @@
+import { Check } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
-export function TrustBadge({ rating, signals }: { rating?: number; signals?: Record<string, any> }) {
-  // If no explicit community rating yet, compute a verified proving-ground baseline (4.5)
-  const displayRating = rating && rating > 0 ? rating : 4.5;
-  const isBaseline = !rating || rating <= 0;
+type TrustBadgeProps = {
+  /** Average of ratings left by signed-in TrendXee shoppers. */
+  ratingAverage?: number;
+  ratingCount?: number;
+  /** Facts recorded by the store audit (see `ratingSignals` on a trend). */
+  signals?: Record<string, unknown>;
+  /** Say "No ratings yet" when there is nothing to show (story view); cards stay quiet. */
+  showEmpty?: boolean;
+};
+
+const chip =
+  "relative z-20 pointer-events-auto inline-flex shrink-0 cursor-default items-center gap-1 rounded-full border border-border bg-cream px-2 py-0.5 font-body text-[12px] font-semibold not-italic leading-4 text-ink/80";
+
+/**
+ * What we actually know about a brand, and nothing more: a star rating only
+ * when shoppers have left one, otherwise the audit facts we verified.
+ */
+export function TrustBadge({ ratingAverage, ratingCount, signals, showEmpty = false }: TrustBadgeProps) {
+  const count = Math.max(0, Math.floor(ratingCount ?? 0));
+  const rated = count > 0 && typeof ratingAverage === "number" && ratingAverage > 0;
+  const cod = signals?.codAvailable === true;
+
+  if (!rated && !cod) {
+    return showEmpty ? <span className="font-body text-[12px] font-semibold not-italic text-ink/55">No ratings yet</span> : null;
+  }
 
   return (
     <TooltipProvider>
       <Tooltip delayDuration={200}>
         <TooltipTrigger asChild>
-          <span className="inline-flex cursor-default items-center gap-1 rounded bg-cream px-1.5 py-0.5 text-[12px] font-medium text-ink/80 shadow-sm border border-ink/5 relative z-20 pointer-events-auto">
-            <span className="text-amber-500">★</span> {displayRating.toFixed(1)}
-          </span>
+          {rated ? (
+            <span className={chip} aria-label={`Rated ${ratingAverage.toFixed(1)} out of 5 by ${count} ${count === 1 ? "shopper" : "shoppers"}`}>
+              <span aria-hidden className="text-warning">★</span>
+              <span className="tabular-nums">{ratingAverage.toFixed(1)}</span>
+              <span className="font-normal text-ink/55">({count})</span>
+            </span>
+          ) : (
+            <span className={chip} aria-label="Cash on Delivery available">
+              <Check aria-hidden className="size-3 text-success" strokeWidth={2.5} />
+              COD
+            </span>
+          )}
         </TooltipTrigger>
-        <TooltipContent sideOffset={4} className="bg-raised text-ink border border-border shadow-lift rounded-xl p-3 flex flex-col gap-1 max-w-[210px] z-[100]">
-          <p className="font-semibold text-[13px] mb-0.5">
-            {isBaseline ? "Store Trust Audit (Baseline)" : "Community Trust Score"}
-          </p>
-          {isBaseline && (
-            <p className="text-[11px] text-ink/60 leading-tight mb-1">
-              Verified indie label storefront & social presence.
+        <TooltipContent sideOffset={4} className="z-[100] flex max-w-[220px] flex-col gap-1.5 rounded-xl border border-border bg-raised p-3 text-ink shadow-lift">
+          {rated ? (
+            <>
+              <p className="text-[13px] font-semibold">Shopper rating</p>
+              <p className="text-[12px] leading-snug text-ink/70">
+                Average from {count} signed-in TrendXee {count === 1 ? "shopper" : "shoppers"}.
+              </p>
+            </>
+          ) : (
+            <p className="text-[13px] font-semibold">Checked at the brand's store</p>
+          )}
+          {cod && (
+            <p className="flex items-center gap-1.5 text-[12px] text-ink/80">
+              <Check aria-hidden className="size-3 shrink-0 text-success" strokeWidth={2.5} /> Cash on Delivery available
             </p>
           )}
-          {signals?.codAvailable && <p className="text-[12px] text-ink/80 flex gap-1.5 items-center">✔️ Cash on Delivery</p>}
-          {signals?.igFollowers && <p className="text-[12px] text-ink/80 flex gap-1.5 items-center">✔️ {signals.igFollowers} IG Followers</p>}
-          {signals?.igEngagement && <p className="text-[12px] text-ink/80 flex gap-1.5 items-center">✔️ {signals.igEngagement} Engagement</p>}
-          {signals?.reviews && <p className="text-[12px] text-ink/80 flex gap-1.5 items-center">✔️ Verified Reviews</p>}
-          {(!signals || Object.keys(signals).length === 0) && (
-            <p className="text-[11px] text-ink/60">✔️ Verified Independent D2C Store</p>
-          )}
+          {!rated && <p className="text-[12px] leading-snug text-ink/60">No shopper ratings yet.</p>}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

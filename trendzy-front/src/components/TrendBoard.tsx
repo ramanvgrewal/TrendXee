@@ -54,7 +54,7 @@ export function TrendBoard({
 
   return (
     <LayoutGroup>
-      <ul aria-label="Products" className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+      <ul aria-label="Products" className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 xl:grid-cols-4">
         {trends.map((trend, i) => (
           <ScrollReveal as="li" key={trend.id} index={i % batchSize} y={24} className="min-w-0">
             <TrendCard

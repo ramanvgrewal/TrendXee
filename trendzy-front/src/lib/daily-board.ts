@@ -47,8 +47,43 @@ export function buildDailyBoard(rotationMap: RotationMap, dateKey = indiaDateKey
   const lead = leadPool.length ? leadPool[((day % leadPool.length) + leadPool.length) % leadPool.length] : undefined;
   const remaining = shuffle(all.filter((item) => !lead || productIdentity(item) !== productIdentity(lead)), dateKey);
   const dailyFive = remaining.slice(0, 5);
-  const used = new Set([...(lead ? [productIdentity(lead)] : []), ...dailyFive.map(productIdentity), ...covers]);
+  const featured = new Set([...(lead ? [productIdentity(lead)] : []), ...dailyFive.map(productIdentity)]);
+  const rising = risingToday(rotationMap, featured);
+  const used = new Set([...featured, ...covers, ...rising.map(productIdentity)]);
   const rest = remaining.filter((item) => !used.has(productIdentity(item)));
   const story = rest.slice(0, 7);
-  return { lead, dailyFive, story };
+  return { lead, dailyFive, rising, story };
+}
+
+export const RISING_COUNT = 8;
+
+/**
+ * A top-scored drop from each lane that isn't already the hero or in the Daily
+ * Five, best first, favouring labels not shown yet. Lanes take turns, so a
+ * small catalog still fills the row.
+ */
+function risingToday(rotationMap: RotationMap, taken: Set<string>) {
+  const lanes = Object.keys(rotationMap).sort().map((lane) => {
+    const seen = new Set<string>();
+    return rotationMap[lane]
+      .filter((item) => item.id && item.image && item.shopUrl && !taken.has(productIdentity(item)))
+      .sort((a, b) => (b.score || 0) - (a.score || 0) || a.id.localeCompare(b.id))
+      .filter((item) => !seen.has(productIdentity(item)) && !!seen.add(productIdentity(item)));
+  });
+  const picked = new Map<string, RotationItem>();
+  const brands = new Set<string>();
+  for (let progressed = true; progressed && picked.size < RISING_COUNT;) {
+    progressed = false;
+    for (const items of lanes) {
+      if (picked.size >= RISING_COUNT) break;
+      const open = items.filter((item) => !picked.has(productIdentity(item)));
+      // One label shouldn't fill the row: prefer a brand not shown yet, else the lane's best.
+      const item = open.find((candidate) => !candidate.brand || !brands.has(candidate.brand.toLowerCase())) ?? open[0];
+      if (!item) continue;
+      picked.set(productIdentity(item), item);
+      if (item.brand) brands.add(item.brand.toLowerCase());
+      progressed = true;
+    }
+  }
+  return [...picked.values()].sort((a, b) => (b.score || 0) - (a.score || 0) || a.id.localeCompare(b.id));
 }
