@@ -85,6 +85,7 @@ export function SiteHeader() {
           <NavLink to="/about" label="About" active={active === "about"} />
           <NavLink to="/journal" label="Journal" active={active === "journal"} />
           <NavLink to="/archive" label="Archive" active={active === "archive"} />
+          <NavLink to="/contact" label="Feedback" active={pathname === "/contact"} />
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
@@ -148,7 +149,7 @@ export function SiteHeader() {
   );
 }
 
-function NavLink({ to, hash, label, active = false }: { to: "/" | "/about" | "/archive" | "/journal"; hash?: string; label: string; active?: boolean }) {
+function NavLink({ to, hash, label, active = false }: { to: "/" | "/about" | "/archive" | "/journal" | "/contact"; hash?: string; label: string; active?: boolean }) {
   return (
     <Magnetic max={4}>
       <Link
@@ -336,6 +337,7 @@ function MobileMenu({
               { to: "/about" as const, label: "About TrendXee" },
               { to: "/journal" as const, label: "The Journal" },
               { to: "/archive" as const, label: "Your archive" },
+              { to: "/contact" as const, label: "Send feedback" },
             ].map((l) => (
               <m.li key={l.label} custom={i++} variants={item} initial="hidden" animate="show">
                 <Link to={l.to} hash={l.hash} onClick={onNavigate} className="flex min-h-11 items-center py-2 text-lg font-semibold text-ink/80 active:text-clay">
