@@ -4,7 +4,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Hero } from "@/components/home/Hero";
 import { RisingToday } from "@/components/home/RisingToday";
 import { StoryScene } from "@/components/home/StoryScene";
-import { DailyFive } from "@/components/home/DailyFive";
+import { TodaysFit } from "@/components/home/TodaysFit";
 import { LaneUniverse } from "@/components/home/LaneUniverse";
 import { EngineSection } from "@/components/home/EngineSection";
 import { FinalCta } from "@/components/home/FinalCta";
@@ -54,20 +54,20 @@ function Home() {
       <ScrollProgress />
       <div data-chapter="01" data-chapter-title="The board" className="tone-hero -mt-16 pt-16">
         <Hero key={`${dateKey}-${lead?.id ?? ""}`} lead={lead} featured={leadIsFeatured} dateKey={dateKey} />
-        {/* Products first: same chapter as the cover, before any storytelling. */}
+      </div>
+      {/* The hero's complete outfit, like the daily reel, then the browse grid. */}
+      <div data-chapter="02" data-chapter-title="Today's fit" className="tone-raised">
+        <TodaysFit key={`${dateKey}-${lead?.id ?? ""}`} candidates={lead ? [lead, ...dailyFive] : dailyFive} featured={leadIsFeatured} />
         <RisingToday key={rising.map((item) => item.id).join("-")} items={rising} />
       </div>
+      <div data-chapter="03" data-chapter-title="The lanes" className="tone-lanes">
+        <LaneUniverse rotationMap={rotationMap} />
+      </div>
       {story.length >= 5 && (
-        <div data-chapter="02" data-chapter-title="The story" className="tone-deep">
+        <div data-chapter="04" data-chapter-title="The story" className="tone-deep">
           <StoryScene items={story} />
         </div>
       )}
-      <div data-chapter="03" data-chapter-title="Daily five" className="tone-raised">
-        <DailyFive key={`${dateKey}-${dailyFive.map((item) => item.id).join("-")}`} items={dailyFive} />
-      </div>
-      <div data-chapter="04" data-chapter-title="The lanes" className="tone-lanes">
-        <LaneUniverse rotationMap={rotationMap} />
-      </div>
       <div data-chapter="05" data-chapter-title="The engine">
         <EngineSection />
       </div>

@@ -60,11 +60,12 @@ export function useToggleArchive(trendId: string, onUnarchived?: () => void) {
   });
 }
 
-export function trackProductClick(trendId: string, url: string) {
+/** `source` names where the click happened (max 50 chars), e.g. "hero" or "todays-fit". */
+export function trackProductClick(trendId: string, url: string, source = "underdog") {
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('trendxee:outfit-action', { detail: { trendId, type: 'SHOP_CLICK' } }));
   businessApiFetch("/api/analytics/click", {
     method: "POST",
-    body: JSON.stringify({ trendId, source: "underdog", url }),
+    body: JSON.stringify({ trendId, source, url }),
     keepalive: true,
   }).catch(() => {});
 }

@@ -3,7 +3,7 @@
  * analytics. Only the link a shopper follows is changed: the stored shopUrl
  * stays untouched because it is also the product's identity.
  */
-export function retailerHref(shopUrl: string | undefined | null): string {
+export function retailerHref(shopUrl: string | undefined | null, campaign = "product_discovery"): string {
   if (!shopUrl) return "#";
   let url: URL;
   try {
@@ -16,6 +16,8 @@ export function retailerHref(shopUrl: string | undefined | null): string {
   if ([...url.searchParams.keys()].some((key) => key.toLowerCase().startsWith("utm_"))) return url.toString();
   url.searchParams.set("utm_source", "trendxee");
   url.searchParams.set("utm_medium", "referral");
-  url.searchParams.set("utm_campaign", "product_discovery");
+  // The campaign names the homepage section, so GA4 link URLs and the brand's
+  // own report both show where the click came from.
+  url.searchParams.set("utm_campaign", campaign);
   return url.toString();
 }

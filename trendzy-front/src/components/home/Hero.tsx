@@ -102,13 +102,13 @@ export function Hero({ lead, dateKey, featured = false }: { lead?: RotationItem;
             <m.div className="relative z-10" style={allowed ? { y: printY, scale: printScale } : undefined}>
               <Parallax depth={3}>
                 <a
-                  href={lead?.shopUrl ? retailerHref(lead.shopUrl) : "#lanes"}
+                  href={lead?.shopUrl ? retailerHref(lead.shopUrl, featured ? "featured_hero" : "hero") : "#lanes"}
                   target={lead ? "_blank" : undefined}
                   rel="noopener noreferrer"
                   data-cursor="view"
                   onClick={() => {
                     if (lead?.id && lead?.shopUrl) {
-                      trackProductClick(lead.id, lead.shopUrl);
+                      trackProductClick(lead.id, lead.shopUrl, featured ? "featured-hero" : "hero");
                     }
                   }}
                   className="group block"
