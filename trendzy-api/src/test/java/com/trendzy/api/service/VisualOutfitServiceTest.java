@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class VisualOutfitServiceTest {
     static Trend item(String id, String title) {
         return Trend.builder().id(id).active(true).category(title.contains("jeans") ? "JEANS" : title.contains("sneakers") ? "SNEAKERS" : "TEES")
+            .subcategory(title.contains("sneakers") ? "Low-tops" : null)
             .enrichmentStatus("COMPLETED").signalProducts(Trend.SignalProducts.builder().underdog(Trend.ProductDetail.builder()
             .title(title).shopUrl("https://shop.test/products/"+id).imageUrl("https://cdn.test/"+id+".jpg")
             .audience("UNISEX").price(1000.).currency("INR").build()).build()).build();

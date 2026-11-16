@@ -79,7 +79,7 @@ export function belongsToLane(trend: Trend, laneId: string) {
 /** One page of a lane's trends, plus whether another page is worth asking for. */
 export async function fetchLanePage(laneId: string, page: number, audience: AudienceFilter = "ALL", filters: LaneFilters = {}) {
   try {
-    const size = laneId === "sneakers" || filters.style || filters.collection ? LANE_PAGE_SIZE : 1;
+    const size = filters.style || filters.collection ? LANE_PAGE_SIZE : 1;
     const result = await getCatalogPage(laneId, size, page, audience, { style: filters.style, subcategory: filters.collection });
     rememberStyles(laneId, result.styles);
     markCatalogFailure(laneId, audience, { ...filters, page: page + 1 }, false);

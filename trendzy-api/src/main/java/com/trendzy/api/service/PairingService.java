@@ -117,7 +117,7 @@ public class PairingService {
                 || trend.isTaxonomyReview() || trend.getTaxonomyDuplicateOf() != null
                 || !PUBLIC_STATUSES.contains(upper(trend.getEnrichmentStatus()))) return false;
         if ("SNEAKERS".equals(upper(trend.getCategory())) && (!trend.isIndianUnderdogBrand()
-                || !blank(trend.getSubcategory()))) return false;
+                || !com.trendzy.api.model.ApprovedTaxonomy.labels("SNEAKERS").contains(trend.getSubcategory()))) return false;
         ProductDetail p = product(trend);
         if (p == null || blank(p.getTitle()) || !ProductIdentity.isProductUrl(p.getShopUrl())
                 || ProductIdentity.canonical(p.getImageUrl()).isEmpty() || p.getPrice() == null

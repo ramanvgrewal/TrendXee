@@ -32,3 +32,38 @@ test('invalid category templates and unrelated hosts do not get redirected into 
   assert.equal(permanentRedirect('https://auth.trendxee.com/'), undefined);
   assert.equal(permanentRedirect('https://www.trendxee.com/aesthetic/upper', 'POST'), undefined);
 });
+
+test('retired subcategory links 301 to their merged, renamed or moved subcategory', () => {
+  const cases = [
+    ['/aesthetic/bottoms?collection=Parachute+Pants', '/aesthetic/bottoms?collection=Cargo+%26+Parachute+Pants'],
+    ['/aesthetic/bottoms?collection=Cargo+Pants', '/aesthetic/bottoms?collection=Cargo+%26+Parachute+Pants'],
+    ['/aesthetic/bottoms?collection=Joggers', '/aesthetic/bottoms?collection=Joggers+%26+Sweatpants'],
+    ['/aesthetic/bottoms?collection=Sweatpants', '/aesthetic/bottoms?collection=Joggers+%26+Sweatpants'],
+    ['/aesthetic/bottoms?collection=Shorts', '/aesthetic/bottoms?collection=Shorts+%26+Jorts'],
+    ['/aesthetic/sportswear?collection=Sports+Shorts', '/aesthetic/bottoms?collection=Shorts+%26+Jorts'],
+    ['/aesthetic/sportswear?collection=Athleisure', '/aesthetic/sportswear'],
+    ['/aesthetic/caps?collection=Beanies+%26+Headwear', '/aesthetic/caps?collection=Caps+%26+Headwear'],
+    ['/aesthetic/caps?collection=Caps+%26+Snapbacks', '/aesthetic/caps?collection=Caps+%26+Headwear'],
+    ['/aesthetic/shirts?collection=Flannel+%26+Check+Shirts', '/aesthetic/shirts?collection=Overshirts+%26+Flannels'],
+    ['/aesthetic/shirts?collection=Overshirts', '/aesthetic/shirts?collection=Overshirts+%26+Flannels'],
+    ['/aesthetic/jeans?collection=Straight-Fit+Jeans', '/aesthetic/jeans?collection=Relaxed+%26+Straight+Fit'],
+    ['/aesthetic/outerwear?collection=Hoodies+%26+Winter+Jackets', '/aesthetic/outerwear?collection=Hoodies+%26+Sweatshirts'],
+    // Old style ids, alias lanes and stray page numbers are handled too.
+    ['/aesthetic/bottoms?style=parachute-pants', '/aesthetic/bottoms?collection=Cargo+%26+Parachute+Pants'],
+    ['/aesthetic/accessories?collection=Beanies+%26+Headwear', '/aesthetic/caps?collection=Caps+%26+Headwear'],
+  ];
+  for (const [from, to] of cases) {
+    assert.equal(permanentRedirect(`https://www.trendxee.com${from}`), `https://www.trendxee.com${to}`, from);
+  }
+  assert.equal(
+    permanentRedirect('https://www.trendxee.com/aesthetic/bottoms?collection=parachute+pants&page=3&audience=MEN&utm_source=ig'),
+    'https://www.trendxee.com/aesthetic/bottoms?collection=Cargo+%26+Parachute+Pants&audience=MEN&utm_source=ig',
+  );
+});
+
+test('current subcategories and unknown collections are not redirected', () => {
+  for (const path of ['/aesthetic/bottoms?collection=Cargo+%26+Parachute+Pants', '/aesthetic/sneakers?collection=Low-tops',
+    '/aesthetic/bottoms?collection=Something+Else', '/aesthetic/tees?collection=Shorts']) {
+    assert.equal(permanentRedirect(`https://www.trendxee.com${path}`), undefined, path);
+  }
+});

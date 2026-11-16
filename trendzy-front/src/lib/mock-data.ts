@@ -88,7 +88,7 @@ const laneArtwork: Aesthetic[] = [
     {
     id: "outerwear",
     name: "OUTERWEAR",
-    description: "Denim, bombers, varsity jackets, overshirts and knitwear.",
+    description: "Varsity, bomber, denim and racing jackets, plus hoodies and sweatshirts, puffers and knitwear.",
     signalCount: 4500,
     trendScore: 92,
     colorPalette: ["#1c1917", "#44403c", "#78716c", "#d6d3d1"],
@@ -99,7 +99,7 @@ const laneArtwork: Aesthetic[] = [
     {
     id: "jeans",
     name: "JEANS",
-    description: "Baggy denim leads the way, with wide-leg, relaxed, bootcut and flared fits.",
+    description: "Baggy denim leads the way, with relaxed and straight, wide-leg, bootcut, flared and cargo fits.",
     signalCount: 0,
     trendScore: 0,
     colorPalette: ["#1e3a5f", "#64748b"],
@@ -110,7 +110,7 @@ const laneArtwork: Aesthetic[] = [
   {
     id: "bottoms",
     name: "BOTTOMS",
-    description: "Cargo pants, joggers, sweatpants and shorts for everyday fits.",
+    description: "Cargo and parachute pants, joggers and sweatpants, shorts and jorts, and Korean pleated trousers.",
     signalCount: 3980,
     trendScore: 88,
     colorPalette: ["#a3a3a3", "#525252", "#f5f5f4", "#0f172a"],
@@ -132,7 +132,7 @@ const laneArtwork: Aesthetic[] = [
     {
     id: "sneakers",
     name: "Sneakers",
-    description: "Sneakers from independent Indian brands.",
+    description: "Low-tops, high-tops, chunky and retro pairs, and slides from independent Indian brands.",
     signalCount: 5120,
     trendScore: 96,
     colorPalette: ["#7f1d1d", "#dc2626", "#fca5a5", "#fef2f2"],
@@ -143,7 +143,7 @@ const laneArtwork: Aesthetic[] = [
     {
     id: "sportswear",
     name: "SPORTSWEAR",
-    description: "Football, basketball and cricket jerseys, gym and compression tees, training tops and performance tanks.",
+    description: "Sports jerseys, gym and training wear, tracksuits and track pants.",
     signalCount: 1890,
     trendScore: 78,
     colorPalette: ["#facc15", "#78716c", "#1c1917", "#e7e5e4"],
@@ -154,7 +154,7 @@ const laneArtwork: Aesthetic[] = [
     {
     id: "shirts",
     name: "SHIRTS",
-    description: "Button-down shirts, from crisp everyday basics to relaxed printed styles.",
+    description: "Linen, printed and Cuban-collar shirts, plus overshirts and flannels.",
     signalCount: 0,
     trendScore: 0,
     colorPalette: ["#fde047", "#eab308", "#a16207", "#713f12"],
@@ -165,7 +165,7 @@ const laneArtwork: Aesthetic[] = [
     {
     id: "caps",
     name: "CAPS & ACCESSORIES",
-    description: "Caps, rings, pendants, bracelets and watches.",
+    description: "Caps and headwear, jewellery, sunglasses, bags and slings, and watches.",
     signalCount: 2610,
     trendScore: 82,
     colorPalette: ["#e5e7eb", "#9ca3af", "#f59e0b", "#111827"],

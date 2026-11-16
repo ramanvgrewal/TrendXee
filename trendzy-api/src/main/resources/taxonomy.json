@@ -16,14 +16,16 @@
       "Bomber Jackets",
       "Denim Jackets",
       "Racing & Biker Jackets",
-      "Hoodies & Winter Jackets"
+      "Hoodies & Sweatshirts",
+      "Puffers & Winter Jackets",
+      "Sweaters & Knitwear"
     ]
   ],
   "JEANS": [
     "Jeans",
     [
       "Baggy Jeans",
-      "Straight-Fit Jeans",
+      "Relaxed & Straight Fit",
       "Wide-Leg Jeans",
       "Bootcut & Flared Jeans",
       "Cargo & Utility Jeans"
@@ -32,11 +34,10 @@
   "BOTTOMS": [
     "Bottoms",
     [
-      "Cargo Pants",
-      "Joggers",
-      "Sweatpants",
-      "Parachute Pants",
-      "Shorts"
+      "Cargo & Parachute Pants",
+      "Joggers & Sweatpants",
+      "Shorts & Jorts",
+      "Korean & Pleated Trousers"
     ]
   ],
   "SPORTSWEAR": [
@@ -44,18 +45,17 @@
     [
       "Sports Jerseys",
       "Gym & Training Wear",
-      "Tracksuits & Track Pants",
-      "Sports Shorts",
-      "Athleisure"
+      "Tracksuits & Track Pants"
     ]
   ],
   "CAPS": [
     "Caps & Accessories",
     [
-      "Caps & Snapbacks",
-      "Beanies & Headwear",
+      "Caps & Headwear",
       "Jewellery",
-      "Sunglasses & Eyewear"
+      "Sunglasses & Eyewear",
+      "Bags & Slings",
+      "Watches"
     ]
   ],
   "SHIRTS": [
@@ -63,12 +63,17 @@
     [
       "Linen Shirts",
       "Printed Shirts",
-      "Flannel & Check Shirts",
-      "Overshirts",
+      "Overshirts & Flannels",
       "Casual & Cuban Collar Shirts"
     ]
   ],
   "SNEAKERS": [
-    "Sneakers", []
+    "Sneakers",
+    [
+      "Low-tops",
+      "High-tops",
+      "Chunky & Retro",
+      "Slides & Clogs"
+    ]
   ]
 }

@@ -25,7 +25,7 @@ class TrendControllerTest {
         var result = controller.getFilteredTrends("JEANS", "Baggy Jeans", 1, 12, "WOMEN", 1000.0, 2000.0, true).block();
         assertEquals(13L, result.get("totalElements"));
         assertEquals(false, result.get("hasMore"));
-        assertEquals(List.of("Baggy Jeans", "Straight-Fit Jeans", "Wide-Leg Jeans", "Bootcut & Flared Jeans", "Cargo & Utility Jeans"),
+        assertEquals(List.of("Baggy Jeans", "Relaxed & Straight Fit", "Wide-Leg Jeans", "Bootcut & Flared Jeans", "Cargo & Utility Jeans"),
                 result.get("subcategories"));
         verify(mongoTemplate).count(argThat(query -> query.getSkip() == 0 && query.getLimit() == 0
                 && query.getQueryObject().containsKey("subcategory")

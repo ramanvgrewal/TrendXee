@@ -41,7 +41,7 @@ class CatalogFilterQueryTest {
         var caps = CatalogFilterQuery.build("Caps & Accessories", "ALL", null, null, null).getQueryObject();
         assertEquals("CAPS", caps.getString("category"));
         assertFalse(caps.containsKey("signalProducts.underdog.price"));
-        assertEquals(List.of("Caps & Snapbacks", "Beanies & Headwear", "Jewellery", "Sunglasses & Eyewear"),
+        assertEquals(List.of("Caps & Headwear", "Jewellery", "Sunglasses & Eyewear", "Bags & Slings", "Watches"),
                 caps.get("subcategory", Document.class).getList("$in", String.class));
         assertEquals("TEES", CatalogFilterQuery.build("T-Shirts", "ALL", null, null, null)
                 .getQueryObject().getString("category"));
@@ -58,12 +58,23 @@ class CatalogFilterQueryTest {
         assertThrows(ResponseStatusException.class, () -> CatalogFilterQuery.build("TEES", "other", null, null, null));
     }
 
-    @Test void sneakersRequiresCuratedBrandAndHasNoSubcategories() {
+    @Test void sneakersRequireCuratedBrandAndAnApprovedSilhouette() {
+        var sneakerLabels = List.of("Low-tops", "High-tops", "Chunky & Retro", "Slides & Clogs");
+        assertEquals(sneakerLabels, com.trendzy.api.model.ApprovedTaxonomy.labels("SNEAKERS"));
         var query = CatalogFilterQuery.build("SNEAKERS", "MEN", null, null, null).getQueryObject();
         assertEquals(true, query.getBoolean("indianUnderdogBrand"));
-        assertEquals(java.util.Arrays.asList(null, ""), query.get("subcategory", Document.class).get("$in"));
-        assertEquals(List.of(), com.trendzy.api.model.ApprovedTaxonomy.labels("SNEAKERS"));
+        assertEquals(sneakerLabels, query.get("subcategory", Document.class).get("$in"));
+        assertEquals("High-tops", CatalogFilterQuery.build("SNEAKERS", "ALL", "High-tops", null, null)
+                .getQueryObject().getString("subcategory"));
         assertEquals(List.of(), CatalogFilterQuery.build("SNEAKERS", "ALL", "Sandals", null, null)
                 .getQueryObject().get("subcategory", Document.class).get("$in"));
+    }
+
+    @Test void restructuredLabelsReplaceRetiredOnes() {
+        assertEquals(List.of("Cargo & Parachute Pants", "Joggers & Sweatpants", "Shorts & Jorts", "Korean & Pleated Trousers"),
+                com.trendzy.api.model.ApprovedTaxonomy.labels("BOTTOMS"));
+        assertEquals(List.of(), CatalogFilterQuery.build("BOTTOMS", "ALL", "Parachute Pants", null, null)
+                .getQueryObject().get("subcategory", Document.class).get("$in"));
+        assertFalse(com.trendzy.api.model.ApprovedTaxonomy.labels("SPORTSWEAR").contains("Sports Shorts"));
     }
 }
