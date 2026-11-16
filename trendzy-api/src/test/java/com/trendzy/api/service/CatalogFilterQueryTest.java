@@ -13,7 +13,7 @@ class CatalogFilterQueryTest {
         assertEquals("JEANS", criteria.getString("category"));
         assertEquals(false, criteria.get("active", Document.class).get("$ne"));
         assertNotNull(criteria.get("$or"));
-        assertEquals("Baggy Jeans", criteria.getString("subcategory"));
+        assertEquals(List.of("Baggy Jeans"), criteria.get("subcategory", Document.class).getList("$in", String.class));
         var price = criteria.get("signalProducts.underdog.price", Document.class);
         assertEquals(1000.0, price.get("$gte"));
         assertEquals(1999.99, price.get("$lte"));
@@ -41,7 +41,7 @@ class CatalogFilterQueryTest {
         var caps = CatalogFilterQuery.build("Caps & Accessories", "ALL", null, null, null).getQueryObject();
         assertEquals("CAPS", caps.getString("category"));
         assertFalse(caps.containsKey("signalProducts.underdog.price"));
-        assertEquals(List.of("Caps & Headwear", "Jewellery", "Sunglasses & Eyewear", "Bags & Slings", "Watches"),
+        assertEquals(List.of("Caps & Headwear", "Jewellery", "Sunglasses & Eyewear", "Bags & Slings", "Watches", "Caps & Snapbacks", "Beanies & Headwear"),
                 caps.get("subcategory", Document.class).getList("$in", String.class));
         assertEquals("TEES", CatalogFilterQuery.build("T-Shirts", "ALL", null, null, null)
                 .getQueryObject().getString("category"));
@@ -65,6 +65,21 @@ class CatalogFilterQueryTest {
         assertEquals(List.of(), com.trendzy.api.model.ApprovedTaxonomy.labels("SNEAKERS"));
         assertEquals(List.of(), CatalogFilterQuery.build("SNEAKERS", "ALL", "Low-tops", null, null)
                 .getQueryObject().get("subcategory", Document.class).get("$in"));
+    }
+
+    @Test void newSubcategoriesAlsoServeProductsStillStoredUnderTheirOldLabels() {
+        var hoodies = CatalogFilterQuery.build("OUTERWEAR", "ALL", "Hoodies & Sweatshirts", null, null).getQueryObject();
+        assertEquals(List.of("Hoodies & Sweatshirts", "Hoodies & Winter Jackets"),
+                hoodies.get("subcategory", Document.class).getList("$in", String.class));
+        var joggers = CatalogFilterQuery.build("BOTTOMS", "ALL", null, null, null, "joggers-sweatpants").getQueryObject();
+        assertEquals(List.of("Joggers & Sweatpants", "Joggers", "Sweatpants"),
+                joggers.get("subcategory", Document.class).getList("$in", String.class));
+        var lane = CatalogFilterQuery.build("CAPS", "ALL", null, null, null).getQueryObject()
+                .get("subcategory", Document.class).getList("$in", String.class);
+        assertTrue(lane.containsAll(List.of("Caps & Headwear", "Caps & Snapbacks", "Beanies & Headwear", "Watches")));
+        // An old label is not itself a valid filter; old links are redirected by the website.
+        assertEquals(List.of(), CatalogFilterQuery.build("OUTERWEAR", "ALL", "Hoodies & Winter Jackets", null, null)
+                .getQueryObject().get("subcategory", Document.class).getList("$in", String.class));
     }
 
     @Test void restructuredLabelsReplaceRetiredOnes() {

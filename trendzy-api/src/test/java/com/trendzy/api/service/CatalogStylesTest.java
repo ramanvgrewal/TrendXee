@@ -64,13 +64,13 @@ class CatalogStylesTest {
                 CatalogStyles.options("SHIRTS", List.of("Ajrakh Printed Shirt", "Block-Printed Shirt", "Chikankari Shirt"))
                         .stream().map(CatalogStyles.Option::id).toList());
         var filtered = CatalogFilterQuery.build("SHIRTS", "WOMEN", "Printed Shirts", null, null).getQueryObject();
-        assertEquals("Printed Shirts", filtered.getString("subcategory"));
+        assertEquals(List.of("Printed Shirts"), filtered.get("subcategory", org.bson.Document.class).getList("$in", String.class));
         assertTrue(filtered.toJson().contains("UNISEX"));
     }
 
     @Test void groupAndAudienceAreBothAppliedBeforePaginationAndUnrelatedLanesAreRejected() {
         var query = CatalogFilterQuery.build("JEANS", "WOMEN", null, null, null, "baggy-jeans");
-        assertEquals("Baggy Jeans", query.getQueryObject().getString("subcategory"));
+        assertEquals(List.of("Baggy Jeans"), query.getQueryObject().get("subcategory", org.bson.Document.class).getList("$in", String.class));
         assertTrue(query.getQueryObject().toJson().contains("UNISEX"));
         assertEquals(12, CatalogFilterQuery.page(query, 1, 12).getSkip());
         assertEquals(List.of(), CatalogFilterQuery.build("TEES", "ALL", "Baggy Jeans", null, null)

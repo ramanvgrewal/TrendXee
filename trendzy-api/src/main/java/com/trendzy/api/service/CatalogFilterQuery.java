@@ -38,14 +38,15 @@ public final class CatalogFilterQuery {
             criteria.put("indianUnderdogBrand", true);
             criteria.put("subcategory", new Document("$in", java.util.Arrays.asList(null, "")));
         } else {
-            criteria.put("subcategory", new Document("$in", labels));
+            criteria.put("subcategory", new Document("$in", stored(normalized, labels)));
         }
         if (!"ALL".equals(normalizedAudience)) {
             List<String> audiences = "UNISEX".equals(normalizedAudience) ? List.of("UNISEX") : List.of(normalizedAudience, "UNISEX");
             criteria.put("$expr", new Document("$in", List.of(Document.parse(TrendRepository.EFFECTIVE_AUDIENCE), audiences)));
         }
         if (subcategory != null && !subcategory.isBlank()) {
-            criteria.put("subcategory", labels.contains(subcategory) ? subcategory : new Document("$in", List.of()));
+            criteria.put("subcategory", new Document("$in",
+                    labels.contains(subcategory) ? stored(normalized, List.of(subcategory)) : List.of()));
         }
         if (style != null && !style.isBlank()) {
             var approved = labels.stream().filter(label ->
@@ -53,7 +54,7 @@ public final class CatalogFilterQuery {
             if (approved.isEmpty() || (subcategory != null && !subcategory.isBlank() && !subcategory.equals(approved.get()))) {
                 criteria.put("subcategory", new Document("$in", List.of()));
             } else {
-                criteria.put("subcategory", approved.get());
+                criteria.put("subcategory", new Document("$in", stored(normalized, List.of(approved.get()))));
             }
         }
         if (minPrice != null || maxPrice != null) {
@@ -72,6 +73,29 @@ public final class CatalogFilterQuery {
     private static void andExpression(Document criteria, Document expression) {
         Object existing = criteria.get("$expr");
         criteria.put("$expr", existing == null ? expression : new Document("$and", List.of(existing, expression)));
+    }
+
+    /**
+     * Pre-v3 stored labels shown under each new subcategory. The owner publishes
+     * migrated catalog data to Atlas manually, so the live database can still hold
+     * the old labels; both are served until every copy is migrated.
+     */
+    static final java.util.Map<String, java.util.Map<String, List<String>>> LEGACY_LABELS = java.util.Map.of(
+            "OUTERWEAR", java.util.Map.of("Hoodies & Sweatshirts", List.of("Hoodies & Winter Jackets")),
+            "BOTTOMS", java.util.Map.of(
+                    "Cargo & Parachute Pants", List.of("Cargo Pants", "Parachute Pants"),
+                    "Joggers & Sweatpants", List.of("Joggers", "Sweatpants"),
+                    "Shorts & Jorts", List.of("Shorts")),
+            "JEANS", java.util.Map.of("Relaxed & Straight Fit", List.of("Straight-Fit Jeans")),
+            "CAPS", java.util.Map.of("Caps & Headwear", List.of("Caps & Snapbacks", "Beanies & Headwear")),
+            "SHIRTS", java.util.Map.of("Overshirts & Flannels", List.of("Flannel & Check Shirts", "Overshirts")));
+
+    /** The approved labels plus any older stored labels they replace. */
+    static List<String> stored(String category, List<String> labels) {
+        var legacy = LEGACY_LABELS.getOrDefault(category, java.util.Map.of());
+        var result = new java.util.ArrayList<String>(labels);
+        for (String label : labels) result.addAll(legacy.getOrDefault(label, List.of()));
+        return result;
     }
 
     public static String normalizeCategory(String category) {
