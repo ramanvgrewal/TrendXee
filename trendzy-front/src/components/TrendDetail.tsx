@@ -28,6 +28,7 @@ import type { Trend } from "@/lib/mock-data";
 import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
 import { adminActions, trackProductClick, useSession } from "@/lib/useTrendActions";
 import { TrustBadge } from "./TrustBadge";
+import { retailerHref } from "@/lib/outbound";
 import { rateTrendProduct, getBrandComments, addBrandComment, type BrandReview } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ScoreDetails } from "@/components/ScoreDetails";
@@ -350,7 +351,7 @@ function DetailBody({
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <Cta magnetic>
                   <a
-                    href={underdog.shopUrl}
+                    href={retailerHref(underdog.shopUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => trackProductClick(trend.id, underdog.shopUrl)}
@@ -626,7 +627,7 @@ function BrandHypeSection({ trend }: { trend: Trend }) {
         </div>
         <div className="flex flex-col border-t border-border pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
           <span className="text-[11px] font-bold text-ink/60 uppercase tracking-wider mb-1 min-h-11 flex items-center">Posts/Wk</span>
-          <span className="text-xl font-display text-ink">{postsPerWeek != null ? postsPerWeek.toFixed(1) : 'N/A'}</span>
+          <span className="text-xl font-display text-ink">{postsPerWeek != null ? Math.round(postsPerWeek) : 'N/A'}</span>
         </div>
       </div>
       {trend.trendScoreUpdatedAt && (

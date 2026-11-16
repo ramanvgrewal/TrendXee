@@ -9,6 +9,7 @@ import { aesthetics } from "@/lib/mock-data";
 import type { RotationItem } from "@/lib/lanes";
 import { indiaDateLabel, laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { trackProductClick } from "@/lib/useTrendActions";
+import { retailerHref } from "@/lib/outbound";
 import { Img } from "@/components/Img";
 import { useAudience } from "@/components/AudienceFilter";
 
@@ -101,7 +102,7 @@ export function Hero({ lead, dateKey }: { lead?: RotationItem; dateKey: string }
             <m.div className="relative z-10" style={allowed ? { y: printY, scale: printScale } : undefined}>
               <Parallax depth={3}>
                 <a
-                  href={lead?.shopUrl || "#lanes"}
+                  href={lead?.shopUrl ? retailerHref(lead.shopUrl) : "#lanes"}
                   target={lead ? "_blank" : undefined}
                   rel="noopener noreferrer"
                   data-cursor="view"

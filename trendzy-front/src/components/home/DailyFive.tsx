@@ -14,6 +14,7 @@ import type { RotationItem } from "@/lib/lanes";
 import { discountPercent, formatPrice, laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { toast } from "sonner";
 import { businessApiFetch, getTrend } from "@/lib/api";
+import { retailerHref } from "@/lib/outbound";
 
 const STORY_MS = 7000;
 
@@ -158,7 +159,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
             <AnimatePresence initial={false} custom={direction} mode="popLayout">
               <m.a
                 key={item.id + index}
-                href={item.shopUrl}
+                href={retailerHref(item.shopUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => {
@@ -281,7 +282,7 @@ export function DailyFive({ items }: { items: RotationItem[] }) {
 
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Cta magnetic>
-                  <a href={item.shopUrl} target="_blank" rel="noopener noreferrer" onClick={track} className={ctaClass("primary")}>
+                  <a href={retailerHref(item.shopUrl)} target="_blank" rel="noopener noreferrer" onClick={track} className={ctaClass("primary")}>
                     Shop the underdog <CtaArrow className="-rotate-45 group-hover/cta:translate-x-0.5" />
                   </a>
                 </Cta>
