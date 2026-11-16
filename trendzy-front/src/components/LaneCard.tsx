@@ -20,6 +20,8 @@ type LaneCardProps = {
   subcategory?: StyleOption;
   className?: string;
   eager?: boolean;
+  /** In a two-column phone grid: a small tile with just the numeral and name. */
+  compact?: boolean;
 };
 
 export function LaneCard({ products, ...props }: LaneCardProps) {
@@ -35,6 +37,7 @@ function LaneCardSlideshow({
   subcategory,
   className = "",
   eager = false,
+  compact = false,
 }: Omit<LaneCardProps, "products"> & { slides: RotationItem[] }) {
   const audience = useAudience();
   const ref = useRef<HTMLDivElement>(null);
@@ -68,7 +71,7 @@ function LaneCardSlideshow({
       ref={ref}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className={`group/lane relative min-h-[26rem] ${className}`}
+      className={`group/lane relative min-h-[26rem] ${compact ? "max-sm:min-h-0" : ""} ${className}`}
       whileHover={lift.card}
       whileTap={lift.press}
       transition={spring.soft}
@@ -114,16 +117,16 @@ function LaneCardSlideshow({
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_0%_0%,color-mix(in_oklab,var(--scrim)_50%,transparent),transparent)]" />
 
           {/* Index numeral */}
-          <span aria-hidden className="pointer-events-none absolute -left-1 -top-4 font-display text-[7.5rem] leading-none tracking-[-0.06em] text-on-scrim/40 transition-colors duration-500 group-hover/lane:text-on-scrim/60 sm:text-[9rem]">
+          <span aria-hidden className={`pointer-events-none absolute -left-1 -top-4 font-display text-[7.5rem] leading-none tracking-[-0.06em] text-on-scrim/40 transition-colors duration-500 group-hover/lane:text-on-scrim/60 sm:text-[9rem] ${compact ? "max-sm:left-0 max-sm:-top-2 max-sm:text-[3.75rem]" : ""}`}>
             {String(index + 1).padStart(2, "0")}
           </span>
 
           {/* Copy */}
-          <div className="absolute inset-x-0 bottom-0 p-6 text-on-scrim sm:p-7">
+          <div className={`absolute inset-x-0 bottom-0 p-6 text-on-scrim sm:p-7 ${compact ? "max-sm:p-3" : ""}`}>
             <Parallax depth={1.5} follow>
-              <h3 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere]">{label}</h3>
-              {!subcategory && <p className="mt-3 line-clamp-2 max-w-[22rem] text-[14px] leading-relaxed text-on-scrim/75">{aesthetic.description}</p>}
-              <div className="mt-5 flex items-center justify-between gap-4 border-t border-on-scrim/20 pt-4 eyebrow">
+              <h3 className={`font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere] ${compact ? "max-sm:text-[17px] max-sm:leading-[1.15] max-sm:tracking-[-0.01em]" : ""}`}>{label}</h3>
+              {!subcategory && <p className={`mt-3 line-clamp-2 max-w-[22rem] text-[14px] leading-relaxed text-on-scrim/75 ${compact ? "max-sm:hidden" : ""}`}>{aesthetic.description}</p>}
+              <div className={`mt-5 flex items-center justify-between gap-4 border-t border-on-scrim/20 pt-4 eyebrow ${compact ? "max-sm:hidden" : ""}`}>
                 <span className="truncate text-on-scrim/75">
                   {brand ? (
                     <>

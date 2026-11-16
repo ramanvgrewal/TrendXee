@@ -143,10 +143,10 @@ function LanePage() {
         <>
           <section className="mx-auto w-full max-w-[1440px] px-5 pt-9 sm:px-8 lg:pt-12" aria-labelledby="subcategory-heading">
             <h2 id="subcategory-heading" className="font-display text-3xl tracking-tight sm:text-4xl">Choose a subcategory</h2>
-            {styles.length > 0 && <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {styles.length > 0 && <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
               {styles.map((option, index) => (
                 <LaneCard key={option.id} aesthetic={aesthetic} index={index} subcategory={option} products={covers?.[option.id]}
-                  eager={index < 3} className="h-[min(65svh,490px)]" />
+                  eager={index < 4} compact className="max-sm:aspect-[3/4] sm:h-[min(65svh,490px)]" />
               ))}
             </div>}
             {failed ? (

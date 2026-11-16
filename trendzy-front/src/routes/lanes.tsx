@@ -34,7 +34,7 @@ function LanesPage() {
         </p>
       </div>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
         {aesthetics.map((aesthetic, i) => {
           return (
             <ScrollReveal key={aesthetic.id} index={i}>
@@ -42,8 +42,9 @@ function LanesPage() {
                 aesthetic={aesthetic}
                 index={i}
                 products={rotationMap[aesthetic.id]}
-                eager={i < 3}
-                className="h-[min(72svh,560px)]"
+                eager={i < 4}
+                compact
+                className="max-sm:aspect-[3/4] sm:h-[min(72svh,560px)]"
               />
             </ScrollReveal>
           );
