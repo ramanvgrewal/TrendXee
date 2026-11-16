@@ -26,6 +26,26 @@ public class SecurityConfig {
     private final JwtCookieAuthFilter jwtCookieAuthFilter;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
+    // Exact extra origins only, such as one Vercel preview URL. Credentials are
+    // allowed, so a wildcard host like *.vercel.app would let any site act as a user.
+    @org.springframework.beans.factory.annotation.Value("${app.cors.extra-origins:}")
+    private String extraOrigins;
+
+    static List<String> allowedOriginPatterns(String extraOrigins) {
+        List<String> origins = new java.util.ArrayList<>(List.of(
+                "http://localhost:[*]",
+                "http://127.0.0.1:[*]",
+                "https://trendxee.com",
+                "https://www.trendxee.com"));
+        if (extraOrigins != null) {
+            for (String origin : extraOrigins.split(",")) {
+                String clean = origin.trim();
+                if (clean.startsWith("https://") && !clean.contains("*")) origins.add(clean);
+            }
+        }
+        return origins;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -59,13 +79,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:[*]",
-                "http://127.0.0.1:[*]",
-                "https://trendxee.com",
-                "https://www.trendxee.com",
-                "https://*.vercel.app"
-        ));
+        configuration.setAllowedOriginPatterns(allowedOriginPatterns(extraOrigins));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

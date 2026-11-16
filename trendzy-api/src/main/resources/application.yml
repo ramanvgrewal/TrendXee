@@ -16,6 +16,9 @@ app:
     feedback-secret: ${OUTFIT_FEEDBACK_SECRET:}
   jwt:
     public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public.pem}
+  cors:
+    # Comma-separated exact https origins, e.g. one Vercel preview URL. No wildcards.
+    extra-origins: ${CORS_EXTRA_ORIGINS:}
   cookie:
     name: ${COOKIE_NAME:trendxee_token}
 

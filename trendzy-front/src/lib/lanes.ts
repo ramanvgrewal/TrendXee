@@ -37,7 +37,7 @@ function shortSummary(text: string, max = 190) {
   return (out || clean.slice(0, max - 1).replace(/\s+\S*$/, "") + "…").trim();
 }
 
-function toRotationItem(t: Trend, laneId: string): RotationItem {
+export function toRotationItem(t: Trend, laneId: string): RotationItem {
   const u = t.products.underdog!;
   return {
     id: t.id,

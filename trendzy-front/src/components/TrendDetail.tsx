@@ -29,6 +29,8 @@ import { discountPercent, formatPrice, laneLabel } from "@/lib/format";
 import { adminActions, trackProductClick, useSession } from "@/lib/useTrendActions";
 import { TrustBadge } from "./TrustBadge";
 import { retailerHref } from "@/lib/outbound";
+import { removeFeaturedPick, setFeaturedPick } from "@/lib/featured";
+import { indiaDateKey } from "@/lib/daily-board";
 import { rateTrendProduct, getBrandComments, addBrandComment, type BrandReview } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ScoreDetails } from "@/components/ScoreDetails";
@@ -383,6 +385,36 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
   const [value, setValue] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [featureOpen, setFeatureOpen] = useState(false);
+  const [featureDate, setFeatureDate] = useState(() => indiaDateKey());
+  const [featureNote, setFeatureNote] = useState("");
+
+  const saveFeature = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await setFeaturedPick(featureDate, trend.id, featureNote.trim());
+      toast.success(featureDate === indiaDateKey() ? "Featured on today's homepage" : `Featured for ${featureDate}`);
+      setFeatureOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "That didn't save.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const clearFeature = async () => {
+    setBusy(true);
+    try {
+      await removeFeaturedPick(featureDate);
+      toast(`Removed the featured pick for ${featureDate}`);
+      setFeatureOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't remove that pick.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const open = (field: "score" | "price") => {
     setValue(String(field === "score" ? Math.round(trend.trendScore) : trend.products?.underdog?.price ?? trend.estimatedPrice ?? ""));
@@ -431,6 +463,9 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
     <div className="mt-8 rounded-[20px] border border-dashed border-destructive/30 p-4">
       <p className="eyebrow text-[11px] text-destructive">Admin</p>
       <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" onClick={() => { setFeatureDate(indiaDateKey()); setFeatureOpen(true); }} className={ctaClass("outline", "sm")}>
+          Feature on homepage
+        </button>
         <button type="button" onClick={() => open("score")} className={ctaClass("outline", "sm")}>
           Edit score
         </button>
@@ -441,6 +476,46 @@ function AdminTools({ trend, onChanged, onDeleted }: { trend: Trend; onChanged?:
           Delete trend
         </button>
       </div>
+
+      <Dialog open={featureOpen} onOpenChange={setFeatureOpen}>
+        <DialogContent className="max-w-sm rounded-[20px] border-0 bg-raised shadow-lift p-7">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl font-normal">Feature on the homepage</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={saveFeature} className="mt-2 flex flex-col gap-4">
+            <p className="text-sm text-ink/70">
+              This product leads the homepage as “Featured underdog” for the whole day (India time). It replaces any pick already set for that date.
+            </p>
+            <label className="flex flex-col gap-1.5 text-sm font-semibold">
+              Date
+              <input
+                type="date"
+                required
+                value={featureDate}
+                min={indiaDateKey()}
+                onChange={(e) => setFeatureDate(e.target.value)}
+                className="h-11 rounded-xl border border-ink/15 bg-cream/50 px-3 font-normal outline-none focus-visible:ring-2 focus-visible:ring-clay"
+              />
+            </label>
+            <label className="flex flex-col gap-1.5 text-sm font-semibold">
+              Private note (optional)
+              <input
+                maxLength={200}
+                value={featureNote}
+                onChange={(e) => setFeatureNote(e.target.value)}
+                placeholder="e.g. Brand outreach, reel Part 4"
+                className="h-11 rounded-xl border border-ink/15 bg-cream/50 px-3 font-normal outline-none focus-visible:ring-2 focus-visible:ring-clay"
+              />
+            </label>
+            <button type="submit" disabled={busy} className={ctaClass("primary")}>
+              {busy ? "Saving…" : "Feature this product"}
+            </button>
+            <button type="button" disabled={busy} onClick={clearFeature} className={`${ctaClass("outline", "sm")} text-destructive`}>
+              Remove the pick for this date
+            </button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent className="max-w-sm rounded-[20px] border-0 bg-raised shadow-lift p-7">

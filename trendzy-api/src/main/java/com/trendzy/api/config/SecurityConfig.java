@@ -45,7 +45,27 @@ public class SecurityConfig {
     @Value("${app.cookie.name:trendxee_token}")
     private String cookieName;
 
+    // Exact extra origins only, such as one Vercel preview URL. Credentials are
+    // allowed, so a wildcard host like *.vercel.app would let any site act as a user.
+    @Value("${app.cors.extra-origins:}")
+    private String extraOrigins;
+
     private final ResourceLoader resourceLoader;
+
+    static List<String> allowedOriginPatterns(String extraOrigins) {
+        java.util.List<String> origins = new java.util.ArrayList<>(List.of(
+                "http://localhost:[*]",
+                "http://127.0.0.1:[*]",
+                "https://trendxee.com",
+                "https://www.trendxee.com"));
+        if (extraOrigins != null) {
+            for (String origin : extraOrigins.split(",")) {
+                String clean = origin.trim();
+                if (clean.startsWith("https://") && !clean.contains("*")) origins.add(clean);
+            }
+        }
+        return origins;
+    }
 
     public SecurityConfig(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
@@ -71,6 +91,10 @@ public class SecurityConfig {
                         // Rating & comment endpoints require authenticated user
                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/products/*/rate").authenticated()
                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/brands/*/comments").authenticated()
+                        .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/brands/**").hasRole("ADMIN")
+                        // Featured picks: public read, admin-only changes
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/v2/featured/**").permitAll()
+                        .pathMatchers("/api/v2/featured/**").hasRole("ADMIN")
                         // Read-only endpoints are public
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/v2/trends/**").permitAll()
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/brands/**").permitAll()
@@ -175,13 +199,7 @@ public class SecurityConfig {
     @Bean
     public org.springframework.web.cors.reactive.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:[*]",
-                "http://127.0.0.1:[*]",
-                "https://trendxee.com",
-                "https://www.trendxee.com",
-                "https://*.vercel.app"
-        ));
+        configuration.setAllowedOriginPatterns(allowedOriginPatterns(extraOrigins));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

@@ -12,13 +12,17 @@ import { ScrollProgress } from "@/motion/ScrollProgress";
 import { fetchLaneRotations, LANE_COVER_STALE_TIME } from "@/lib/lanes";
 import { buildDailyBoard, indiaDateKey, untilNextIndiaDay } from "@/lib/daily-board";
 import { normalizeAudienceFilter } from "@/lib/audience";
+import { getFeaturedToday } from "@/lib/featured";
 
 export const Route = createFileRoute("/")({
   loaderDeps: ({ search }) => ({ audience: normalizeAudienceFilter(search.audience) }),
   loader: async ({ deps }) => {
-    const rotationMap = await fetchLaneRotations(deps.audience);
+    const [rotationMap, featuredLead] = await Promise.all([
+      fetchLaneRotations(deps.audience),
+      getFeaturedToday(deps.audience),
+    ]);
     const dateKey = indiaDateKey();
-    return { rotationMap, dateKey, loadedAt: Date.now(), ...buildDailyBoard(rotationMap, dateKey) };
+    return { rotationMap, dateKey, loadedAt: Date.now(), ...buildDailyBoard(rotationMap, dateKey, featuredLead) };
   },
   staleTime: 0,
   head: () => pageSeo({ title: "TrendXee — Discover Fashion Trends & Indian Indie Brands", description: "Discover fashion trends and emerging Indian indie brands on TrendXee. Explore oversized tees, baggy jeans, streetwear and fresh drops from the labels behind them.", path: "/" }),
@@ -27,7 +31,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { audience = "ALL" } = Route.useSearch();
-  const { rotationMap, dateKey, dailyFive, rising, lead, story, loadedAt } = Route.useLoaderData();
+  const { rotationMap, dateKey, dailyFive, rising, lead, leadIsFeatured, story, loadedAt } = Route.useLoaderData();
   const router = useRouter();
   useEffect(() => {
     let refreshing = false;
@@ -49,7 +53,7 @@ function Home() {
     <div key={audience} className="relative">
       <ScrollProgress />
       <div data-chapter="01" data-chapter-title="The board" className="tone-hero -mt-16 pt-16">
-        <Hero key={dateKey} lead={lead} dateKey={dateKey} />
+        <Hero key={`${dateKey}-${lead?.id ?? ""}`} lead={lead} featured={leadIsFeatured} dateKey={dateKey} />
         {/* Products first: same chapter as the cover, before any storytelling. */}
         <RisingToday key={rising.map((item) => item.id).join("-")} items={rising} />
       </div>

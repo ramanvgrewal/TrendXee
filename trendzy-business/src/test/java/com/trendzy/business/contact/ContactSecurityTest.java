@@ -42,6 +42,12 @@ class ContactSecurityTest {
                 .andExpect(status().isOk()).andExpect(header().string("Access-Control-Allow-Origin", "https://www.trendxee.com"));
         verifyNoInteractions(sender);
     }
+    @Test void anyVercelSiteIsNotGrantedCredentialedAccess() throws Exception {
+        mvc.perform(options("/api/contact").header("Origin", "https://attacker.vercel.app")
+                .header("Access-Control-Request-Method", "POST"))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(sender);
+    }
     @Test void unrelatedOriginsAreNotGrantedAccess() throws Exception {
         mvc.perform(options("/api/contact").header("Origin", "https://unrelated.example")
                 .header("Access-Control-Request-Method", "POST"))

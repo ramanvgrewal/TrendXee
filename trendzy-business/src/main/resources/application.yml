@@ -51,6 +51,9 @@ app:
   frontend:
     url: ${FRONTEND_URL:http://localhost:3000}
   admin-emails: ${APP_ADMIN_EMAILS:}
+  cors:
+    # Comma-separated exact https origins, e.g. one Vercel preview URL. No wildcards.
+    extra-origins: ${CORS_EXTRA_ORIGINS:}
   cookie:
     name: ${COOKIE_NAME:trendxee_token}
     domain: ${COOKIE_DOMAIN:localhost}

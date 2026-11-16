@@ -76,3 +76,16 @@ test('rising today prefers a label that is not on the row yet', () => {
   assert.equal(first.filter(pick => pick.brand === 'Big Label').length <= 1, true);
   assert.equal(new Set(rising.map(pick => pick.id)).size, rising.length);
 });
+
+test('an admin-featured product leads the day and is not repeated in other rows', () => {
+  const map = catalog();
+  const pick = { ...map.jeans[7] };
+  const board = buildDailyBoard(map, '2026-11-16', pick);
+  assert.equal(board.lead.id, pick.id);
+  assert.equal(board.leadIsFeatured, true);
+  for (const row of [board.dailyFive, board.rising, board.story]) {
+    assert.ok(row.every((item) => item.shopUrl !== pick.shopUrl));
+  }
+  const automatic = buildDailyBoard(map, '2026-11-16');
+  assert.equal(automatic.leadIsFeatured, false);
+});

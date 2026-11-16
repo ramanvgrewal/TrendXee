@@ -34,7 +34,11 @@ function shuffle(items: RotationItem[], key: string) {
 }
 
 /** Stable within a day; the lead advances daily even when the catalog never changes. */
-export function buildDailyBoard(rotationMap: RotationMap, dateKey = indiaDateKey()) {
+/**
+ * An admin-featured product replaces only the automatic lead for the day and
+ * is kept out of the other rows so it never appears twice.
+ */
+export function buildDailyBoard(rotationMap: RotationMap, dateKey = indiaDateKey(), featuredLead?: RotationItem | null) {
   const unique = new Map<string, RotationItem>();
   for (const item of Object.values(rotationMap).flat().filter((p) => p.id && p.image && p.shopUrl).sort((a, b) => a.id.localeCompare(b.id))) {
     if (!unique.has(productIdentity(item))) unique.set(productIdentity(item), item);
@@ -44,7 +48,8 @@ export function buildDailyBoard(rotationMap: RotationMap, dateKey = indiaDateKey
   const alternatives = all.filter((item) => !covers.has(productIdentity(item)));
   const leadPool = alternatives.length >= 2 ? alternatives : all;
   const day = Math.floor(Date.parse(`${dateKey}T00:00:00Z`) / DAY_MS);
-  const lead = leadPool.length ? leadPool[((day % leadPool.length) + leadPool.length) % leadPool.length] : undefined;
+  const lead = featuredLead
+    ?? (leadPool.length ? leadPool[((day % leadPool.length) + leadPool.length) % leadPool.length] : undefined);
   const remaining = shuffle(all.filter((item) => !lead || productIdentity(item) !== productIdentity(lead)), dateKey);
   const dailyFive = remaining.slice(0, 5);
   const featured = new Set([...(lead ? [productIdentity(lead)] : []), ...dailyFive.map(productIdentity)]);
@@ -52,7 +57,7 @@ export function buildDailyBoard(rotationMap: RotationMap, dateKey = indiaDateKey
   const used = new Set([...featured, ...covers, ...rising.map(productIdentity)]);
   const rest = remaining.filter((item) => !used.has(productIdentity(item)));
   const story = rest.slice(0, 7);
-  return { lead, dailyFive, rising, story };
+  return { lead, leadIsFeatured: !!featuredLead, dailyFive, rising, story };
 }
 
 export const RISING_COUNT = 8;

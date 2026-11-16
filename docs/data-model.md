@@ -14,7 +14,9 @@ Atlas manually. PostgreSQL account data belongs to the business API.
 | `outfit_events` | Catalog API; signed, expiring outfit interaction events |
 | `archived_trends` | Catalog API; user saves |
 | `brand_reviews`, `brand_stats` | Catalog API; community reviews and rating aggregates |
-| `product_clicks` | Business API; retailer-link analytics |
+| `brand_ratings` | Catalog API; one rating per user per brand (`userId|brand`), so a repeat rating replaces the earlier vote |
+| `featured_picks` | Catalog API; admin-chosen homepage lead, one document per India date (`_id` = `yyyy-MM-dd`) |
+| `product_clicks` | Business API; retailer-link analytics, stored in PostgreSQL (Neon), not MongoDB |
 
 Missing optional collections are created when a feature first writes data.
 

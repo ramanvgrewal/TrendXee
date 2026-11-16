@@ -1,9 +1,5 @@
 package com.trendzy.business.auth;
 
-import com.trendzy.business.auth.dto.AuthResponse;
-import com.trendzy.business.auth.dto.LoginRequest;
-import com.trendzy.business.auth.dto.SignupRequest;
-import com.trendzy.business.user.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -11,11 +7,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Authentication", description = "Endpoints for user login, signup, and logout")
+/**
+ * Sign-in is Google OAuth only (see OAuth2LoginSuccessHandler). Email/password
+ * signup was removed because it accepted any unverified address, including
+ * configured admin emails.
+ */
+@Tag(name = "Authentication", description = "Logout; sign-in uses Google OAuth")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -23,28 +23,6 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @Operation(summary = "User login", description = "Authenticates user credentials and issues JWT auth cookie")
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        User user = authService.login(request);
-        ResponseCookie cookie = authService.generateJwtCookie(user);
-        
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new AuthResponse(user));
-    }
-
-    @Operation(summary = "User registration", description = "Creates a new user account and returns JWT auth cookie")
-    @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest request) {
-        User user = authService.signup(request);
-        ResponseCookie cookie = authService.generateJwtCookie(user);
-        
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new AuthResponse(user));
-    }
-    
     @Operation(summary = "User logout", description = "Clears authentication cookies and invalidates session")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(jakarta.servlet.http.HttpServletRequest request) {
@@ -53,14 +31,14 @@ public class AuthController {
                 .path("/")
                 .maxAge(0)
                 .build();
-        
+
         // Invalidate the stateful OAuth2 session
         jakarta.servlet.http.HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }
         org.springframework.security.core.context.SecurityContextHolder.clearContext();
-        
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .header(HttpHeaders.SET_COOKIE, jsessionCookie.toString())

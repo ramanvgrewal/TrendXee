@@ -21,6 +21,7 @@ Normal builds and unit tests do not require running the services or real AI keys
 | `VITE_API_BASE_URL`, `VITE_BUSINESS_API_BASE_URL` | Frontend service URLs |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth credentials |
 | `COOKIE_DOMAIN`, `COOKIE_SECURE`, `FRONTEND_URL` | Environment-specific cookies and redirects |
+| `CORS_EXTRA_ORIGINS` | Optional comma-separated exact `https://` origins (for example one Vercel preview URL) allowed to call the APIs with cookies. Wildcards are ignored; trendxee.com, www and localhost are always allowed |
 | `OUTFIT_VISUAL_ENABLED` | Enables saved reviewed-outfit serving; default true |
 | `OUTFIT_FEEDBACK_ENABLED`, `OUTFIT_FEEDBACK_SECRET` | Optional signed outfit events; default off |
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` | Contact email delivery |

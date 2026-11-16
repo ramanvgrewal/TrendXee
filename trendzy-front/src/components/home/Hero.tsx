@@ -25,7 +25,7 @@ const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
  * lifts away faster, so the cover peels off into the story below.
  * Pointer (desktop): the print and stamp move at different depths.
  */
-export function Hero({ lead, dateKey }: { lead?: RotationItem; dateKey: string }) {
+export function Hero({ lead, dateKey, featured = false }: { lead?: RotationItem; dateKey: string; featured?: boolean }) {
   const audience = useAudience();
   const ref = useRef<HTMLElement>(null);
   const motionAllowed = useMotionAllowed();
@@ -133,7 +133,7 @@ export function Hero({ lead, dateKey }: { lead?: RotationItem; dateKey: string }
                         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-on-scrim">
                           <div className="min-w-0">
                             <p className="eyebrow text-[11px] text-on-scrim/70">
-                              Today's underdog
+                              {featured ? "Featured underdog · Today" : "Today's underdog"}
                             </p>
                             <p className="mt-1 truncate font-display text-xl italic">{lead.brand}</p>
                           </div>
