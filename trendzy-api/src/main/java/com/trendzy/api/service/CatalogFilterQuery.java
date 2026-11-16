@@ -34,10 +34,12 @@ public final class CatalogFilterQuery {
         Document criteria = Document.parse("{" + TrendRepository.VISIBLE + "}");
         criteria.put("category", normalized);
         if ("SNEAKERS".equals(normalized)) {
-            // Sneakers are curated Indian brands only; their silhouette is an approved subcategory.
+            // Sneakers are one curated lane of Indian brands, without subcategories.
             criteria.put("indianUnderdogBrand", true);
+            criteria.put("subcategory", new Document("$in", java.util.Arrays.asList(null, "")));
+        } else {
+            criteria.put("subcategory", new Document("$in", labels));
         }
-        criteria.put("subcategory", new Document("$in", labels));
         if (!"ALL".equals(normalizedAudience)) {
             List<String> audiences = "UNISEX".equals(normalizedAudience) ? List.of("UNISEX") : List.of(normalizedAudience, "UNISEX");
             criteria.put("$expr", new Document("$in", List.of(Document.parse(TrendRepository.EFFECTIVE_AUDIENCE), audiences)));

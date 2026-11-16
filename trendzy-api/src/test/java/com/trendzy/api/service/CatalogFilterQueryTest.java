@@ -58,15 +58,12 @@ class CatalogFilterQueryTest {
         assertThrows(ResponseStatusException.class, () -> CatalogFilterQuery.build("TEES", "other", null, null, null));
     }
 
-    @Test void sneakersRequireCuratedBrandAndAnApprovedSilhouette() {
-        var sneakerLabels = List.of("Low-tops", "High-tops", "Chunky & Retro", "Slides & Clogs");
-        assertEquals(sneakerLabels, com.trendzy.api.model.ApprovedTaxonomy.labels("SNEAKERS"));
+    @Test void sneakersRequiresCuratedBrandAndHasNoSubcategories() {
         var query = CatalogFilterQuery.build("SNEAKERS", "MEN", null, null, null).getQueryObject();
         assertEquals(true, query.getBoolean("indianUnderdogBrand"));
-        assertEquals(sneakerLabels, query.get("subcategory", Document.class).get("$in"));
-        assertEquals("High-tops", CatalogFilterQuery.build("SNEAKERS", "ALL", "High-tops", null, null)
-                .getQueryObject().getString("subcategory"));
-        assertEquals(List.of(), CatalogFilterQuery.build("SNEAKERS", "ALL", "Sandals", null, null)
+        assertEquals(java.util.Arrays.asList(null, ""), query.get("subcategory", Document.class).get("$in"));
+        assertEquals(List.of(), com.trendzy.api.model.ApprovedTaxonomy.labels("SNEAKERS"));
+        assertEquals(List.of(), CatalogFilterQuery.build("SNEAKERS", "ALL", "Low-tops", null, null)
                 .getQueryObject().get("subcategory", Document.class).get("$in"));
     }
 

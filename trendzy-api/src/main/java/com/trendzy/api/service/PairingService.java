@@ -116,8 +116,9 @@ public class PairingService {
         if (trend == null || !trend.isActive() || !LANES.contains(upper(trend.getCategory()))
                 || trend.isTaxonomyReview() || trend.getTaxonomyDuplicateOf() != null
                 || !PUBLIC_STATUSES.contains(upper(trend.getEnrichmentStatus()))) return false;
+        // Sneakers have no subcategories: only curated brands with a blank label appear.
         if ("SNEAKERS".equals(upper(trend.getCategory())) && (!trend.isIndianUnderdogBrand()
-                || !com.trendzy.api.model.ApprovedTaxonomy.labels("SNEAKERS").contains(trend.getSubcategory()))) return false;
+                || !blank(trend.getSubcategory()))) return false;
         ProductDetail p = product(trend);
         if (p == null || blank(p.getTitle()) || !ProductIdentity.isProductUrl(p.getShopUrl())
                 || ProductIdentity.canonical(p.getImageUrl()).isEmpty() || p.getPrice() == null

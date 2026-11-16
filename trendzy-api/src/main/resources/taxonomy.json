@@ -68,12 +68,6 @@
     ]
   ],
   "SNEAKERS": [
-    "Sneakers",
-    [
-      "Low-tops",
-      "High-tops",
-      "Chunky & Retro",
-      "Slides & Clogs"
-    ]
+    "Sneakers", []
   ]
 }

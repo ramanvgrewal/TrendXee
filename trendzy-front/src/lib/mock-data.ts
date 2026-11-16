@@ -132,7 +132,7 @@ const laneArtwork: Aesthetic[] = [
     {
     id: "sneakers",
     name: "Sneakers",
-    description: "Low-tops, high-tops, chunky and retro pairs, and slides from independent Indian brands.",
+    description: "Sneakers from independent Indian brands.",
     signalCount: 5120,
     trendScore: 96,
     colorPalette: ["#7f1d1d", "#dc2626", "#fca5a5", "#fef2f2"],

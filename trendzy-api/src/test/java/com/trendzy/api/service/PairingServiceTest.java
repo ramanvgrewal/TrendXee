@@ -123,13 +123,22 @@ class PairingServiceTest {
     @Test void refreshUnderSameIdInvalidatesSourceAndOpeningCandidate() {
         var updated = item("same-id", "New Sneakers", "SNEAKERS", "MEN");
         updated.setIndianUnderdogBrand(true);
-        updated.setSubcategory("Low-tops");
         updated.getSignalProducts().getUnderdog().setShopUrl("https://store.example/products/new");
         when(repository.findById("same-id")).thenReturn(Mono.just(updated));
         assertEquals(409, assertThrows(ResponseStatusException.class, () -> service.pairings("same-id", "ALL", "https://store.example/products/old").block()).getStatusCode().value());
         assertThrows(ResponseStatusException.class, () -> service.selectedProduct("same-id", "https://store.example/products/old").block());
         verify(repository, times(2)).findById("same-id");
         verifyNoMoreInteractions(repository);
+    }
+    @Test void sneakersAreOutfitEligibleOnlyWithoutASubcategory() {
+        var sneaker = item("sneaker", "Street Sneakers", "SNEAKERS", "MEN");
+        sneaker.setIndianUnderdogBrand(true);
+        assertTrue(PairingService.eligible(sneaker), "curated sneaker without a subcategory");
+        sneaker.setSubcategory("Chunky & Retro");
+        assertFalse(PairingService.eligible(sneaker), "sneakers have no subcategories");
+        sneaker.setSubcategory("");
+        sneaker.setIndianUnderdogBrand(false);
+        assertFalse(PairingService.eligible(sneaker), "uncurated brand");
     }
     @Test void invalidAudienceAndSourceIdentityAreRejected() {
         assertEquals(400, assertThrows(ResponseStatusException.class, () -> service.pairings("source", "kids", null).block()).getStatusCode().value());

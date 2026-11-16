@@ -34,14 +34,14 @@ export const Route = createFileRoute("/aesthetic/$id")({
     const aesthetic = aesthetics.find((a) => a.id === params.id);
     if (!aesthetic) throw notFound();
 
-    // Every lane, Sneakers included, opens on its subcategory chooser.
-    const showProducts = !!deps.collection;
+    const directFeed = params.id === "sneakers";
+    const showProducts = directFeed || !!deps.collection;
     const linkedTrend = (location.search as Record<string, unknown>).trend;
     const destination = () => redirect({ to: "/aesthetic/$id", params, search: {
       audience: deps.audience === "ALL" ? undefined : deps.audience,
       trend: typeof linkedTrend === "string" ? linkedTrend : undefined,
     }, replace: true });
-    if (deps.style || (!showProducts && deps.page > 1)) throw destination();
+    if (deps.style || (directFeed && deps.collection) || (!showProducts && deps.page > 1)) throw destination();
 
     let result;
     try {
@@ -91,7 +91,7 @@ function LanePage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const filters = normalizeLaneFilters(search);
   const subcategory = filters.style || filters.collection;
-  const showProducts = !!subcategory;
+  const showProducts = aesthetic.id === "sneakers" || !!subcategory;
   const page = normalizeLanePage(search.page);
   const categoryName = laneLabel(aesthetic.name);
   const index = styles.findIndex((option) => option.id === subcategory);
@@ -434,13 +434,17 @@ function LaneFeed({
     ) : trends.length === 0 ? (
       <EmptyState
         title={audience !== "ALL" ? "No drops for this fit yet." : "Nothing pinned in " + name + " yet."}
-        body="Try a different fit or browse another subcategory."
+        body={aesthetic.id === "sneakers" ? "Explore more independent Indian brands in the other lanes." : "Try a different fit or browse another subcategory."}
         action={
           <div className="flex flex-wrap justify-center gap-3">
             {audience !== "ALL" && <button type="button" onClick={resetFilters} className={ctaClass("primary")}>Show all fits</button>}
-            <Link to="/aesthetic/$id" params={{ id: aesthetic.id }} search={{}} className={ctaClass(audience === "ALL" ? "primary" : "outline")}>
-              Browse subcategories <CtaArrow />
-            </Link>
+            {aesthetic.id === "sneakers" ? (
+              <Link to="/lanes" className={ctaClass(audience === "ALL" ? "primary" : "outline")}>Browse all lanes <CtaArrow /></Link>
+            ) : (
+              <Link to="/aesthetic/$id" params={{ id: aesthetic.id }} search={{}} className={ctaClass(audience === "ALL" ? "primary" : "outline")}>
+                Browse subcategories <CtaArrow />
+              </Link>
+            )}
           </div>
         }
       />
