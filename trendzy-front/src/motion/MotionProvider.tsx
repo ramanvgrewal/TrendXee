@@ -3,6 +3,7 @@ import { LazyMotion, MotionConfig } from "framer-motion";
 import { PointerProvider } from "@/motion/pointer";
 import { Cursor } from "@/motion/Cursor";
 import { AmbientLight } from "@/motion/AmbientLight";
+import { Snowfall } from "@/motion/Snowfall";
 import { usePrefersReducedMotion } from "@/motion/hooks";
 
 const loadFeatures = () => import("@/motion/features").then((mod) => mod.default);
@@ -24,6 +25,7 @@ export function MotionProvider({ children }: { children: ReactNode }) {
         <PointerProvider>
           <AmbientLight />
           {children}
+          <Snowfall />
           <Cursor />
         </PointerProvider>
       </MotionConfig>

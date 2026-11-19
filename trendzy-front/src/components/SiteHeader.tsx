@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeIcon, ThemeToggle, useTheme } from "@/components/ThemeToggle";
+import { SnowToggle } from "@/motion/Snowfall";
 import { AuthModal } from "@/components/AuthModal";
 import { ContactDialog } from "@/components/ContactDialog";
 import { Cta, ctaClass } from "@/components/Cta";
@@ -89,6 +90,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <SnowToggle />
           <ThemeToggle />
           {user ? (
             <ProfileMenu user={user} onContact={() => setContactOpen(true)} onLogout={handleLogout} />
@@ -103,6 +105,7 @@ export function SiteHeader() {
 
         {/* Mobile */}
         <div className="flex items-center gap-1 md:hidden">
+          <SnowToggle />
           <ThemeToggle />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
