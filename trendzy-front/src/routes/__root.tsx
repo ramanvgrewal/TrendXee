@@ -1,3 +1,4 @@
+import { useTabTitle } from "@/lib/useTabTitle";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -144,6 +145,7 @@ import { Toaster } from "@/components/ui/sonner";
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  useTabTitle();
 
   useEffect(() => {
     // Handle back/forward cache (bfcache) restoration
