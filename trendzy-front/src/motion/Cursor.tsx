@@ -170,7 +170,7 @@ export function Cursor() {
   const interactive = kind === "link" || kind === "button" || kind === "label";
 
   return (
-    <m.div aria-hidden className="pointer-events-none fixed inset-0 z-[100]" style={{ opacity: presence }}>
+    <m.div aria-hidden className="pointer-events-none fixed inset-0 z-[1000]" style={{ opacity: presence }}>
       {/* Aura: a soft clay glow, a beat behind, stretched by speed. */}
       <m.div className="absolute left-0 top-0" style={{ x: auraX, y: auraY, rotate: angle, scaleX: stretch, scaleY: squash }}>
         <m.span
