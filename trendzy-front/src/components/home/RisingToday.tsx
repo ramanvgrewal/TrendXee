@@ -47,10 +47,10 @@ export function RisingToday({ items }: { items: RotationItem[] }) {
             <span className="inline-block size-1.5 rounded-full bg-clay" /> On the board now
           </p>
           <h2 id="rising-heading" className="mt-3 font-display text-[clamp(2rem,3.6vw,3.25rem)] leading-none tracking-[-0.025em]">
-            Rising <em className="italic text-clay">today</em>
+            Rising <em className="italic text-clay">this week</em>
           </h2>
         </div>
-        <p className="lede max-w-sm">A top-scoring drop from every lane right now. Open one to see the brand, the proof and where to buy.</p>
+        <p className="lede max-w-sm">A top-scoring drop from every lane this week. Open one to see the brand, the proof and where to buy.</p>
       </div>
 
       <ul className="mt-7 grid grid-cols-2 gap-x-3 gap-y-6 sm:mt-10 sm:gap-x-6 sm:gap-y-10 md:grid-cols-4">
