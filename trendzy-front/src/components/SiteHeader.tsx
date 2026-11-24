@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeIcon, ThemeToggle, useTheme } from "@/components/ThemeToggle";
+import { SearchButton, SearchDialog } from "@/components/SearchDialog";
 import { SnowToggle } from "@/motion/Snowfall";
 import { AuthModal } from "@/components/AuthModal";
 import { ContactDialog } from "@/components/ContactDialog";
@@ -45,6 +46,7 @@ export function SiteHeader() {
   const { pathname } = useLocation();
   const [authOpen, setAuthOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { data: user } = useQuery(currentUserQuery);
@@ -75,7 +77,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between gap-3 px-5 sm:gap-6 sm:px-8">
         <Link to="/" className="group flex items-center gap-2.5" aria-label="TrendXee home">
           <img src="/brand/trendxee-mark.svg" alt="" width={32} height={32} className="size-8 shrink-0" />
-          <span className="font-display text-xl tracking-tight">
+          <span className="font-display text-xl tracking-tight max-[359px]:hidden">
             Trend<em className="italic text-clay">Xee</em>
           </span>
         </Link>
@@ -91,6 +93,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <SearchButton onClick={() => setSearchOpen(true)} />
           <SnowToggle />
           <ThemeToggle />
           {user ? (
@@ -105,7 +108,8 @@ export function SiteHeader() {
         </div>
 
         {/* Mobile */}
-        <div className="flex items-center gap-1 md:hidden">
+        <div className="flex items-center md:hidden">
+          <SearchButton onClick={() => setSearchOpen(true)} />
           <SnowToggle />
           <ThemeToggle />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
@@ -146,6 +150,7 @@ export function SiteHeader() {
         </div>
       </div>
 
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
       <ContactDialog open={contactOpen} onOpenChange={setContactOpen} user={user} />
     </header>
