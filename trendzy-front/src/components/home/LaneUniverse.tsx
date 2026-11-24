@@ -53,11 +53,8 @@ export function LaneUniverse({ rotationMap }: { rotationMap: RotationMap }) {
       <div className="py-6">
         <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-end justify-between gap-6 px-5 pt-20 sm:px-8">
           <div>
-            <p className="eyebrow text-ink/70">
-              <span className="text-clay-ink">04</span> · The lanes
-            </p>
             <RevealHeading
-              className="mt-4 h-section"
+              className="h-section"
               lines={[
                 "Eight lanes.",
                 <em key="w" className="italic text-clay">

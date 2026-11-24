@@ -23,7 +23,6 @@ export function laneLabel(name: string) {
 export function indiaDateLabel(now = new Date()) {
   return new Intl.DateTimeFormat("en-IN", {
     timeZone: "Asia/Kolkata",
-    weekday: "short",
     day: "numeric",
     month: "short",
   }).format(now);

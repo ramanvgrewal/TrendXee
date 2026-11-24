@@ -27,7 +27,7 @@ export function FinalCta({ rotationMap }: { rotationMap: Record<string, Rotation
       <div className="section-pad mx-auto grid w-full max-w-[1440px] items-center gap-16 px-5 sm:px-8 lg:grid-cols-12">
         <div className="lg:col-span-7 xl:col-span-8">
           <p className="eyebrow text-ink/70">
-            <span className="text-clay-ink">06</span> · Start somewhere
+            Start somewhere
           </p>
           <ScrollTextReveal
             as="h2"
