@@ -16,6 +16,7 @@ import { ThemeIcon, ThemeToggle, useTheme } from "@/components/ThemeToggle";
 import { SnowToggle } from "@/motion/Snowfall";
 import { AuthModal } from "@/components/AuthModal";
 import { ContactDialog } from "@/components/ContactDialog";
+import { InstagramLink } from "@/components/InstagramLink";
 import { Cta, ctaClass } from "@/components/Cta";
 import { Magnetic } from "@/motion/Magnetic";
 import { ease, spring } from "@/motion/tokens";
@@ -348,6 +349,9 @@ function MobileMenu({
                 </Link>
               </m.li>
             ))}
+            <m.li custom={i++} variants={item} initial="hidden" animate="show">
+              <InstagramLink onClick={onNavigate} className="py-2 text-lg font-semibold text-ink/80 active:text-clay" />
+            </m.li>
           </ul>
 
           <m.div custom={i++} variants={item} initial="hidden" animate="show" className="mt-auto pt-10">

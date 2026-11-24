@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
+import { InstagramLink } from "@/components/InstagramLink";
 import { aesthetics } from "@/lib/mock-data";
 import { laneLabel } from "@/lib/format";
 
@@ -25,6 +26,7 @@ export function SiteFooter() {
             Zero middlemen, straight to the brand. TrendXee is a discovery platform and doesn't sell or fulfil the
             products shown.
           </p>
+          <InstagramLink className="mt-4 text-[14px] text-ink/70 transition-colors hover:text-clay" />
         </div>
 
         <nav aria-label="Lanes" className="col-span-2 lg:col-span-3">

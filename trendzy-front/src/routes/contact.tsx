@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ContactForm } from "@/components/ContactForm";
+import { InstagramLink } from "@/components/InstagramLink";
 import { currentUserQuery } from "@/lib/user";
 import { pageSeo } from "@/lib/seo";
 
@@ -17,6 +18,7 @@ function ContactPage() {
       <h1 className="mt-4 font-display text-[clamp(3rem,6vw,5rem)] leading-none tracking-tight">Let's <em className="text-clay">talk.</em></h1>
       <p className="mt-6 max-w-md text-base leading-relaxed text-ink/70">A brand we should know, a question about the board, or something that isn't working? We'd like to hear it.</p>
       <a className="mt-5 inline-flex min-h-11 items-center text-clay-ink underline underline-offset-4" href="mailto:hello@trendxee.com">hello@trendxee.com</a>
+      <div><InstagramLink className="text-clay-ink underline underline-offset-4" /></div>
       <p className="mt-6 max-w-sm text-sm leading-relaxed text-ink/65">For orders, delivery and returns, contact the retailer you bought from. TrendXee helps you discover products; the store handles your purchase.</p>
     </header>
     <section aria-label="Send a message" className="rounded-3xl border border-border bg-raised p-6 sm:p-8"><ContactForm email={user?.email} /></section>

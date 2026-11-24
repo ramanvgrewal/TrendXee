@@ -1,5 +1,7 @@
 export const SITE_ORIGIN = "https://www.trendxee.com";
 export const SOCIAL_IMAGE = `${SITE_ORIGIN}/og-trendxee.png`;
+export const INSTAGRAM_HANDLE = "trendxeeindia";
+export const INSTAGRAM_URL = `https://www.instagram.com/${INSTAGRAM_HANDLE}/`;
 
 export function absoluteUrl(path: string) {
   if (!path.startsWith("/") || path.startsWith("//")) throw new Error("Expected a site-relative path");
@@ -46,7 +48,7 @@ export const siteSchema = {
       description: "Discover Indian indie fashion brands and build outfits from the products on the board.",
       logo: { "@type": "ImageObject", url: `${SITE_ORIGIN}/brand/trendxee-mark.png` },
       email: "hello@trendxee.com",
-      sameAs: ["https://www.instagram.com/trendxeeindia/"],
+      sameAs: [INSTAGRAM_URL],
       contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "hello@trendxee.com", url: `${SITE_ORIGIN}/contact` },
     },
     { "@type": "WebSite", "@id": `${SITE_ORIGIN}/#website`, name: "TrendXee", alternateName: "Trendxee", url: `${SITE_ORIGIN}/`,
