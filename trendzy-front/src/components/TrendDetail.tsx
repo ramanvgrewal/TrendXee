@@ -8,7 +8,7 @@ import { BookmarkButton } from "@/components/BookmarkButton";
 import { Cta, CtaArrow, ctaClass } from "@/components/Cta";
 import { trendImage, trendLane } from "@/components/TrendCard";
 import { ProductGallery } from "@/components/ProductGallery";
-import { PairUpWith } from "@/components/PairUpWith";
+import { PairUpWith, isEssentialCategory } from "@/components/PairUpWith";
 import { useAudience } from "@/components/AudienceFilter";
 import type { AudienceFilter } from "@/lib/audience";
 import { trackOutfit, type PairingChoices, type PairingResult, type OutfitReceipt } from "@/lib/pairings";
@@ -207,7 +207,7 @@ function StorySession({ source, scrollRef, onClose, onChanged, onDeleted, archiv
     onUnarchived={pairing ? undefined : onUnarchived}
     backToSource={pairing ? back : undefined}
     sourceName={source.products.underdog?.title || source.name}
-    pairingSection={!pairing ? <PairUpWith source={source} audience={audience} setAudience={setAudience} choices={choices} setChoices={setChoices} outfit={outfit} setOutfit={setOutfit} onOpen={openPairing} /> : undefined}
+    pairingSection={!pairing && !isEssentialCategory(source.aestheticId) ? <PairUpWith source={source} audience={audience} setAudience={setAudience} choices={choices} setChoices={setChoices} outfit={outfit} setOutfit={setOutfit} onOpen={openPairing} /> : undefined}
   /></>;
 }
 

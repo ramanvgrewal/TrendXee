@@ -244,6 +244,8 @@ public class PairingService {
         if (has(primary, "sunglasses|eyewear")) roles.add("EYEWEAR");
         // A denim jacket is not jeans; a shirt jacket is a layer.
         if (roles.equals(Set.of("TOP", "LAYER")) && has(primary, "shirt[ -]?jackets?")) return "LAYER";
+        // "High Top / Low Top Sneakers" names a sneaker cut, not a top.
+        if (roles.equals(Set.of("TOP", "SHOES")) && has(primary, "(?:high|low|mid)[ -]?tops?") && has(primary, "sneakers?")) return "SHOES";
         return roles.size() == 1 ? roles.iterator().next() : "UNKNOWN";
     }
 

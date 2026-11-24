@@ -7,6 +7,13 @@ import { formatPrice, isShoeCategory, productImageFit } from "@/lib/format";
 import type { Trend } from "@/lib/mock-data";
 import { getPairings, getPairingTrend, getOutfitSwap, trackOutfit, PairingRequestError, type PairingChoices, type PairingItem, type PairingResult, type OutfitReceipt } from "@/lib/pairings";
 
+/** Caps & accessories and sneakers are finishing pieces: they appear inside other
+ * products' looks but don't get a pair-up section of their own. */
+export function isEssentialCategory(category?: string) {
+  const c = (category || "").trim().toLowerCase();
+  return c === "caps" || c === "accessories" || isShoeCategory(category);
+}
+
 export function PairUpWith({ source, audience, setAudience, choices, setChoices, outfit, setOutfit, onOpen }: {
   source: Trend;
   audience: AudienceFilter;
@@ -116,9 +123,9 @@ export function PairUpWith({ source, audience, setAudience, choices, setChoices,
     <section ref={sectionRef} aria-labelledby="pair-up-heading" className="mt-8 min-w-0 scroll-mt-16 border-t border-border pt-6 lg:scroll-mt-0">
       <div className="flex items-baseline justify-between gap-3">
         <h3 ref={headingRef} tabIndex={-1} id="pair-up-heading" className="font-display text-[22px] tracking-tight focus:outline-none">Pair up with</h3>
-        {!!data?.slots.length && <span className="text-[11px] text-ink/50">{data.slots.length} picks</span>}
+        {!!data?.slots.length && <span className="text-[11px] text-ink/50">{data.slots.length + 1}-piece look</span>}
       </div>
-      {data?.engine === 'vision-v2' && <p className="mt-1 text-[12px] leading-relaxed text-ink/60">Styled together. Swap a piece to make it yours.</p>}
+      {data?.engine === 'vision-v2' && <p className="mt-1 text-[12px] leading-relaxed text-ink/60">Matched to how it's styled in the photos. Swap a piece to make it yours.</p>}
       {data?.engine === 'vision-v2' && data.reason && <p className="mt-3 line-clamp-3 text-[12px] leading-relaxed text-ink/70" title={data.reason}>{data.reason}</p>}
       <span className="sr-only" aria-live="polite" aria-atomic="true">{swapAnnouncement}</span>
 
@@ -137,28 +144,30 @@ export function PairUpWith({ source, audience, setAudience, choices, setChoices,
         {[0, 1].map((i) => <div key={i} className="flex gap-3 rounded-xl border border-border p-2 motion-safe:animate-pulse"><div className="h-24 w-[72px] shrink-0 rounded-lg bg-cream/80" /><div className="flex-1 space-y-3 py-3"><div className="h-2 w-1/3 rounded bg-cream/80" /><div className="h-3 w-4/5 rounded bg-cream/80" /><div className="h-2 w-1/2 rounded bg-cream/80" /></div></div>)}
       </div> : data.needsAudience ? <p className="mt-5 rounded-xl bg-cream/60 p-4 text-[13px] leading-relaxed text-ink/75">Choose Men or Women above to find complementary fits. This is a styling preference; it doesn't change the product's sizing.</p>
         : data.slots.length === 0 ? <p className="mt-5 rounded-xl bg-cream/60 p-4 text-[13px] leading-relaxed text-ink/75">Pairings for this piece haven't been reviewed yet.</p>
-          : <div id="pairing-pieces" className="mt-4 grid gap-2.5">
+          : <div id="pairing-pieces" className={`mt-4 grid gap-2.5 ${data.slots.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
             {data.slots.map((slot) => {
               const item = slot.items[0];
               const product = item.trend.products.underdog!;
               const canSwap = data.swappableRoles.includes(slot.role) && !exhausted.includes(slot.role);
               const busy = opening === item.identity;
-              return <article key={slot.role} className="group/row grid min-w-0 grid-cols-[minmax(0,1fr)_44px] items-center overflow-hidden rounded-xl border border-border bg-cream/15 pr-1 transition-colors hover:border-ink/25 hover:bg-cream/35 sm:grid-cols-[minmax(0,1fr)_56px] sm:pr-2">
-                <button type="button" disabled={!!opening || !!swapping} aria-busy={busy} onClick={() => void open(item)} data-pairing-identity={item.identity} aria-label={`Open pairing: ${product.title}`} className="group flex min-w-0 items-center gap-3 rounded-xl p-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-clay disabled:cursor-wait sm:gap-3.5 sm:p-2.5">
-                  <div className="relative h-[100px] w-[72px] shrink-0 overflow-hidden rounded-lg bg-cream sm:w-[80px]">
+              const compact = data.slots.length === 3;
+              return <article key={slot.role} className="group/tile relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-cream/15 transition-colors hover:border-ink/25">
+                <button type="button" disabled={!!opening || !!swapping} aria-busy={busy} onClick={() => void open(item)} data-pairing-identity={item.identity} aria-label={`Open pairing: ${product.title}`} className="group flex min-w-0 flex-1 flex-col text-left focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-clay disabled:cursor-wait">
+                  <div className="relative aspect-[4/5] w-full overflow-hidden bg-cream">
                     <Img src={product.imageUrl} alt="" eager fallbackLabel="View photos" className={`h-full w-full ${productImageFit(item.trend.aestheticId, true)} transition-transform duration-300 ${isShoeCategory(item.trend.aestheticId) ? "" : "group-hover:scale-[1.04]"} [&>span]:px-2 [&>span]:text-center [&>span]:text-[11px] [&>span]:not-italic [&>span]:text-ink/50`} />
+                    <span className="absolute left-1.5 top-1.5 rounded-full bg-paper/90 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-clay-ink">{slot.label}</span>
                     {busy && <span className="absolute inset-0 grid place-items-center bg-paper/60"><LoaderCircle className="size-5 motion-safe:animate-spin" /><span className="sr-only" role="status">Checking this pick…</span></span>}
                   </div>
-                  <div className="min-w-0 flex-1 py-0.5">
-                    <p className="truncate text-[10px] leading-4 text-ink/60"><span className="font-semibold text-clay-ink">{slot.label}</span><span className="px-1.5 text-ink/30">/</span>{product.brandName}</p>
-                    <h4 className="mt-0.5 line-clamp-2 font-display text-[16px] leading-[1.2] transition-colors group-hover:text-clay-ink sm:text-[17px]">{product.title}</h4>
-                    <p className="mt-1.5 flex items-center gap-2 text-[12px] font-semibold">{formatPrice(product.price, product.currency)}<ArrowUpRight className="size-3 text-ink/40" aria-hidden /></p>
+                  <div className={`min-w-0 flex-1 ${compact ? "p-2" : "p-2.5"}`}>
+                    <p className="truncate text-[10px] leading-4 text-ink/60">{product.brandName}</p>
+                    <h4 className={`mt-0.5 line-clamp-2 font-display leading-[1.2] transition-colors group-hover:text-clay-ink ${compact ? "text-[13px]" : "text-[15px]"}`}>{product.title}</h4>
+                    <p className="mt-1 flex items-center gap-1 text-[12px] font-semibold">{formatPrice(product.price, product.currency)}<ArrowUpRight className="size-3 text-ink/40" aria-hidden /></p>
                   </div>
                 </button>
-                  <button ref={element => { swapButtons.current[slot.role] = element; }} type="button" disabled={!canSwap || !!opening || !!swapping} aria-label={`Try another ${slot.label.toLowerCase()}`} aria-busy={swapping === slot.role} title={canSwap ? `Swap ${slot.label.toLowerCase()}` : 'No more suitable swaps'} onClick={() => void swap(slot.role)} className="flex min-h-11 min-w-11 flex-col items-center justify-center gap-1 rounded-lg text-ink/60 transition-colors hover:bg-cream hover:text-clay-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-clay disabled:cursor-default disabled:opacity-30">
-                    {swapping === slot.role ? <LoaderCircle className="size-3.5 motion-safe:animate-spin" /> : <RefreshCw className="size-3.5" />}<span className="text-[10px]">{canSwap ? 'Swap' : 'Seen'}</span>
-                  </button>
-                {openError?.identity === item.identity && <p className="col-span-2 px-3 pb-3 text-xs leading-relaxed text-clay-ink" role="status">{openError.message}</p>}
+                <button ref={element => { swapButtons.current[slot.role] = element; }} type="button" disabled={!canSwap || !!opening || !!swapping} aria-label={`Try another ${slot.label.toLowerCase()}`} aria-busy={swapping === slot.role} title={canSwap ? `Swap ${slot.label.toLowerCase()}` : 'No more suitable swaps'} onClick={() => void swap(slot.role)} className="absolute right-1 top-1 flex size-11 items-center justify-center rounded-full text-ink/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-clay disabled:hidden">
+                  <span className="grid size-7 place-items-center rounded-full bg-paper/90 shadow-sm transition-colors hover:text-clay-ink">{swapping === slot.role ? <LoaderCircle className="size-3.5 motion-safe:animate-spin" /> : <RefreshCw className="size-3.5" />}</span>
+                </button>
+                {openError?.identity === item.identity && <p className="px-2.5 pb-2.5 text-xs leading-relaxed text-clay-ink" role="status">{openError.message}</p>}
               </article>;
             })}
           </div>}
