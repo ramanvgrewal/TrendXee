@@ -19,6 +19,13 @@ public final class ApprovedTaxonomy {
         }
     }
 
+    public static java.util.Set<String> categories() {
+        return java.util.Collections.unmodifiableSet(LANES.keySet());
+    }
+    public static String laneLabel(String category) {
+        var lane = LANES.get(category);
+        return lane == null ? "" : (String) lane.get(0);
+    }
     public static List<String> labels(String category) {
         var lane = LANES.get(category);
         if (lane == null) return List.of();

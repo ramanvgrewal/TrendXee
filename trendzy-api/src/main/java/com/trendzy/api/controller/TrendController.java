@@ -27,12 +27,23 @@ public class TrendController {
 
     private final TrendRepository trendRepository;
     private final org.springframework.data.mongodb.core.ReactiveMongoTemplate mongoTemplate;
+    private com.trendzy.api.search.SearchService searchService;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setSearchService(com.trendzy.api.search.SearchService searchService) {
+        this.searchService = searchService;
+    }
+
+    private void refreshSearch() {
+        if (searchService != null) searchService.requestRefresh();
+    }
 
     private Mono<Trend> patch(String id, org.springframework.data.mongodb.core.query.Update update) {
         return mongoTemplate.findAndModify(
                 org.springframework.data.mongodb.core.query.Query.query(org.springframework.data.mongodb.core.query.Criteria.where("id").is(id)),
                 update, org.springframework.data.mongodb.core.FindAndModifyOptions.options().returnNew(true), Trend.class)
-                .switchIfEmpty(Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND)));
+                .switchIfEmpty(Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND)))
+                .doOnSuccess(trend -> refreshSearch());
     }
 
     @Operation(summary = "Get trends by category", description = "Category, audience and grouped styles, applied before pagination. Legacy exact subcategory and price parameters remain supported.")
@@ -148,6 +159,7 @@ public class TrendController {
     public Mono<Map<String, Object>> deleteTrendById(@PathVariable String id) {
         log.info("[CTRL] Permanently deleting trend with ID: {}", id);
         return trendRepository.deleteById(id)
+                .doOnSuccess(done -> refreshSearch())
                 .then(Mono.just(Map.of(
                         "deletedId", id,
                         "message", "Successfully deleted trend permanently"

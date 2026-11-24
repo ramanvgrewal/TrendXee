@@ -97,6 +97,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/v2/featured/**").hasRole("ADMIN")
                         // Read-only endpoints are public
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/v2/trends/**").permitAll()
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/v2/search").permitAll()
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/brands/**").permitAll()
                         .anyExchange().permitAll()
                 )
