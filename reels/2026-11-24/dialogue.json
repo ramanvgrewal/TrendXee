@@ -1,0 +1,19 @@
+{
+  "model": "eleven_multilingual_v2",
+  "leadMs": 0,
+  "gapMs": 180,
+  "voices": {
+    "HOST": { "id": "TX3LPaxmHKxFdv7VOQHJ", "name": "Liam (young, energetic)", "stability": 0.35, "style": 0.55, "speed": 1.1 }
+  },
+  "lines": [
+    { "who": "HOST", "d": "ये छह hoodies Amazon पे नहीं मिलेंगी।", "r": "Ye chhe hoodies Amazon pe nahi milengi.", "gapAfterMs": 60 },
+    { "who": "HOST", "d": "सब Indian brands, और एक से एक।", "r": "Sab Indian brands, aur ek se ek.", "gapAfterMs": 250 },
+    { "who": "HOST", "d": "Number one, Kyoshi Studios. ये back print देखो... चार हज़ार का था, अब दो हज़ार से कम।", "r": "Number one, Kyoshi Studios. Ye back print dekho... chaar hazaar ka tha, ab do hazaar se kam.", "gapAfterMs": 250 },
+    { "who": "HOST", "d": "Number two, फुआर्क। Heavyweight oversized, clean और minimal. Price? सोलह सौ निन्यानवे।", "r": "Number two, FUAARK. Heavyweight oversized, clean aur minimal. Price? Solah sau ninyanve.", "gapAfterMs": 250 },
+    { "who": "HOST", "d": "Girls, ये तुम्हारे लिए। कावा का dark green fleece hoodie, full cosy।", "r": "Girls, ye tumhare liye. CAVA ka dark green fleece hoodie, full cosy.", "gapAfterMs": 250 },
+    { "who": "HOST", "d": "यूगोफिंच का acid wash, तीन सौ GSM heavy cotton, और पूरा एक हज़ार off।", "r": "Yugofinch ka acid wash, teen sau GSM heavy cotton, aur pura ek hazaar off.", "gapAfterMs": 250 },
+    { "who": "HOST", "d": "हेगनवॉक का Black Devil. All black, छोटा सा logo, subtle flex।", "r": "Heganwalk ka Black Devil. All black, chhota sa logo, subtle flex.", "gapAfterMs": 250 },
+    { "who": "HOST", "d": "और last, अर्बन ठेका। ये tiger back print... हर किसी के पास नहीं होगा।", "r": "Aur last, Urban Theka. Ye tiger back print... har kisi ke paas nahi hoga.", "gapAfterMs": 300 },
+    { "who": "HOST", "d": "कौनसा ले रहे हो? Number comment करो। सारे links ट्रेंडज़ी पे।", "r": "Kaunsa le rahe ho? Number comment karo. Saare links TrendXee pe." }
+  ]
+}

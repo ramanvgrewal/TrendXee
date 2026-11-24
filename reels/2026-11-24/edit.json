@@ -1,0 +1,322 @@
+{
+ "id": "2026-11-24-hoodies-underdog",
+ "output": "exports/2026-11-24-hoodies-underdog.mp4",
+ "onsetOffsetMs": 0,
+ "durationMs": 44700,
+ "video": {
+  "src": "raw/2026-11-24-hoodies-underdog/story.mp4",
+  "type": "video",
+  "volume": 1,
+  "grade": {
+   "preset": "none"
+  },
+  "vignette": 0.3,
+  "grain": 0.03
+ },
+ "captions": {
+  "src": "raw/2026-11-24-hoodies-underdog/captions.json",
+  "style": "clean",
+  "maxWords": 3,
+  "size": 76,
+  "y": 0.79,
+  "layoutY": {
+   "overlay": 0.79,
+   "full": 0.79
+  },
+  "emphasis": [
+   "Amazon",
+   "Indian",
+   "hazaar",
+   "kam.",
+   "Solah",
+   "ninyanve.",
+   "Girls,",
+   "cosy.",
+   "off.",
+   "flex.",
+   "tiger",
+   "comment",
+   "TrendXee"
+  ]
+ },
+ "scenes": [
+  {
+   "atWord": "Kyoshi",
+   "offsetMs": -150,
+   "endWord": "kam.",
+   "endOffsetMs": 120,
+   "layout": "overlay",
+   "top": 250,
+   "kicker": "#01 · HOODIES",
+   "gap": 20,
+   "blocks": [
+    {
+     "type": "stat",
+     "atWord": "dekho...",
+     "value": 1999,
+     "prefix": "₹",
+     "size": 130,
+     "countMs": 700,
+     "label": "Heavenly Restriction Hoodie  ·  was ₹3,999  ·  *-50%*"
+    }
+   ],
+   "title": "Kyoshi *Studios*",
+   "titleSize": 84
+  },
+  {
+   "atWord": "FUAARK.",
+   "offsetMs": -150,
+   "endWord": "ninyanve.",
+   "endOffsetMs": 120,
+   "layout": "overlay",
+   "top": 250,
+   "kicker": "#02 · HOODIES",
+   "gap": 20,
+   "blocks": [
+    {
+     "type": "stat",
+     "atWord": "minimal.",
+     "value": 1699,
+     "prefix": "₹",
+     "size": 130,
+     "countMs": 700,
+     "label": "Heavyweight Oversized Hoodie"
+    }
+   ],
+   "title": "*FUAARK*",
+   "titleSize": 84
+  },
+  {
+   "atWord": "CAVA",
+   "offsetMs": -150,
+   "endWord": "cosy.",
+   "endOffsetMs": 120,
+   "layout": "overlay",
+   "top": 250,
+   "kicker": "#03 · HOODIES",
+   "gap": 20,
+   "blocks": [
+    {
+     "type": "stat",
+     "atWord": "fleece",
+     "value": 1899,
+     "prefix": "₹",
+     "size": 130,
+     "countMs": 700,
+     "label": "Dark Green Fleece Oversized Hoodie"
+    }
+   ],
+   "title": "CAVA *Athleisure*",
+   "titleSize": 84
+  },
+  {
+   "atWord": "Yugofinch",
+   "offsetMs": -150,
+   "endWord": "off.",
+   "endOffsetMs": 120,
+   "layout": "overlay",
+   "top": 250,
+   "kicker": "#04 · HOODIES",
+   "gap": 20,
+   "blocks": [
+    {
+     "type": "stat",
+     "atWord": "GSM",
+     "value": 1999,
+     "prefix": "₹",
+     "size": 130,
+     "countMs": 700,
+     "label": "Acid-Wash 300 GSM Hoodie  ·  was ₹2,999  ·  *-33%*"
+    }
+   ],
+   "title": "*Yugofinch*",
+   "titleSize": 84
+  },
+  {
+   "atWord": "Heganwalk",
+   "offsetMs": -150,
+   "endWord": "flex.",
+   "endOffsetMs": 120,
+   "layout": "overlay",
+   "top": 250,
+   "kicker": "#05 · HOODIES",
+   "gap": 20,
+   "blocks": [
+    {
+     "type": "stat",
+     "atWord": "Devil.",
+     "value": 1799,
+     "prefix": "₹",
+     "size": 130,
+     "countMs": 700,
+     "label": "Black Devil Hoodie  ·  was ₹2,499  ·  *-28%*"
+    }
+   ],
+   "title": "*Heganwalk*",
+   "titleSize": 84
+  },
+  {
+   "atWord": "Urban",
+   "offsetMs": -150,
+   "endWord": "hoga.",
+   "endOffsetMs": 120,
+   "layout": "overlay",
+   "top": 250,
+   "kicker": "#06 · HOODIES",
+   "gap": 20,
+   "blocks": [
+    {
+     "type": "stat",
+     "atWord": "tiger",
+     "value": 4500,
+     "prefix": "₹",
+     "size": 130,
+     "countMs": 700,
+     "label": "Wild Fury Stonewashed Hoodie"
+    }
+   ],
+   "title": "Urban *Theka*",
+   "titleSize": 84
+  },
+  {
+   "atWord": "Kaunsa",
+   "offsetMs": -150,
+   "endWord": "pe.",
+   "layout": "overlay",
+   "top": 420,
+   "gap": 20,
+   "blocks": [
+    {
+     "type": "cta",
+     "keyword": "1-6",
+     "label": "COMMENT KARO",
+     "text": "Saare links *trendxee.com* pe"
+    }
+   ]
+  }
+ ],
+ "overlays": [
+  {
+   "type": "hook",
+   "atMs": 0,
+   "durMs": 2350,
+   "y": 560,
+   "kicker": "INDIAN BRANDS ONLY",
+   "text": "6 hoodies jo *Amazon* pe nahi milengi",
+   "size": 124,
+   "staggerMs": 35
+  },
+  {
+   "type": "snow",
+   "atMs": 0,
+   "durMs": 44700,
+   "count": 45,
+   "opacity": 0.55
+  },
+  {
+   "type": "outro",
+   "atMs": 42000,
+   "durMs": 2700,
+   "logo": "brand-kit/trendxee-mark.svg",
+   "tagline": "Fits before they *go viral.*",
+   "cta": "Follow @trendxeeindia"
+  }
+ ],
+ "music": {
+  "src": "audio-library/music/upbeat-energetic/Funkorama.mp3",
+  "volume": 0.22,
+  "duckTo": 0.08,
+  "fadeInMs": 300,
+  "fadeOutMs": 1500,
+  "credit": "\"Funkorama\" Kevin MacLeod (incompetech.com) Licensed under Creative Commons: By Attribution 4.0 License http://creativecommons.org/licenses/by/4.0/"
+ },
+ "sfx": [
+  {
+   "atMs": 0,
+   "name": "whoosh",
+   "volume": 0.45
+  },
+  {
+   "atMs": 2400,
+   "name": "ui-whoosh-in",
+   "volume": 0.4
+  },
+  {
+   "atWord": "Kyoshi",
+   "offsetMs": -150,
+   "name": "ui-swoosh",
+   "volume": 0.4
+  },
+  {
+   "atWord": "dekho...",
+   "name": "pop",
+   "volume": 0.35
+  },
+  {
+   "atWord": "FUAARK.",
+   "offsetMs": -150,
+   "name": "ui-swoosh",
+   "volume": 0.4
+  },
+  {
+   "atWord": "minimal.",
+   "name": "pop",
+   "volume": 0.35
+  },
+  {
+   "atWord": "CAVA",
+   "offsetMs": -150,
+   "name": "ui-swoosh",
+   "volume": 0.4
+  },
+  {
+   "atWord": "fleece",
+   "name": "pop",
+   "volume": 0.35
+  },
+  {
+   "atWord": "Yugofinch",
+   "offsetMs": -150,
+   "name": "ui-swoosh",
+   "volume": 0.4
+  },
+  {
+   "atWord": "GSM",
+   "name": "pop",
+   "volume": 0.35
+  },
+  {
+   "atWord": "Heganwalk",
+   "offsetMs": -150,
+   "name": "ui-swoosh",
+   "volume": 0.4
+  },
+  {
+   "atWord": "Devil.",
+   "name": "pop",
+   "volume": 0.35
+  },
+  {
+   "atWord": "Urban",
+   "offsetMs": -150,
+   "name": "ui-swoosh",
+   "volume": 0.4
+  },
+  {
+   "atWord": "tiger",
+   "name": "pop",
+   "volume": 0.35
+  },
+  {
+   "atWord": "Kaunsa",
+   "offsetMs": -150,
+   "name": "ui-whoosh-in",
+   "volume": 0.4
+  },
+  {
+   "atMs": 42000,
+   "name": "level-up",
+   "volume": 0.35
+  }
+ ]
+}

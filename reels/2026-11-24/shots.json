@@ -1,0 +1,335 @@
+{
+ "audio": "dialogue.wav",
+ "out": "story.mp4",
+ "durationMs": 44700,
+ "shots": [
+  {
+   "id": "h00",
+   "src": "assets/hook/kyoshi-01.jpg",
+   "fromMs": 0,
+   "toMs": 200,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h01",
+   "src": "assets/hook/fuaark-03.jpg",
+   "fromMs": 200,
+   "toMs": 400,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h02",
+   "src": "assets/hook/cava-01.jpg",
+   "fromMs": 400,
+   "toMs": 600,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h03",
+   "src": "assets/hook/yugofinch-01.jpg",
+   "fromMs": 600,
+   "toMs": 800,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h04",
+   "src": "assets/hook/heganwalk-02.jpg",
+   "fromMs": 800,
+   "toMs": 1000,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h05",
+   "src": "assets/hook/kyoshi-03.jpg",
+   "fromMs": 1000,
+   "toMs": 1200,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h06",
+   "src": "assets/hook/fuaark-01.jpg",
+   "fromMs": 1200,
+   "toMs": 1400,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h07",
+   "src": "assets/hook/cava-03.jpg",
+   "fromMs": 1400,
+   "toMs": 1600,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h08",
+   "src": "assets/hook/yugofinch-03.jpg",
+   "fromMs": 1600,
+   "toMs": 1800,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h09",
+   "src": "assets/hook/heganwalk-03.jpg",
+   "fromMs": 1800,
+   "toMs": 2000,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h10",
+   "src": "assets/hook/kyoshi-02.jpg",
+   "fromMs": 2000,
+   "toMs": 2200,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "h11",
+   "src": "assets/hook/cava-02.jpg",
+   "fromMs": 2200,
+   "toMs": 2400,
+   "move": "in",
+   "amount": 0.18,
+   "focus": [
+    0.5,
+    0.4
+   ]
+  },
+  {
+   "id": "b0",
+   "src": "assets/fuaark-02.jpg",
+   "fromMs": 2400,
+   "toMs": 3050,
+   "move": "left",
+   "amount": 0.1
+  },
+  {
+   "id": "b1",
+   "src": "assets/heganwalk-01.png",
+   "fromMs": 3050,
+   "toMs": 3700,
+   "move": "in",
+   "amount": 0.1
+  },
+  {
+   "id": "b2",
+   "src": "assets/yugofinch-02.jpg",
+   "fromMs": 3700,
+   "toMs": 4346,
+   "move": "right",
+   "amount": 0.1
+  },
+  {
+   "id": "kyoshi0",
+   "src": "assets/kyoshi-01.png",
+   "fromMs": 4346,
+   "toMs": 6220,
+   "move": "in",
+   "amount": 0.12
+  },
+  {
+   "id": "kyoshi1",
+   "src": "assets/kyoshi-02.png",
+   "fromMs": 6220,
+   "toMs": 8094,
+   "move": "left",
+   "amount": 0.12
+  },
+  {
+   "id": "kyoshi2",
+   "src": "assets/kyoshi-03.png",
+   "fromMs": 8094,
+   "toMs": 9969,
+   "move": "out",
+   "amount": 0.12
+  },
+  {
+   "id": "fuaark0",
+   "src": "assets/fuaark-01.jpg",
+   "fromMs": 9969,
+   "toMs": 11958,
+   "move": "left",
+   "amount": 0.12
+  },
+  {
+   "id": "fuaark1",
+   "src": "assets/fuaark-02.jpg",
+   "fromMs": 11958,
+   "toMs": 13947,
+   "move": "out",
+   "amount": 0.12
+  },
+  {
+   "id": "fuaark2",
+   "src": "assets/fuaark-03.jpg",
+   "fromMs": 13947,
+   "toMs": 15936,
+   "move": "right",
+   "amount": 0.12
+  },
+  {
+   "id": "fuaark3",
+   "src": "assets/fuaark-01.jpg",
+   "fromMs": 15936,
+   "toMs": 17926,
+   "move": "up",
+   "amount": 0.12
+  },
+  {
+   "id": "cava0",
+   "src": "assets/cava-01.jpg",
+   "fromMs": 17926,
+   "toMs": 19583,
+   "move": "out",
+   "amount": 0.12
+  },
+  {
+   "id": "cava1",
+   "src": "assets/cava-02.jpg",
+   "fromMs": 19583,
+   "toMs": 21241,
+   "move": "right",
+   "amount": 0.12
+  },
+  {
+   "id": "cava2",
+   "src": "assets/cava-03.jpg",
+   "fromMs": 21241,
+   "toMs": 22899,
+   "move": "up",
+   "amount": 0.12
+  },
+  {
+   "id": "yugofinch0",
+   "src": "assets/yugofinch-01.png",
+   "fromMs": 22899,
+   "toMs": 24653,
+   "move": "right",
+   "amount": 0.12
+  },
+  {
+   "id": "yugofinch1",
+   "src": "assets/yugofinch-02.jpg",
+   "fromMs": 24653,
+   "toMs": 26407,
+   "move": "up",
+   "amount": 0.12
+  },
+  {
+   "id": "yugofinch2",
+   "src": "assets/yugofinch-03.png",
+   "fromMs": 26407,
+   "toMs": 28162,
+   "move": "in",
+   "amount": 0.12
+  },
+  {
+   "id": "heganwalk0",
+   "src": "assets/hook/heganwalk-01.jpg",
+   "fromMs": 28162,
+   "toMs": 29804,
+   "move": "up",
+   "amount": 0.12
+  },
+  {
+   "id": "heganwalk1",
+   "src": "assets/hook/heganwalk-02.jpg",
+   "fromMs": 29804,
+   "toMs": 31446,
+   "move": "in",
+   "amount": 0.12
+  },
+  {
+   "id": "heganwalk2",
+   "src": "assets/hook/heganwalk-03.jpg",
+   "fromMs": 31446,
+   "toMs": 33088,
+   "move": "left",
+   "amount": 0.12
+  },
+  {
+   "id": "urbantheka0",
+   "src": "assets/urbantheka-01.png",
+   "fromMs": 33088,
+   "toMs": 35533,
+   "move": "in",
+   "amount": 0.06
+  },
+  {
+   "id": "urbantheka1",
+   "src": "assets/urbantheka-01.png",
+   "fromMs": 35533,
+   "toMs": 37978,
+   "move": "left",
+   "amount": 0.06
+  },
+  {
+   "id": "cta0",
+   "src": "assets/kyoshi-03.png",
+   "fromMs": 37978,
+   "toMs": 39878,
+   "move": "in",
+   "amount": 0.08
+  },
+  {
+   "id": "cta1",
+   "src": "assets/cava-01.jpg",
+   "fromMs": 39878,
+   "toMs": 44700,
+   "move": "out",
+   "amount": 0.08
+  }
+ ]
+}
