@@ -98,6 +98,15 @@ public final class CatalogFilterQuery {
         return result;
     }
 
+    /** The approved label shown for a stored label, which may be an older one. */
+    public static String currentLabel(String category, String storedLabel) {
+        if (storedLabel == null) return "";
+        for (var entry : LEGACY_LABELS.getOrDefault(category, java.util.Map.of()).entrySet()) {
+            if (entry.getValue().contains(storedLabel)) return entry.getKey();
+        }
+        return storedLabel;
+    }
+
     public static String normalizeCategory(String category) {
         String normalized = category.trim().toUpperCase(Locale.ROOT);
         if (List.of("CAPS & ACCESSORIES", "CAPS_ACCESSORIES", "ACCESSORIES").contains(normalized)) return "CAPS";
