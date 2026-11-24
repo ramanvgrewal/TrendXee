@@ -22,6 +22,12 @@
     </properties>
 
     <dependencies>
+        <!-- Error monitoring (DSN comes from SENTRY_DSN; empty = disabled) -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
+            <version>8.13.2</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

@@ -12,6 +12,7 @@ services:
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx256m -Xms128m"
       JWT_PUBLIC_KEY_PATH: "file:/run/secrets/trendzy-public.pem"
+      SENTRY_DSN: "https://088c1a53f81a76331af1bb7c12a686c9@o4512484830609408.ingest.us.sentry.io/4512484978720768"
 
   business:
     image: ghcr.io/ramanvgrewal/trendxee/business-api:latest
@@ -28,3 +29,4 @@ services:
       JAVA_TOOL_OPTIONS: "-Xmx256m -Xms128m"
       JWT_PRIVATE_KEY_PATH: "file:/run/secrets/trendzy-private.pem"
       JWT_PUBLIC_KEY_PATH: "file:/run/secrets/trendzy-public.pem"
+      SENTRY_DSN: "https://088c1a53f81a76331af1bb7c12a686c9@o4512484830609408.ingest.us.sentry.io/4512484978720768"

@@ -30,3 +30,10 @@ springdoc:
     operations-sorter: method
     tags-sorter: alpha
 
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SENTRY_ENVIRONMENT:production}
+  traces-sample-rate: 0.05
+  send-default-pii: false
+  tags:
+    service: trend-api
