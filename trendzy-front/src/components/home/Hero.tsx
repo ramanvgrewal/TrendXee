@@ -20,7 +20,7 @@ const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
  * left, a portrait print of today's lead underdog on the right.
  *
  * Entrance is CSS (plays from server HTML, ~900ms total): image unclips →
- * headline lines rise → copy → CTA → metadata.
+ * headline lines rise → copy → CTA.
  * Scroll (MotionValues): the print sinks and scales gently while the headline
  * lifts away faster, so the cover peels off into the story below.
  * Pointer (desktop): the print and stamp move at different depths.
@@ -48,13 +48,8 @@ export function Hero({ lead, dateKey, featured = false }: { lead?: RotationItem;
           className="relative z-10 flex min-w-0 flex-col justify-center lg:pr-4"
           style={allowed ? { y: copyY, opacity: copyOpacity } : undefined}
         >
-          <div className="enter-fade flex flex-wrap items-center gap-x-2 gap-y-1 eyebrow text-[10px] text-ink/70 sm:gap-3 sm:text-[11.5px]" style={d(620)}>
-            <span className="inline-block size-1.5 rounded-full bg-clay" />
-            TrendXee · Indian fashion discovery <span className="text-ink/30">/</span> {indiaDateLabel(new Date(`${dateKey}T12:00:00+05:30`))}
-          </div>
-
           <Parallax depth={1.5} follow>
-            <h1 className="mt-5 font-display text-[clamp(2.6rem,12.8vw,4.5rem)] font-normal leading-[0.94] tracking-[-0.035em] sm:mt-7 lg:mt-8 lg:text-[clamp(4rem,8.4vw,8.5rem)] lg:leading-[0.9]">
+            <h1 className="font-display text-[clamp(2.6rem,12.8vw,4.5rem)] font-normal leading-[0.94] tracking-[-0.035em] lg:text-[clamp(4rem,8.4vw,8.5rem)] lg:leading-[0.9]">
               <span className="-mb-[0.1em] block overflow-hidden pb-[0.1em]">
                 <span className="enter-line block" style={d(120)}>
                   Fits before
@@ -133,7 +128,7 @@ export function Hero({ lead, dateKey, featured = false }: { lead?: RotationItem;
                         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-on-scrim">
                           <div className="min-w-0">
                             <p className="eyebrow text-[11px] text-on-scrim/70">
-                              {featured ? "Featured underdog · Today" : "Today's underdog"}
+                              {featured ? "Featured underdog" : "Underdog"} · {indiaDateLabel(new Date(`${dateKey}T12:00:00+05:30`))}
                             </p>
                             <p className="mt-1 truncate font-display text-xl italic">{lead.brand}</p>
                           </div>

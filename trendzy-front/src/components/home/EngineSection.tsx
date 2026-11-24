@@ -38,7 +38,7 @@ export function EngineSection() {
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="lg:col-span-6">
           <p className="eyebrow text-ink/70">
-            <span className="text-clay-ink">05</span> · How the engine works
+            How the engine works
           </p>
           <RevealHeading
             className="mt-4 h-section"

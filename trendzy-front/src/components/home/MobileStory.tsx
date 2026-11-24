@@ -61,7 +61,7 @@ export function MobileStory({ products, chosen, reduced }: { products: RotationI
       <div className="sr-only">{CHAPTERS.map((step) => <p key={step.label}>{step.heading} {step.detail}</p>)}</div>
       <div className="mobile-story-stage">
         <div className="mobile-story-topline flex items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[.16em] text-ink/60">
-          <span><span className="text-clay-ink">02</span> / Behind the finds</span>
+          <span>Behind the finds</span>
           <span className="flex shrink-0 items-center gap-1.5">{still ? "Tap to explore" : "Scroll"}<ArrowDown className="size-3" aria-hidden /></span>
         </div>
 
