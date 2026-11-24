@@ -16,6 +16,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ImageRouteImport } from './routes/image'
 import { Route as LanesRouteImport } from './routes/lanes'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrendingStreetwearRouteImport } from './routes/trending-streetwear'
@@ -57,6 +58,11 @@ const LanesRoute = LanesRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/image': typeof ImageRoute
   '/lanes': typeof LanesRoute
   '/privacy': typeof PrivacyRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trending-streetwear': typeof TrendingStreetwearRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/image': typeof ImageRoute
   '/lanes': typeof LanesRoute
   '/privacy': typeof PrivacyRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trending-streetwear': typeof TrendingStreetwearRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/image': typeof ImageRoute
   '/lanes': typeof LanesRoute
   '/privacy': typeof PrivacyRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trending-streetwear': typeof TrendingStreetwearRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/image'
     | '/lanes'
     | '/privacy'
+    | '/search'
     | '/sitemap.xml'
     | '/terms'
     | '/trending-streetwear'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/image'
     | '/lanes'
     | '/privacy'
+    | '/search'
     | '/sitemap.xml'
     | '/terms'
     | '/trending-streetwear'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/image'
     | '/lanes'
     | '/privacy'
+    | '/search'
     | '/sitemap.xml'
     | '/terms'
     | '/trending-streetwear'
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   ImageRoute: typeof ImageRoute
   LanesRoute: typeof LanesRoute
   PrivacyRoute: typeof PrivacyRoute
+  SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   TrendingStreetwearRoute: typeof TrendingStreetwearRoute
@@ -261,6 +274,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImageRoute: ImageRoute,
   LanesRoute: LanesRoute,
   PrivacyRoute: PrivacyRoute,
+  SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   TrendingStreetwearRoute: TrendingStreetwearRoute,
