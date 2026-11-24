@@ -1,0 +1,11 @@
+{"hook": ["6 HOODIES", "AMAZON PE", "NAHI MILENGE"], "hook_sub": "Indian brands only",
+ "outro_title": ["Kaunsa", "le rahe ho?"], "outro_lines": ["Comment the number 1-6", "Save for your winter haul"],
+ "seconds_per_product": 5.5,
+ "products": [
+  {"brand": "Kyoshi Studios", "name": "Heavenly Restriction Hoodie", "price": 1999, "orig": 3999, "images": ["src/4a.png", "src/4b.png"]},
+  {"brand": "FUAARK", "name": "Heavyweight Oversized Hoodie", "price": 1699, "orig": null, "images": ["src/1a.jpg", "src/1b.jpg"]},
+  {"brand": "CAVA Athleisure", "name": "Dark Green Fleece Oversized Hoodie", "price": 1899, "orig": null, "images": ["src/2a.jpg", "src/2b.jpg"]},
+  {"brand": "Yugofinch", "name": "Acid-Wash 300 GSM Hoodie", "price": 1999, "orig": 2999, "images": ["src/3a.png", "src/3b.jpg"]},
+  {"brand": "Heganwalk", "name": "Black Devil Hoodie", "price": 1799, "orig": 2499, "images": ["src/5a.png", "src/5b.png"]},
+  {"brand": "Urban Theka", "name": "Wild Fury Stonewashed Hoodie", "price": 4500, "orig": null, "images": ["src/6a.png"]}
+ ]}
