@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useAudience } from "@/components/AudienceFilter";
+import { SearchIcon } from "@/components/SearchIcon";
 import { Img } from "@/components/Img";
 import { trendImage } from "@/components/TrendCard";
 import { formatPrice, laneLabel, productImageFit } from "@/lib/format";
@@ -24,8 +24,9 @@ export function styleName(style: SearchStyle) {
 export function SearchButton({ onClick }: { onClick: () => void }) {
   return (
     <button type="button" aria-label="Search" title="Search" aria-haspopup="dialog" onClick={onClick}
-      className="grid size-11 place-items-center rounded-full text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink">
-      <Search className="size-[18px]" aria-hidden />
+      className="group/search inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-full text-ink transition-colors hover:bg-clay/10 active:bg-clay/20 xl:h-10 xl:border xl:border-ink/15 xl:bg-raised/60 xl:pl-3 xl:pr-4 xl:hover:border-clay/60">
+      <SearchIcon />
+      <span className="hidden text-[13px] font-semibold xl:inline">Search</span>
     </button>
   );
 }
@@ -82,7 +83,7 @@ function SearchPanel({ onClose }: { onClose: () => void }) {
           onClose();
           void navigate({ to: "/search", search: (previous) => ({ audience: previous.audience, q: query }) });
         }}>
-        <Search className="size-5 shrink-0 text-ink/50" aria-hidden />
+        <SearchIcon />
         <input autoFocus type="search" enterKeyHint="search" autoComplete="off" spellCheck={false} maxLength={MAX_QUERY_LENGTH}
           value={text} onChange={(event) => setText(event.target.value)}
           aria-label="Search brands, styles and products" placeholder="Brand, style or product"
