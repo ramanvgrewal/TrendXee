@@ -55,6 +55,7 @@ export function Hero({ lead, dateKey, featured = false }: { lead?: RotationItem;
 
           <Parallax depth={1.5} follow>
             <h1 className="mt-5 font-display text-[clamp(2.6rem,12.8vw,4.5rem)] font-normal leading-[0.94] tracking-[-0.035em] sm:mt-7 lg:mt-8 lg:text-[clamp(4rem,8.4vw,8.5rem)] lg:leading-[0.9]">
+              <span className="sr-only">TrendXee: </span>
               <span className="-mb-[0.1em] block overflow-hidden pb-[0.1em]">
                 <span className="enter-line block" style={d(120)}>
                   Fits before

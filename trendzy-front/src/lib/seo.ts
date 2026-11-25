@@ -44,14 +44,14 @@ export function jsonLd(value: unknown) {
 export const siteSchema = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "Organization", "@id": `${SITE_ORIGIN}/#organization`, name: "TrendXee", alternateName: ["Trendxee", "trendxee.com"], url: `${SITE_ORIGIN}/`,
+    { "@type": "Organization", "@id": `${SITE_ORIGIN}/#organization`, name: "TrendXee", alternateName: ["Trendxee", "trendxee", "Trend Xee", "trendxee.com"], url: `${SITE_ORIGIN}/`,
       description: "Discover Indian indie fashion brands and build outfits from the products on the board.",
       logo: { "@type": "ImageObject", url: `${SITE_ORIGIN}/brand/trendxee-mark.png` },
       email: "hello@trendxee.com",
       sameAs: [INSTAGRAM_URL],
       contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "hello@trendxee.com", url: `${SITE_ORIGIN}/contact` },
     },
-    { "@type": "WebSite", "@id": `${SITE_ORIGIN}/#website`, name: "TrendXee", alternateName: "Trendxee", url: `${SITE_ORIGIN}/`,
+    { "@type": "WebSite", "@id": `${SITE_ORIGIN}/#website`, name: "TrendXee", alternateName: ["Trendxee", "trendxee", "Trend Xee"], url: `${SITE_ORIGIN}/`,
       publisher: { "@id": `${SITE_ORIGIN}/#organization` } },
   ],
 };
