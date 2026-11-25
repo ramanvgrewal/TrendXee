@@ -83,7 +83,7 @@ export function SiteHeader() {
         </Link>
 
         {/* Desktop */}
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
           <LanesMenu active={active === "lanes"} />
           <NavLink to="/" hash="engine" label="Engine" />
           <NavLink to="/about" label="About" active={active === "about"} />
@@ -92,7 +92,7 @@ export function SiteHeader() {
           <NavLink to="/contact" label="Feedback" active={pathname === "/contact"} />
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
           <SearchButton onClick={() => setSearchOpen(true)} />
           <SnowToggle />
           <ThemeToggle />
@@ -108,7 +108,7 @@ export function SiteHeader() {
         </div>
 
         {/* Mobile */}
-        <div className="flex items-center md:hidden">
+        <div className="flex items-center lg:hidden">
           <SearchButton onClick={() => setSearchOpen(true)} />
           <SnowToggle />
           <ThemeToggle />
@@ -259,7 +259,7 @@ function ProfileMenu({ user, onContact, onLogout }: { user: CurrentUser; onConta
         className="group flex h-9 items-center gap-2 rounded-full border border-ink/15 py-1 pl-1 pr-3 text-[13px] font-semibold outline-none transition-colors hover:border-ink/40 data-[state=open]:border-ink/40"
       >
         <Avatar user={user} />
-        <span className="max-w-[8rem] truncate">{first}</span>
+        <span className="max-w-[4.5rem] truncate xl:max-w-[8rem]">{first}</span>
         <ChevronDown className="size-3.5 text-ink/70 transition-transform duration-300 group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={10} className="w-64 rounded-[20px] border-0 bg-raised p-2 shadow-lift data-[state=open]:duration-200">
