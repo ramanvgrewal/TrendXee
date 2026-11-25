@@ -7,7 +7,7 @@ import { Parallax, PointerScope } from "@/motion/Parallax";
 import { useFinePointer, useMotionAllowed } from "@/motion/hooks";
 import { aesthetics } from "@/lib/mock-data";
 import type { RotationItem } from "@/lib/lanes";
-import { indiaDateLabel, laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
+import { laneLabel, isShoeCategory, productImageFit } from "@/lib/format";
 import { trackProductClick } from "@/lib/useTrendActions";
 import { retailerHref } from "@/lib/outbound";
 import { Img } from "@/components/Img";
@@ -48,13 +48,8 @@ export function Hero({ lead, dateKey, featured = false }: { lead?: RotationItem;
           className="relative z-10 flex min-w-0 flex-col justify-center lg:pr-4"
           style={allowed ? { y: copyY, opacity: copyOpacity } : undefined}
         >
-          <div className="enter-fade flex flex-wrap items-center gap-x-2 gap-y-1 eyebrow text-[10px] text-ink/70 sm:gap-3 sm:text-[11.5px]" style={d(620)}>
-            <span className="inline-block size-1.5 rounded-full bg-clay" />
-            TrendXee · Indian fashion discovery <span className="text-ink/30">/</span> {indiaDateLabel(new Date(`${dateKey}T12:00:00+05:30`))}
-          </div>
-
           <Parallax depth={1.5} follow>
-            <h1 className="mt-5 font-display text-[clamp(2.6rem,12.8vw,4.5rem)] font-normal leading-[0.94] tracking-[-0.035em] sm:mt-7 lg:mt-8 lg:text-[clamp(4rem,8.4vw,8.5rem)] lg:leading-[0.9]">
+            <h1 className="font-display text-[clamp(2.6rem,12.8vw,4.5rem)] font-normal leading-[0.94] tracking-[-0.035em] lg:text-[clamp(4rem,8.4vw,8.5rem)] lg:leading-[0.9]">
               <span className="sr-only">TrendXee: </span>
               <span className="-mb-[0.1em] block overflow-hidden pb-[0.1em]">
                 <span className="enter-line block" style={d(120)}>
